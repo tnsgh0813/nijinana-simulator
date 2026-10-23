@@ -6,6 +6,8 @@
    - 이미지: Firestore 'img' 컬렉션에 base64로 저장 (무료 Spark 요금제에서 동작) + 브라우저 캐시 */
 (function(){
   'use strict';
+  // 다른 사이트가 이 페이지를 몰래 iframe으로 띄워 클릭을 유도하는 것(클릭재킹) 차단
+  if(window.top!==window.self){try{window.top.location.replace(location.href)}catch(e){}document.documentElement.style.display='none';return}
   const C=window.NJ_CONFIG||{};
   const V='10.12.2';
   const SDK=n=>`https://www.gstatic.com/firebasejs/${V}/firebase-${n}.js`;
@@ -44,13 +46,16 @@
   const BLANK='data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
   const rid=()=>[...crypto.getRandomValues(new Uint8Array(16))].map(b=>b.toString(16).padStart(2,'0')).join('');
   async function b64(blob){const u=new Uint8Array(await blob.arrayBuffer());let s='';for(let i=0;i<u.length;i+=0x8000)s+=String.fromCharCode.apply(null,u.subarray(i,i+0x8000));return btoa(s)}
-  function unb64(d,t){const bin=atob(d);const u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return new Blob([u],{type:t||'image/webp'})}
+  // 이미지로 허용하는 형식만 (text/html 등이 섞여 있어도 이미지로만 취급)
+  const IMG_T=['image/webp','image/png','image/jpeg','image/gif'];
+  const safeT=t=>IMG_T.includes(t)?t:'image/webp';
+  function unb64(d,t){t=safeT(t);const bin=atob(d);const u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return new Blob([u],{type:t||'image/webp'})}
   async function cachePut(id,blob){try{const c=await caches.open(CACHE);await c.put('./__img/'+id,new Response(blob,{headers:{'Content-Type':blob.type}}))}catch(e){}}
-  async function cacheGet(id){try{const c=await caches.open(CACHE);const r=await c.match('./__img/'+id);return r?await r.blob():null}catch(e){return null}}
+  async function cacheGet(id){try{const c=await caches.open(CACHE);const r=await c.match('./__img/'+id);if(!r)return null;const bl=await r.blob();return IMG_T.includes(bl.type)?bl:new Blob([bl],{type:'image/webp'})}catch(e){return null}}
   async function fetchImg(id){
     const hit=await cacheGet(id);if(hit)return hit; // 이미지 id는 바뀌지 않으므로 한 번 받으면 다시 받지 않음
     const F=await load();const s=await F.fs.getDoc(F.fs.doc(F.db,'img/'+id));
-    if(!s.exists())throw new Error('없는 이미지');const v=s.data();const blob=unb64(v.d,v.t);cachePut(id,blob);return blob;
+    if(!s.exists())throw new Error('없는 이미지');const v=s.data();if(!v||typeof v.d!=='string')throw new Error('잘못된 이미지');const blob=unb64(v.d,v.t);cachePut(id,blob);return blob;
   }
   function bump(){clearTimeout(rr);rr=setTimeout(()=>{try{window.rerenderAll&&window.rerenderAll()}catch(e){}},60)}
   window.__imgUrl=id=>{
@@ -66,7 +71,8 @@
   const MAXB=700*1024; // Firestore 문서 1MB 제한 안쪽
   async function putImg(F,id,blob){
     if(blob.size>MAXB){const e=new Error('too large');e.code='too_large';throw e}
-    await F.fs.setDoc(F.fs.doc(F.db,'img/'+id),{d:await b64(blob),t:blob.type||'image/webp',s:blob.size,at:Date.now()}).catch(e=>{throw codeErr(e)});
+    if(blob.type&&!IMG_T.includes(blob.type)){const e=new Error('bad type');e.code='bad_type';throw e}
+    await F.fs.setDoc(F.fs.doc(F.db,'img/'+id),{d:await b64(blob),t:safeT(blob.type),s:blob.size,at:Date.now()}).catch(e=>{throw codeErr(e)});
     cachePut(id,blob);URLS[id]=URL.createObjectURL(blob);
   }
   const assetsFor=F=>Object.freeze({
