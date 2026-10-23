@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta http-equiv="Content-Security-Policy" content="object-src 'none'; base-uri 'self'; form-action 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
-<title>にじなな 대전 시뮬레이터</title>
+<title>NIJISANJI 7 Colors Card Game Simulator</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Noto+Sans+JP:wght@500;700;900&display=swap">
-<script src="config.js?v=202610240311"></script>
-<script src="fb.js?v=202610240311"></script>
+<script src="config.js?v=202610240319"></script>
+<script src="fb.js?v=202610240319"></script>
 </head>
 <body>
 <style>
@@ -821,11 +821,19 @@ legend{font-size:12px;font-weight:700;color:var(--accent);padding:0 4px}
 .lb-back:hover{background:#fff}
 .lb-back svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
 .lb-title{margin:0;font-size:24px;font-weight:800;letter-spacing:-.01em}
-.lb-logo.big .rb{font-size:56px}.lb-logo.big small{font-size:18px}
+.lg-name{font-family:var(--f-num);font-weight:700;font-size:21px;letter-spacing:.01em;color:var(--ink);white-space:nowrap;line-height:1.15}
+.lg-name .rb{font-family:inherit!important;font-size:inherit!important;font-weight:700!important}
+.lb-logo.big .lg-name{font-size:40px;white-space:normal}
+.auth-art .lg-name{color:#fff}
+.copy{font-size:12px;color:var(--ink-3);text-align:center;letter-spacing:.02em}
+.home .copy{margin-top:-6px}
+.hh-l{position:relative;z-index:3;display:flex;flex-direction:column;justify-content:flex-end;gap:18px;min-width:0;height:100%}
+.hh-kv{position:relative;z-index:3;display:flex;align-items:center;justify-content:center;min-width:0}
+.kv{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:18px;box-shadow:0 18px 44px rgba(10,5,30,.45),0 0 0 1px rgba(255,255,255,.16)}
 
 /* ---------- home ---------- */
-.home{flex:1;min-height:0;display:grid;grid-template-rows:minmax(0,1fr) 140px;gap:18px;padding:0 40px 34px}
-.home-hero{position:relative;border-radius:28px;overflow:hidden;background:linear-gradient(135deg,#2a2150 0%,#3b2463 45%,#5a2a6e 100%);box-shadow:0 20px 50px rgba(40,20,80,.25);display:flex;flex-direction:column;justify-content:flex-end;gap:16px;padding:44px 48px}
+.home{flex:1;min-height:0;display:grid;grid-template-rows:minmax(0,1fr) 132px auto;gap:16px;padding:0 40px 16px}
+.home-hero{position:relative;border-radius:28px;overflow:hidden;background:linear-gradient(135deg,#2a2150 0%,#3b2463 45%,#5a2a6e 100%);box-shadow:0 20px 50px rgba(40,20,80,.25);display:grid;grid-template-columns:minmax(0,1fr) 760px;gap:36px;align-items:center;padding:36px 40px}
 .home-hero::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 78% 30%,rgba(255,120,190,.45),transparent 45%),radial-gradient(circle at 10% 100%,rgba(90,160,255,.35),transparent 50%)}
 .home-hero::after{content:"";position:absolute;left:-10%;right:-10%;top:-30%;height:60%;background:conic-gradient(from 200deg,var(--R),var(--O),var(--Y),var(--G),var(--B),var(--I),var(--V),var(--R));opacity:.13;filter:blur(30px)}
 .home-tag{position:relative;z-index:3;color:rgba(255,255,255,.8);font-size:16px;font-weight:600;margin:0}
@@ -837,7 +845,7 @@ legend{font-size:12px;font-weight:700;color:var(--accent);padding:0 4px}
 .home-hero .hf0{left:47%;top:20%;transform:rotate(-12deg)}
 .home-hero .hf1{left:61%;top:10%;transform:rotate(3deg);z-index:2}
 .home-hero .hf2{left:75%;top:22%;transform:rotate(14deg)}
-.home-start{position:relative;z-index:3;display:flex;align-items:center;gap:22px;border:0;cursor:pointer;font:inherit;text-align:left;color:#fff;width:600px;
+.home-start{position:relative;z-index:3;display:flex;align-items:center;gap:22px;border:0;cursor:pointer;font:inherit;text-align:left;color:#fff;width:100%;
   padding:26px 34px;border-radius:24px;background:linear-gradient(100deg,#ff4d8d,#d6337a 45%,#8a44b5);box-shadow:0 14px 34px rgba(214,51,122,.5),inset 0 1px 0 rgba(255,255,255,.35);transition:transform .15s,box-shadow .15s}
 .home-start:hover{transform:translateY(-3px);box-shadow:0 20px 44px rgba(214,51,122,.6),inset 0 1px 0 rgba(255,255,255,.35)}
 .home-start:active{transform:translateY(0)}
@@ -941,7 +949,8 @@ legend{font-size:12px;font-weight:700;color:var(--accent);padding:0 4px}
 .auth-art>*{position:relative;z-index:2}
 .auth-art .lb-logo small{color:rgba(255,255,255,.85)}
 .auth-tag{margin:0;color:rgba(255,255,255,.75);font-size:16px}
-.auth-art .home-fan{position:absolute;inset:0;z-index:1}
+.auth-kv{margin-top:auto;width:100%;max-width:900px}
+.auth-art .copy{color:rgba(255,255,255,.6);text-align:left;margin-top:14px}
 .auth-art .hf0{left:10%;top:38%;transform:rotate(-12deg)}
 .auth-art .hf1{left:32%;top:31%;transform:rotate(3deg);z-index:2}
 .auth-art .hf2{left:54%;top:40%;transform:rotate(14deg)}
@@ -2534,6 +2543,10 @@ function rerenderSettings(){
 function showSettings(){showModal(`<h2>설정</h2>${settingsHTML()}<div class="mfoot"><button class="btn primary" data-act="close">닫기</button></div>`,'1000px')}
 
 /* ================= HOME / PLAY FLOW ================= */
+/* 홈·로그인 배너: 공식 키 비주얼 (사이트는 같은 폴더의 파일, 아티팩트는 업로드한 에셋) */
+const KV_URL=SOLO?'keyvisual.webp':'/_blob/1f5b990f5ab4db9be3f4e96be73afd52';
+const COPY='© ANYCOLOR, Inc. © TOMY';
+const kvHTML=cls=>`<img class="${cls}" src="${KV_URL}" alt="NIJISANJI 7 Colors Card Game 스타터 덱 키 비주얼" decoding="async" onerror="this.style.visibility='hidden'">`;
 const IC={
   play:'<svg viewBox="0 0 24 24"><path d="M7 4.5v15l12.5-7.5z"/></svg>',
   deck:'<svg viewBox="0 0 24 24"><rect x="4" y="6" width="11" height="15" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v13"/></svg>',
@@ -2550,7 +2563,7 @@ const TABTITLE={play:'게임 시작',build:'덱 만들기',cards:'카드 목록'
 function lobbyHeadHTML(){
   const store=DECKSRC==='account'?'<span class="pill ok">덱 저장: 내 계정</span>':'<span class="pill">덱 저장: 이 브라우저</span>';
   const who=`<div class="lb-who">${acctHTML()}${store}</div>`;
-  if(LOBBY.tab==='home')return`<header class="lb-head home-head"><div class="lb-logo"><span class="rb">にじなな</span><small>대전 시뮬레이터</small></div>${who}</header>`;
+  if(LOBBY.tab==='home')return`<header class="lb-head home-head"><div class="lb-logo"><b class="lg-name">NIJISANJI <span class="rb">7 Colors</span> Card Game Simulator</b></div>${who}</header>`;
   let back=['home','홈'],title=TABTITLE[LOBBY.tab]||'';
   if(LOBBY.tab==='play'&&LOBBY.mode){back=['play','모드 선택'];title=LOBBY.mode==='ai'?'AI 대전':'멀티 대전'}
   return`<header class="lb-head"><button class="lb-back" data-act="lb-go" data-v="${back[0]}">${IC.back}<span>${back[1]}</span></button><h1 class="lb-title">${title}</h1>${who}</header>`;
@@ -2559,15 +2572,17 @@ function homeHTML(){
   const tiles=[['build','덱 만들기','50장 덱을 만들고 저장',IC.deck],['cards','카드 목록','모든 카드와 효과 보기',IC.cards],['settings','설정','연출 · 소리 · 카드 · 글씨 크기',IC.gear],
     ['rules','룰 · 가정','이 시뮬레이터의 규칙 정리',IC.book],['acct','계정',(CAP.me&&CAP.me.id)?'로그인 정보 · 로그아웃':'로그인 · 덱 저장 위치',IC.user]];
   if(CAP.admin)tiles.push(['admin','관리자','카드 이미지 · 카드 데이터 · 사운드',IC.shield]);
-  const fan=Object.values(STARTERS).slice(0,3).map((s,i)=>`<div class="hf hf${i}">${chHTML(null,{id:s.ch,plain:true})}</div>`).join('');
   return`<main class="home">
    <section class="home-hero">
-    <div class="home-fan" aria-hidden="true">${fan}</div>
-    <p class="home-tag"><b>덱을 고르고 바로 대전</b>NIJISANJI 7 Colors Card Game 팬메이드 웹 시뮬레이터</p>
+    <div class="hh-l">
+    <p class="home-tag"><b>덱을 고르고 바로 대전</b>팬메이드 웹 대전 시뮬레이터</p>
     <button class="home-start" data-act="lb-go" data-v="play"><span class="hs-ic">${IC.play}</span><span class="hs-tx"><b>게임 시작</b><small>AI 대전 · 멀티 대전</small></span></button>
+    </div>
+    <div class="hh-kv">${kvHTML('kv')}</div>
    </section>
    <nav class="home-menu" aria-label="메뉴">${tiles.map(([k,t,d,ic])=>{const act=k==='rules'?'rules':k==='acct'?'acct':'lb-go';
      return`<button class="htile ${k==='admin'?'adm':''}" data-act="${act}" data-v="${k}"><span class="ht-ic">${ic}</span><span class="ht-tx"><b>${t}</b><small>${d}</small></span></button>`}).join('')}</nav>
+   <footer class="copy">${COPY}</footer>
   </main>`;
 }
 function modeHTML(){
@@ -2703,13 +2718,12 @@ function loginHTML(){
      <button class="btn primary big wide" data-act="lb-auth" data-v="reset" ${B}>재설정 메일 보내기</button>
     </form>
     <p class="hint">Google로 가입한 계정은 Google 계정 비밀번호를 사용</p>${backL}`;
-  const fan=Object.values(STARTERS).slice(0,3).map((s,i)=>`<div class="hf hf${i}">${chHTML(null,{id:s.ch,plain:true})}</div>`).join('');
   return`<main class="auth">
-   <section class="auth-art"><div class="lb-logo big"><span class="rb">にじなな</span><small>대전 시뮬레이터</small></div>
-    <p class="auth-tag">NIJISANJI 7 Colors Card Game 팬메이드 웹 대전</p><div class="home-fan" aria-hidden="true">${fan}</div></section>
+   <section class="auth-art"><div class="lb-logo big"><b class="lg-name">NIJISANJI <span class="rb">7 Colors</span><br>Card Game Simulator</b></div>
+    <p class="auth-tag">팬메이드 웹 대전 시뮬레이터</p><div class="auth-kv">${kvHTML('kv')}</div><footer class="copy">${COPY}</footer></section>
    <section class="auth-panel">${body}</section></main>`;
 }
-function bootHTML(){return`<main class="boot"><div class="lb-logo big"><span class="rb">にじなな</span></div><div class="ld-spin" aria-hidden="true"></div><small>불러오는 중</small></main>`}
+function bootHTML(){return`<main class="boot"><div class="lb-logo big"><b class="lg-name">NIJISANJI <span class="rb">7 Colors</span> Card Game Simulator</b></div><div class="ld-spin" aria-hidden="true"></div><small>불러오는 중</small></main>`}
 async function authDo(kind){
   const A=window.claude&&window.claude.auth;const f=AUTH.f;
   const fail=m=>{AUTH.busy=false;AUTH.msg=m;AUTH.err=true;renderLobby();const i=$('#lobby input[data-f]');if(i&&!i.value)i.focus()};
