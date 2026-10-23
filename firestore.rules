@@ -5,22 +5,52 @@ service cloud.firestore {
     function isAdmin() {
       return request.auth != null && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
     }
+    function d() { return request.resource.data; }
+
     // 관리자 목록: 자기 문서만 확인 가능, 쓰기는 콘솔에서만
-    match /admins/{uid} { allow read: if request.auth != null && request.auth.uid == uid; allow write: if false; }
+    match /admins/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if false;
+    }
     // 카드 이미지 목록·썸네일 목록·추가 카드 데이터: 누구나 읽기, 관리자만 쓰기
-    match /cardart/{doc} { allow read: if true; allow write: if isAdmin(); }
-    match /carddata/{doc} { allow read: if true; allow write: if isAdmin(); }
-    // 업로드한 효과음 (base64, 1MB 미만)
-    match /sound/{slot} { allow read: if true; allow write: if isAdmin(); }
-    // 이미지 본문 (base64, 1MB 미만)
-    match /img/{id} {
+    match /cardart/{doc} {
       allow read: if true;
-      allow create, update: if isAdmin() && request.resource.data.d is string && request.resource.data.d.size() < 1000000;
+      allow write: if isAdmin() && doc in ['map', 'thumbs'];
+    }
+    match /carddata/{doc} {
+      allow read: if true;
+      allow write: if isAdmin() && doc == 'custom';
+    }
+    // 업로드한 효과음: 오디오 형식, 1MB 미만
+    match /sound/{slot} {
+      allow read: if true;
+      allow create, update: if isAdmin()
+        && d().keys().hasOnly(['d', 't', 'n', 'at'])
+        && d().d is string && d().d.size() < 1000000
+        && d().t is string && d().t.matches('audio/[a-z0-9.+-]+')
+        && (!('n' in d()) || (d().n is string && d().n.size() <= 60));
       allow delete: if isAdmin();
     }
-    // 각자의 덱: 본인만 읽고 쓰기
-    match /data/users/{uid}/{rest=**} {
-      allow read, write: if request.auth != null && request.auth.uid == uid;
+    // 이미지 본문: 이미지 형식만, 1MB 미만
+    match /img/{id} {
+      allow read: if true;
+      allow create, update: if isAdmin()
+        && d().keys().hasOnly(['d', 't', 's', 'at'])
+        && d().d is string && d().d.size() < 1000000
+        && d().t in ['image/webp', 'image/png', 'image/jpeg', 'image/gif'];
+      allow delete: if isAdmin();
     }
+    // 각자의 덱: 본인만 읽고 쓰기, 덱 모양·크기 제한
+    match /data/users/{uid}/profile/decks/{deckId} {
+      allow read, delete: if request.auth != null && request.auth.uid == uid;
+      allow create, update: if request.auth != null && request.auth.uid == uid
+        && deckId.matches('[A-Za-z0-9_-]{1,40}')
+        && d().keys().hasOnly(['name', 'ch', 'list', 'updated'])
+        && d().name is string && d().name.size() <= 40
+        && d().ch is string && d().ch.size() <= 20
+        && d().list is map && d().list.size() <= 80
+        && d().updated is number;
+    }
+    // 그 밖의 모든 경로는 거부 (규칙에 없는 곳은 기본으로 막힘)
   }
 }
