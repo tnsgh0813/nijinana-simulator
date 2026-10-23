@@ -1,4 +1,4 @@
-# にじなな 대전 시뮬레이터 (독립 사이트)
+# NIJISANJI 7 Colors Card Game Simulator (독립 사이트)
 
 NIJISANJI 7 Colors Card Game 팬메이드 웹 대전 시뮬레이터.
 
