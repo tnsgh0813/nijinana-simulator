@@ -1,7 +1,7 @@
 /* にじなな 시뮬레이터 — 독립 사이트용 Firebase 연결
    시뮬레이터 본체는 claude.ai의 window.claude.use('db'|'user'|'assets') 형식으로 작성되어 있어서,
    여기서 같은 모양의 함수를 Firebase(Auth + Firestore)로 만들어 준다.
-   - 로그인: Google
+   - 로그인: 이메일/비밀번호 · Google
    - 데이터: Firestore (cardart/*, carddata/*, data/users/{uid}/…)
    - 이미지: Firestore 'img' 컬렉션에 base64로 저장 (무료 Spark 요금제에서 동작) + 브라우저 캐시 */
 (function(){
@@ -18,7 +18,7 @@
       if(!C.firebase||!C.firebase.apiKey)throw new Error('config.js에 Firebase 설정이 없음');
       const [app,auth,fs]=await Promise.all([import(SDK('app')),import(SDK('auth')),import(SDK('firestore'))]);
       const A=app.initializeApp(C.firebase);
-      const au=auth.getAuth(A);
+      const au=auth.getAuth(A);try{au.languageCode='ko'}catch(e){} // 인증·재설정 메일을 한국어로
       const db=fs.getFirestore(A);
       const user=await new Promise(res=>{const un=auth.onAuthStateChanged(au,u=>{un();res(u)})});
       // 관리자 = Firestore admins/{uid} 문서가 있는 계정 (이메일을 공개 파일에 적지 않음)
@@ -105,14 +105,22 @@
     use:async name=>{
       let F;try{F=await load()}catch(e){console.error(e);return null}
       if(name==='db')return Object.freeze({doc:p=>mkDoc(F,p),collection:p=>mkCol(F,p)});
-      if(name==='user'){const u=F.user;const me={id:u?u.uid:null,name:u?(u.displayName||u.email||''):'',avatarUrl:(u&&u.photoURL)||'',color:'#d6337a',email:u?u.email:null,isOwner:F.admin,canEdit:F.admin};
+      if(name==='user'){const u=F.user;const prov=u&&u.providerData&&u.providerData[0]?u.providerData[0].providerId:null;
+        const me={id:u?u.uid:null,name:u?(u.displayName||(u.email?u.email.split('@')[0]:'')):'',avatarUrl:(u&&u.photoURL)||'',color:'#d6337a',email:u?u.email:null,provider:prov,verified:!!(u&&u.emailVerified),isOwner:F.admin,canEdit:F.admin};
         return Object.freeze({id:async()=>me.id,me:async()=>me,canEdit:async()=>me.canEdit,isOwner:async()=>me.isOwner,can:async()=>null})}
       if(name==='assets')return F.admin?assetsFor(F):null;
       return null;
     },
+    // 로그인 함수들은 성공/실패만 돌려주고, 새로고침은 화면 쪽에서 함
     auth:{
-      login:async()=>{const F=await load();await F.auth.signInWithPopup(F.au,new F.auth.GoogleAuthProvider());location.reload()},
-      logout:async()=>{const F=await load();await F.auth.signOut(F.au);location.reload()}
+      google:async()=>{const F=await load();await F.auth.signInWithPopup(F.au,new F.auth.GoogleAuthProvider())},
+      email:async(email,pw)=>{const F=await load();await F.auth.signInWithEmailAndPassword(F.au,email,pw)},
+      signup:async(email,pw,nick)=>{const F=await load();const cr=await F.auth.createUserWithEmailAndPassword(F.au,email,pw);
+        try{await F.auth.updateProfile(cr.user,{displayName:String(nick||'').slice(0,12)})}catch(e){}
+        try{await F.auth.sendEmailVerification(cr.user)}catch(e){}},
+      reset:async email=>{const F=await load();await F.auth.sendPasswordResetEmail(F.au,email)},
+      verify:async()=>{const F=await load();const u=F.au.currentUser;if(!u)throw new Error('로그인 필요');await F.auth.sendEmailVerification(u)},
+      logout:async()=>{const F=await load();await F.auth.signOut(F.au)}
     },
     seed
   };
