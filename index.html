@@ -9,8 +9,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Noto+Sans+JP:wght@500;700;900&display=swap">
-<script src="config.js?v=202610240319"></script>
-<script src="fb.js?v=202610240319"></script>
+<script src="config.js?v=202610240335"></script>
+<script src="fb.js?v=202610240335"></script>
 </head>
 <body>
 <style>
@@ -982,6 +982,33 @@ legend{font-size:12px;font-weight:700;color:var(--accent);padding:0 4px}
 .aid span{font-size:12px;font-weight:600;color:var(--accent)}
 .boot{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;color:var(--ink-2)}
 @media (prefers-reduced-motion:reduce){.home-start,.htile,.mcard{transition:none}.ld-spin{animation:none}}
+
+/* ---------- 스테이지·채널 아래 카드 · 덱 아래 순서 ---------- */
+.ustk{position:relative;isolation:isolate;display:inline-block}
+.ustk>.card{position:relative;z-index:1}
+.ustk .ub{position:absolute;inset:0;z-index:0;border-radius:8px;background:linear-gradient(160deg,#3b3f7a,#1c2440);box-shadow:0 0 0 1px rgba(255,255,255,.35),0 2px 6px rgba(20,20,60,.35);transform:translate(calc(var(--i) * 4px),calc(var(--i) * 5px))}
+.z-stage.boxz{overflow:visible}
+.z-stage .under{background:var(--navy);color:#fff;padding:1px 9px;border-radius:999px;font-size:11px;margin-top:6px}
+.chstk{position:absolute;inset:0;pointer-events:none;z-index:0}
+.chstk i{position:absolute;inset:0;border-radius:8px;background:linear-gradient(160deg,#3b3f7a,#1c2440);box-shadow:0 0 0 1px rgba(255,255,255,.35);transform:translate(calc(var(--i) * 5px),calc(var(--i) * 5px))}
+.z-ch>.chcard{position:relative;z-index:1}
+.a-tuck{animation:tuck calc(.42s * var(--fxk,1)) ease-out}
+@keyframes tuck{0%{transform:translateY(0)}35%{transform:translateY(-5px) scale(1.04)}100%{transform:none}}
+.ordc{position:relative;cursor:pointer}
+.ordc .ordn{position:absolute;left:50%;top:-30px;transform:translateX(-50%);z-index:5}
+.ordn{min-width:30px;height:30px;padding:0 6px;border-radius:999px;background:var(--accent);color:#fff;font-family:var(--f-num);font-size:17px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;box-shadow:0 0 0 3px #fff,0 4px 10px rgba(214,51,122,.5)}
+.ordn.q{background:#6b6f93;box-shadow:0 0 0 3px rgba(255,255,255,.7);font-size:15px}
+.ordc.on .card{opacity:.92}
+#tray .row:has(.ordc){padding-top:30px;gap:12px}
+.ordprev{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px;color:#dfe0f6;font-size:12.5px;padding-top:4px;border-top:1px solid rgba(255,255,255,.12)}
+.ordprev .opl{opacity:.75;margin-right:4px}
+.ordprev i{font-style:normal;opacity:.5}
+.ops{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.08);padding:4px 10px 4px 4px;border-radius:999px;max-width:180px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.ops b{width:20px;height:20px;border-radius:50%;background:#6b6f93;color:#fff;font-family:var(--f-num);font-size:12px;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.ops.on b{background:var(--accent)}
+.ops em{font-style:normal;font-size:11px;font-weight:800;color:var(--gold);margin-left:2px}
+.undlist{display:flex;flex-wrap:wrap;gap:26px;padding:36px 0 6px;justify-content:center}
+.undc{position:relative}.undc .ordn{position:absolute;left:50%;top:-34px;transform:translateX(-50%);z-index:3}
 </style>
 
 <div id="app">
@@ -1269,13 +1296,32 @@ function drawN(pid,n,why){const P=G.p[pid];let k=0;for(let i=0;i<n;i++){if(!P.de
   if(k){log(`${why||'효과'}: ${k}장 뽑음 (패 ${P.hand.length}장)`,pid);sfx('draw')}if(k<n)log(`${why||'효과'}: 덱이 비어 ${n-k}장은 뽑지 못함`,pid);render();return k}
 function drawTo(pid,n,why){const P=G.p[pid];const need=Math.max(0,n-P.hand.length);if(!need){log(`${why}: 패가 이미 ${P.hand.length}장`,pid);return 0}return drawN(pid,need,why)}
 async function untapCard(c){if(!c.tapped)return;c.tapped=false;if(EFF[c.id]&&EFF[c.id].upright&&onField(c))await EFF[c.id].upright(c.owner,c)}
-async function orderToBottom(pid,cards,label){ // 원하는 순서로 덱 아래에: 나중에 고른 카드일수록 더 아래
-  let rest=[...cards];const order=[];
-  while(rest.length>1){
-    const u=await ask(pid,{kind:'card',uids:rest.map(x=>x.uid),optional:false,
-      text:`${label}: 덱 아래에 놓을 순서 선택 (${order.length+1}/${order.length+rest.length}번째 · 나중에 고른 카드일수록 더 아래)`,ai:()=>rest[0].uid});
-    const c=rest.find(x=>x.uid===u)||rest[0];order.push(c);rest=rest.filter(x=>x!==c)}
-  order.push(...rest);for(const c of order)reset(c);G.p[pid].deck.push(...order);return order}
+async function orderToBottom(pid,cards,label){ // 원하는 순서로 덱 아래에: 1번부터 차례로 놓음 → 마지막 번호가 덱 맨 아래
+  let order=[...cards];
+  if(cards.length>1){
+    const us=await ask(pid,{kind:'order',uids:cards.map(x=>x.uid),label,text:`${label}: 덱 아래에 놓을 순서 정하기`,ai:()=>cards.map(x=>x.uid)});
+    order=(Array.isArray(us)?us:[]).map(u=>cards.find(x=>x.uid===u)).filter(Boolean);for(const c of cards)if(!order.includes(c))order.push(c)}
+  for(const c of order)reset(c);G.p[pid].deck.push(...order);
+  log(`${label}: ${order.length}장을 덱 아래로 (맨 아래: ${nm(order[order.length-1])})`,pid);return order}
+/* 카드가 어디서 와서 스테이지·채널 "아래"로 들어가는지 보여 주는 연출 */
+async function fxUnder(pid,src,c,dest){
+  if(!FXON()||RM)return;
+  const from=src==='deck'?stageRect(document.querySelector('.z-deck.p'+pid+' .pilecard')):src==='log'?stageRect(document.querySelector('.z-log.p'+pid+' .pilecard'))
+    :stageRect(pid===0?cardEl(c.uid):document.querySelector('#oppHand .oback:last-child'));
+  const tEl=dest==='ch'?document.querySelector('.z-ch.p'+pid+' .chcard'):document.querySelector('.z-stage.p'+pid+' .ustk');
+  const to=stageRect(tEl);if(!from||!to)return;
+  const W=73,H=104;const face=src==='log'||(src==='hand'&&pid===0);
+  if(src==='hand'&&pid===0){const he=cardEl(c.uid);const hc=he&&he.closest('.hcard');if(hc)hc.style.visibility='hidden'}
+  const g=fxEl(`<div style="position:relative;width:${W}px;height:${H}px;border-radius:8px;font-size:12px">${face?cardHTML(c,{plain:true}).replace('class="card ','style="--s:1.18" class="card '):backHTML()}</div>`,'fxghost');
+  const tx=to.x+to.w/2-W/2,ty=to.y+to.h/2-H/2,fx0=from.x+from.w/2-W/2,fy0=from.y+from.h/2-H/2;
+  const pk=dest==='ch'?16:12; // 아래로 살짝 비집고 들어가는 위치
+  sfx('play');
+  await anim(g,[{transform:`translate(${fx0}px,${fy0}px) scale(${Math.max(.6,from.w/W).toFixed(2)})`,opacity:1},
+    {transform:`translate(${(fx0+tx)/2}px,${Math.min(fy0,ty)-50}px) scale(1.08)`,opacity:1,offset:.5},
+    {transform:`translate(${tx}px,${ty+pk+18}px) scale(1)`,opacity:1,offset:.8},
+    {transform:`translate(${tx}px,${ty+pk}px) scale(.96)`,opacity:0}],{duration:fxT(760),easing:'ease-in-out',fill:'forwards'});
+  kill(g);mark(dest==='ch'?'tuckch'+pid:'tuckst'+pid,'tuck',420);
+}
 function mill(pid,n){const P=G.p[pid];let k=0;for(let i=0;i<n;i++){if(!refill(pid))break;P.log.push(P.deck.shift());k++}if(k)fxMill(pid,k);return k}
 function canActivate(pid,src){
   const P=G.p[pid];if(G.cur!==pid||G.winner!=null)return false;
@@ -1488,11 +1534,11 @@ EFF['SD02-015']={async play(pid){
 EFF['SD02-016']={
   canAct(pid){return G.p[pid].deck.length>0},
   async act(pid){
-    const P=G.p[pid];if(!refill(pid))return;P.under.push(P.deck.shift());log(`흡혈귀의 밤: 덱 위 1장을 아래에 둠 (${P.under.length}장)`,pid);render();
+    const P=G.p[pid];if(!refill(pid))return;await fxUnder(pid,'deck',P.deck[0],'st');P.under.push(P.deck.shift());log(`흡혈귀의 밤: 덱 위 1장을 아래에 둠 (${P.under.length}장)`,pid);render();if(P.under.length>=3)await sleep(350);
     if(P.under.length>=3){
       // 원하는 순서로 덱 아래에: 먼저 고른 카드부터 차례로 놓음(나중에 고른 카드일수록 더 아래)
       const st=P.stage;await orderToBottom(pid,[st,...P.under],'흡혈귀의 밤');P.under=[];P.stage=null;
-      log('흡혈귀의 밤: 스테이지와 아래 카드를 덱 아래로',pid);render();await sleep(300);
+      render();await sleep(300);
       if(P.field.length<FIELD_MAX){
         const opts=P.log.filter(x=>nm(x)==='쿠즈하'&&D(x).type==='liver'&&D(x).lv<=4);
         if(opts.length){const u=await ask(pid,{kind:'card',uids:opts.map(x=>x.uid),optional:false,text:'흡혈귀의 밤: 등장시킬 로그의 Lv4 이하 쿠즈하',ai:()=>maxBy(opts,val).uid});
@@ -1505,8 +1551,8 @@ EFF['SD02-016']={
 /* ---- SD03 사사키 사쿠 ---- */
 EFF['SD03-001']={
   async oppLogged(pid,c){const P=G.p[pid];if(!P.log.includes(c))return;
-    P.log.splice(P.log.indexOf(c),1);P.chUnder.push(c);log(`사사키 사쿠 채널: ${nm(c)}을(를) 채널 아래에 둠 (${P.chUnder.length}장)`,pid);render();await sleep(300);
-    if(P.chUnder.length>=3){await orderToBottom(pid,[...P.chUnder],'사사키 사쿠 채널');P.chUnder=[];log('사사키 사쿠 채널: 아래 카드를 덱 아래로',pid);render();drawTo(pid,5,'사사키 사쿠 채널')}},
+    await fxUnder(pid,'log',c,'ch');P.log.splice(P.log.indexOf(c),1);P.chUnder.push(c);log(`사사키 사쿠 채널: ${nm(c)}을(를) 채널 아래에 둠 (${P.chUnder.length}장)`,pid);render();await sleep(300);
+    if(P.chUnder.length>=3){await orderToBottom(pid,[...P.chUnder],'사사키 사쿠 채널');P.chUnder=[];render();drawTo(pid,5,'사사키 사쿠 채널')}},
   async trig(pid){drawTo(pid,5,'사사키 사쿠 트리거')}
 };
 EFF['SD03-004']={enter:buffEnter};
@@ -1539,9 +1585,10 @@ EFF['SD03-016']={
   canAct(pid){return G.p[pid].hand.length>0},
   async act(pid){const P=G.p[pid];
     const u=await ask(pid,{kind:'card',uids:P.hand.map(x=>x.uid),optional:false,text:'리로드 포인트: 이 카드 아래에 둘 패 1장 선택',ai:()=>minBy(P.hand,keepVal).uid});
+    {const hc=P.hand.find(x=>x.uid===u);if(hc)await fxUnder(pid,'hand',hc,'st')}
     const x=take(P.hand,u);if(!x)return;P.under.push(x);log(`리로드 포인트: 패 1장을 아래에 둠 (${P.under.length}장)`,pid);render();
     drawN(pid,1,'리로드 포인트');
-    if(P.under.length>=3){const st=P.stage;await orderToBottom(pid,[st,...P.under],'리로드 포인트');P.under=[];P.stage=null;log('리로드 포인트: 스테이지와 아래 카드를 덱 아래로',pid);render();drawN(pid,1,'리로드 포인트')}}
+    if(P.under.length>=3){const st=P.stage;await orderToBottom(pid,[st,...P.under],'리로드 포인트');P.under=[];P.stage=null;render();drawN(pid,1,'리로드 포인트')}}
 };
 
 /* ================= AI ================= */
@@ -2021,6 +2068,7 @@ function handleCardClick(uid){
   if(p&&p.req.uids&&p.req.uids.includes(uid)){
     if(p.req.kind==='card'){p.pick=p.pick===uid?null:uid;render();return}
     if(p.req.kind==='cards'){const i=p.sel.indexOf(uid);if(i>=0)p.sel.splice(i,1);else if(p.sel.length<p.req.max)p.sel.push(uid);render();return}
+    if(p.req.kind==='order'){const i=p.sel.indexOf(uid);if(i>=0)p.sel.splice(i,1);else p.sel.push(uid);sfx('click');render();return}
   }
   const c=byUid(uid);if(!c)return;
   if(UI.att&&!p){
@@ -2048,6 +2096,9 @@ function handleAct(a,el){
     case'skip':if(p)resolvePending(p.req.kind==='cards'?[]:null);break;
     case'confirm':if(p&&validSel(p))resolvePending([...p.sel]);break;
     case'cancel':if(p&&p.req.cancelable)resolvePending(null);else if(UI.tgt){UI.tgt=null;render()}else if(UI.att){UI.att=null;render()}break;
+    case'ordok':if(p&&p.req.kind==='order'&&p.sel.length===p.req.uids.length)resolvePending([...p.sel]);break;
+    case'ordreset':if(p&&p.req.kind==='order'){p.sel=[];render()}break;
+    case'viewunder':showUnder(+ds.pid,ds.src);break;
     case'pickok':if(p&&p.pick!=null&&(p.req.kind==='card'||p.req.kind==='color'))resolvePending(p.pick);break;
     case'atkgo':if(UI.att&&UI.tgt&&humanCanAct()){const a=UI.att,t=UI.tgt;UI.att=null;UI.tgt=null;UI.sel=null;UI.ccOpen=false;act(()=>doAttack(0,a,t))}break;
     case'ctpick':handleColorClick(+ds.owner,+ds.idx);break;
@@ -2064,7 +2115,7 @@ function handleAct(a,el){
     case'set':{const c=byUid(UI.sel);const P=G.p[0];
       if(c&&humanCanAct()&&G.phase==='set'&&P.hand.includes(c)){setCard(0,c);UI.sel=null;
         if(UI.phaseRes){const r=UI.phaseRes;UI.phaseRes=null;r()}render()}}break;
-    case'activate':if(humanCanAct())act(()=>activate(0,ds.src));break;
+    case'activate':if(humanCanAct()){UI.sel=null;act(()=>activate(0,ds.src))}break;
     case'viewlog':showLog(+ds.pid);break;
     case'acct':showAcct();break;
     case'login':if(SOLO)window.claude.auth.google().then(()=>{setGuest(false);location.reload()},e=>{if(!/popup-closed|cancelled-popup/.test(e&&e.code||''))toast(authErr(e))});break;
@@ -2198,12 +2249,29 @@ function chHTML(P,opt={}){
   const cu=P&&!plain&&P.chUnder&&P.chUnder.length?`<div class="chund">아래 ${P.chUnder.length}장</div>`:'';
   return`<div class="${cls.join(' ')}"${attrs}${ta?` style="animation-delay:${ta.delay}ms"`:''} aria-label="채널 카드 ${esc(d.name)}">${inner}${cu}</div>`;
 }
-function actBubble(src){
+function zoneBubble(pid,src){ // 채널·스테이지를 눌렀을 때: 기동 효과 버튼 + 아래 카드 보기
+  const P=G.p[pid];const card=src==='ch'?P.ch:P.stage;if(!card)return'';
+  const und=src==='ch'?(P.chUnder||[]):P.under;
+  const act=pid===0?actBubble(src,true):'';
+  const see=pid===0||src==='ch'; // 상대 스테이지 아래(덱·손패에서 온 카드)는 비공개
+  const view=und.length?(see?`<button class="btn" data-act="viewunder" data-pid="${pid}" data-src="${src}">아래 카드 보기 · ${und.length}장</button>`:`<span class="why">아래 ${und.length}장 · 비공개</span>`):'';
+  if(!act&&!view)return'';
+  return`<div class="bubble">${act}${view}</div>`;
+}
+function showUnder(pid,src){
+  const P=G.p[pid];const und=src==='ch'?(P.chUnder||[]):P.under;const card=src==='ch'?P.ch:P.stage;
+  if(!card||!und.length||!(pid===0||src==='ch'))return;
+  showModal(`<h2>${esc(nm(card))} 아래 카드 · ${und.length}장</h2><p>${src==='ch'?'채널':'스테이지'} 아래에 놓인 순서대로 (1번이 가장 먼저 놓인 카드). 3장이 되면 효과로 덱 아래로 이동.</p>
+   <div class="loglist undlist">${und.map((c,i)=>`<div class="undc"><b class="ordn">${i+1}</b>${cardHTML(c,{plain:true}).replace('class="card ','style="--s:1.7" class="card ')}</div>`).join('')}</div>
+   <div class="mfoot"><button class="btn primary" data-act="close">닫기</button></div>`);
+}
+function actBubble(src,inner){
   if(!humanCanAct())return'';
   const P=G.p[0];const card=src==='ch'?P.ch:P.stage;if(!card||!EFF[card.id]||!EFF[card.id].act)return'';
   const ok=canActivate(0,src);const ph=EFF[card.id].actPhases||['main'];
   const why=!ph.includes(G.phase)?(ph.length===1&&ph[0]==='main'?'메인 페이즈 전용':'현재 페이즈에서 사용 불가'):P.once[src]?'이번 턴 사용 완료':'조건 미충족';
-  return`<div class="bubble">${ok?`<button class="btn primary" data-act="activate" data-src="${src}">기동 효과 사용</button>`:`<span class="why">${why}</span>`}</div>`;
+  const b=ok?`<button class="btn primary" data-act="activate" data-src="${src}">기동 효과 사용</button>`:`<span class="why">${why}</span>`;
+  return inner?b:`<div class="bubble">${b}</div>`;
 }
 function clHTML(pid,x,i){
   const ca=animOf('cl'+pid+':'+i);
@@ -2229,8 +2297,9 @@ function zonesHTML(pid){
   return`
   <div class="z z-field ${p}" style="gap:${fg}px;--fs:${fs.toFixed(3)}"><span class="fcap">FIELD ${fn}</span>${slots}${P.field.length?'':'<span class="fempty">필드에 라이버 없음</span>'}</div>
   <div class="z z-set boxz ${p}"><span class="zlab">SET</span>${P.set?(pid===0?cardHTML(P.set)+(UI.sel===P.set.uid&&!UI.pending&&G.phase==='main'?handBubble(P.set):''):`<div class="setback">${backHTML('sm')}</div>`):'<span class="note">비어 있음</span>'}</div>
-  <div class="z z-ch ${p}">${chHTML(P)}${pid===0&&UI.sel===P.ch.uid?actBubble('ch'):''}</div>
-  <div class="z z-stage boxz ${p}"><span class="zlab">STAGE</span>${P.stage?cardHTML(P.stage):'<span class="note">비어 있음</span>'}${P.under.length?`<span class="under">아래 ${P.under.length}장</span>`:''}${pid===0&&P.stage&&UI.sel===P.stage.uid?actBubble('st'):''}</div>
+  <div class="z z-ch ${p}">${(()=>{const n=Math.min(3,(P.chUnder||[]).length);const ta=animOf('tuckch'+pid);return n?`<div class="chstk${ta?' '+ta.cls:''}" style="${ta?'animation-delay:'+ta.delay+'ms':''}">${Array.from({length:n},(_,i)=>`<i style="--i:${n-i}"></i>`).join('')}</div>`:''})()}${chHTML(P)}${UI.sel===P.ch.uid&&!UI.pending?zoneBubble(pid,'ch'):''}</div>
+  <div class="z z-stage boxz ${p}"><span class="zlab">STAGE</span>${P.stage?(()=>{const n=Math.min(3,P.under.length);const ta=animOf('tuckst'+pid);
+      return`<div class="ustk${ta?' '+ta.cls:''}" style="${ta?'animation-delay:'+ta.delay+'ms':''}">${Array.from({length:n},(_,i)=>`<i class="ub" style="--i:${n-i}"></i>`).join('')}${cardHTML(P.stage)}</div>`})():'<span class="note">비어 있음</span>'}${P.under.length?`<span class="under">아래 ${P.under.length}장</span>`:''}${P.stage&&UI.sel===P.stage.uid&&!UI.pending?zoneBubble(pid,'st'):''}</div>
   <div class="z z-cl ${p}${pid===1&&SEL.line&&!UI.ccOpen?' cltarget':''}"${pid===1?' data-act="clzone"':''}><div class="clcol">${P.cl.map((x,i)=>clHTML(pid,x,i)).join('')}</div><span class="clcap">COLOR LINE</span></div>
   <div class="z z-niji ${p}"><div class="njcap"><span>NIJI AREA</span><b>${P.niji.length}/7</b></div><div class="njrow">${COLORS.map(col=>{const has=P.niji.includes(col)&&!NJHIDE.has(pid+col);
     const na=animOf('nj'+pid+col);return`<div class="nslot${na?' '+na.cls:''}" style="--cc:var(--${col});${na?'--ad:'+na.delay+'ms;animation-delay:'+na.delay+'ms':''}">${has?(()=>{const a=thumbOf('_cl'+col);return`<div class="nc${a?' img':''}"${a?` style="background-image:url('${blobUrl(a)}')"`:''}>${a?'':`<b>${col}</b><i>${CNAME[col]}</i>`}</div>`})():''}<span class="nl">${col}</span></div>`}).join('')}</div></div>
@@ -2276,6 +2345,9 @@ function centerHTML(){
     if(p.req.kind==='yesno')btns='<button class="btn primary" data-act="yes">예</button><button class="btn" data-act="no">아니오</button>';
     else if(p.req.kind==='mulligan'){t='첫 손패 확인 — 다시 뽑을지 선택'}
     else if(p.req.cost){sub='아래 판에서 선택 · 필드의 빛나는 라이버도 선택 가능'}
+    else if(p.req.kind==='order'){const N=p.req.uids.length,k=p.sel.length;
+      sub=k<N?`누른 순서대로 번호가 붙음 · 1번부터 차례로 덱 아래에 놓여서 ${N}번이 덱 맨 아래 · 다시 누르면 번호 취소`:`1번부터 차례로 덱 아래에 놓임 · ${N}번이 덱 맨 아래`;
+      btns=`<button class="btn primary" data-act="ordok" ${k===N?'':'disabled'}>이 순서로 놓기 ${k}/${N}</button>`+(k?'<button class="btn" data-act="ordreset">다시 고르기</button>':'')}
     else if(p.req.kind==='cards'){btns=`<button class="btn primary" data-act="confirm" ${validSel(p)?'':'disabled'}>확인 ${p.sel.length}/${p.req.max}</button>`+(p.req.cancelable?'<button class="btn" data-act="cancel">취소</button>':'');sub='빛나는 카드를 눌러 선택'}
     else{
       if(p.pick!=null){const nmP=p.req.kind==='color'?colorLabel(p.req.owner,p.pick):nm(byUid(p.pick));
@@ -2362,8 +2434,19 @@ function csheetHTML(){
     <button class="btn primary" data-act="confirm" ${validSel(p)?'':'disabled'}>확인 ${k}/${N}</button>
     <button class="btn" data-act="cancel">취소</button></div>`;
 }
+function orderTrayHTML(p){
+  const cs=p.req.uids.map(byUid).filter(Boolean);const N=cs.length;
+  const s=Math.max(.9,Math.min(1.35,860/(N*80)));
+  const cards=cs.map(c=>{const i=p.sel.indexOf(c.uid);
+    return`<div class="ordc ${i>=0?'on':''}">${cardHTML(c).replace('class="card ','style="--s:'+s.toFixed(2)+'" class="card ')}${i>=0?`<b class="ordn">${i+1}</b>`:'<b class="ordn q">?</b>'}</div>`}).join('');
+  const slots=Array.from({length:N},(_,i)=>{const c=p.sel[i]!=null?byUid(p.sel[i]):null;
+    return`<span class="ops ${c?'on':''}"><b>${i+1}</b>${c?esc(nm(c)):'—'}${i===N-1?'<em>맨 아래</em>':''}</span>`}).join('<i>→</i>');
+  return`<span class="tt">덱 아래에 놓을 순서 · 카드를 누른 순서대로 1, 2, 3… 번호</span><div class="row" style="justify-content:center">${cards}</div>
+   <div class="ordprev"><span class="opl">덱 ··· 위에서 아래로</span>${slots}</div>`;
+}
 function trayHTML(){
   const p=UI.pending;let title='',list=[];
+  if(p&&p.pid===0&&p.req.kind==='order')return orderTrayHTML(p);
   if(p&&p.pid===0&&p.req.uids&&!p.req.cost){const off=p.req.uids.filter(u=>!visibleOnBoard(u));if(off.length){title='선택 가능한 카드 (로그·스테이지 아래 등)';list=off.map(byUid)}}
   if(!list.length&&G.reveal){title='공개된 카드';list=G.reveal}
   if(!list.length)return'';
