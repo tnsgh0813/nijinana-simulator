@@ -74,10 +74,18 @@
   async function seed(progress){
     const F=await load();if(!F.admin)throw new Error('관리자 권한 필요');
     const r=await fetch('seed/seed.json',{cache:'no-store'});if(!r.ok)throw new Error('seed.json 없음');const S=await r.json();
-    const ids=[...new Set([...Object.values(S.map||{}),...Object.values(S.thumbs||{}).map(x=>x.t)])];let n=0;
-    for(const id of ids){const b=await fetch('seed/'+id+'.webp');if(!b.ok)continue;await putImg(F,id,await b.blob());n++;progress&&progress(`기존 이미지 가져오는 중… ${n}/${ids.length}`)}
-    await F.fs.setDoc(F.fs.doc(F.db,'cardart/map'),S.map||{});
-    await F.fs.setDoc(F.fs.doc(F.db,'cardart/thumbs'),S.thumbs||{});
+    const cm=await F.fs.getDoc(F.fs.doc(F.db,'cardart/map'));const ct=await F.fs.getDoc(F.fs.doc(F.db,'cardart/thumbs'));
+    const curM=cm.exists()?cm.data():{},curT=ct.exists()?ct.data():{};
+    const ids=[...new Set([...Object.values(S.map||{}),...Object.values(S.thumbs||{}).map(x=>x.t)])];let n=0,k=0;
+    for(const id of ids){k++;
+      const ex=await F.fs.getDoc(F.fs.doc(F.db,'img/'+id));
+      if(!ex.exists()){const b=await fetch('seed/'+id+'.webp',{cache:'no-store'});if(b.ok){await putImg(F,id,await b.blob());n++}}
+      progress&&progress(`기존 이미지 가져오는 중… ${k}/${ids.length}`)}
+    // 기존 목록과 합침 (seed에 있는 칸은 seed 값으로), 교체된 예전 이미지는 지움
+    const old=[];for(const [slot,id] of Object.entries(S.map||{})){if(curM[slot]&&curM[slot]!==id){old.push(curM[slot]);if(curT[slot]&&curT[slot].t)old.push(curT[slot].t)}}
+    await F.fs.setDoc(F.fs.doc(F.db,'cardart/map'),{...curM,...(S.map||{})});
+    await F.fs.setDoc(F.fs.doc(F.db,'cardart/thumbs'),{...curT,...(S.thumbs||{})});
+    const keep=new Set(ids);for(const id of old)if(!keep.has(id))await F.fs.deleteDoc(F.fs.doc(F.db,'img/'+id)).catch(()=>{});
     return Object.keys(S.map||{}).length;
   }
 
