@@ -55,9 +55,14 @@
   function bump(){clearTimeout(rr);rr=setTimeout(()=>{try{window.rerenderAll&&window.rerenderAll()}catch(e){}},60)}
   window.__imgUrl=id=>{
     if(URLS[id])return URLS[id];
-    if(!PEND[id])PEND[id]=fetchImg(id).then(b=>{URLS[id]=URL.createObjectURL(b);bump()}).catch(()=>{URLS[id]='data:,';bump()});
+    if(!PEND[id])PEND[id]=fetchImg(id).then(b=>{URLS[id]=URL.createObjectURL(b);
+      // 다시 그려지지 않는 화면(인트로 연출 등)의 빈 이미지도 바로 교체
+      try{document.querySelectorAll('img[data-art="'+id+'"]').forEach(i=>{if(i.src===BLANK)i.src=URLS[id]})}catch(e){}
+      bump()}).catch(()=>{URLS[id]='data:,';bump()});
     return BLANK;
   };
+  // 다 받아질 때까지 기다리는 버전 (대전 시작 전 로딩 확인용)
+  window.__imgLoad=id=>URLS[id]?Promise.resolve(URLS[id]):(window.__imgUrl(id),PEND[id].then(()=>URLS[id]));
   const MAXB=700*1024; // Firestore 문서 1MB 제한 안쪽
   async function putImg(F,id,blob){
     if(blob.size>MAXB){const e=new Error('too large');e.code='too_large';throw e}

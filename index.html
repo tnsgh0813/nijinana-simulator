@@ -7,8 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Noto+Sans+JP:wght@500;700;900&display=swap">
-<script src="config.js?v=202610240146"></script>
-<script src="fb.js?v=202610240146"></script>
+<script src="config.js?v=202610240207"></script>
+<script src="fb.js?v=202610240207"></script>
 </head>
 <body>
 <style>
@@ -347,6 +347,15 @@ button{font:inherit}
 #logpanel li.win{color:var(--accent);font-weight:700}
 
 /* ---------- modals ---------- */
+#ldov{position:absolute;inset:0;z-index:85;background:rgba(40,28,70,.42);display:flex;align-items:center;justify-content:center}
+#ldov .ld-box{background:var(--paper);border-radius:18px;padding:26px 34px;min-width:340px;display:flex;flex-direction:column;align-items:center;gap:12px;box-shadow:0 24px 60px rgba(30,20,60,.3)}
+#ldov .ld-box b{font-size:17px}
+#ldov .ld-spin{width:34px;height:34px;border-radius:50%;border:4px solid rgba(214,51,122,.18);border-top-color:#d6337a;animation:ldspin .8s linear infinite}
+@keyframes ldspin{to{transform:rotate(360deg)}}
+#ldov .ld-bar{width:100%;height:8px;border-radius:99px;background:rgba(40,28,70,.1);overflow:hidden}
+#ldov .ld-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ff5f8f,#9a6bff);transition:width .15s}
+#ldov .ld-n{font-size:13px;opacity:.7;font-variant-numeric:tabular-nums}
+@media (prefers-reduced-motion:reduce){#ldov .ld-spin{animation:none}}
 #modal{position:absolute;inset:0;z-index:80;background:rgba(40,28,70,.36);display:flex;align-items:center;justify-content:center}
 .mbox{background:var(--paper);border-radius:20px;padding:26px 30px;width:740px;box-shadow:0 24px 60px rgba(30,20,60,.3)}
 .mbox.wide{width:1340px}
@@ -2299,9 +2308,39 @@ const ADMIN={busy:false,msg:'',err:false,usage:null,arm:null,pending:null,drop:n
 function goLobby(){
   TOKEN.dead=true;SCREEN='lobby';hideModal();fxReset();if(UI)UI.logOpen=false;renderInspector();if(CD_PENDING){CD_PENDING=false;applyCardData()}renderLobby();
 }
-function startGame(){
+/* ---------- 대전 시작 전 이미지 로딩 확인 ----------
+   채널 원본(인트로용)·덱 카드 썸네일·뒷면·컬러 카드를 미리 받아 둔다. 캐시에 있으면 즉시 통과(화면 안 뜸). */
+let LOADING=false;
+function loadOne(id,ms){return new Promise(res=>{let done=false;const fin=ok=>{if(!done){done=true;clearTimeout(t);res(ok)}};const t=setTimeout(()=>fin(false),ms);
+  const go=url=>{if(!url||url==='data:,')return fin(false);const im=new Image();im.decoding='async';
+    im.onload=()=>{(im.decode?im.decode():Promise.resolve()).catch(()=>{}).then(()=>fin(true))};im.onerror=()=>{if(!window.__imgLoad)BAD.add(id);fin(false)};im.src=url};
+  try{if(window.__imgLoad)window.__imgLoad(id).then(go,()=>fin(false));else go(blobUrl(id))}catch(e){fin(false)}})}
+function gameImgIds(dks){const ids=new Set();const add=id=>{if(id)ids.add(id)};
+  for(const dk of dks){add(artOf(dk.ch));add(thumbOf(dk.ch));for(const k of Object.keys(dk.list||{}))add(thumbOf(k))}
+  for(const k of XSLOTS)add(thumbOf(k));return[...ids]}
+async function waitArtMaps(ms){if(!CAP.db)return;const t0=performance.now();while((RAWART==null||RAWTHUMB==null)&&performance.now()-t0<ms)await new Promise(r=>setTimeout(r,80))}
+async function preloadGame(dks){
+  const host=$('#modal').parentNode;let ov=null,skip=false,n=0,bad=0,total=0;
+  const paint=()=>{if(!ov)return;const pct=total?Math.round(n/total*100):0;ov.querySelector('.ld-n').textContent=total?`${n} / ${total}`:'카드 정보 확인 중';ov.querySelector('.ld-bar i').style.width=pct+'%'};
+  const showT=setTimeout(()=>{ov=document.createElement('div');ov.id='ldov';ov.setAttribute('role','status');
+    ov.innerHTML=`<div class="ld-box"><div class="ld-spin" aria-hidden="true"></div><b>카드 이미지 불러오는 중</b><div class="ld-bar"><i></i></div><span class="ld-n"></span><button class="btn sm ld-skip" hidden>기다리지 않고 시작</button></div>`;
+    ov.querySelector('.ld-skip').onclick=()=>{skip=true;wake&&wake()};host.appendChild(ov);paint()},180);
+  const skipT=setTimeout(()=>{const b=ov&&ov.querySelector('.ld-skip');if(b)b.hidden=false},5000);
+  let wake=null;const skipP=new Promise(r=>{wake=r});
+  await Promise.race([waitArtMaps(4000),skipP]);
+  const ids=skip?[]:gameImgIds(dks);total=ids.length;paint();
+  const work=(async()=>{let i=0;const lane=async()=>{while(i<ids.length&&!skip){const id=ids[i++];if(!(await loadOne(id,15000)))bad++;n++;paint()}};
+    await Promise.all(Array.from({length:Math.min(6,ids.length)},lane))})();
+  await Promise.race([work,skipP]);
+  clearTimeout(showT);clearTimeout(skipT);if(ov)ov.remove();
+  if(bad&&!skip)toast(`이미지 ${bad}장을 불러오지 못함 — 글자 카드로 표시`);
+}
+async function startGame(){
+  if(LOADING)return;
   const me=getDeck(LOBBY.me),ai=getDeck(LOBBY.ai);
   if(validateDeck(me).length||validateDeck(ai).length){toast('사용할 수 없는 덱 있음');goLobby();return}
+  const scr=SCREEN;LOADING=true;try{await preloadGame([me,ai])}catch(e){}finally{LOADING=false}
+  if(SCREEN!==scr)return; // 로딩 중 화면을 떠났으면 시작 안 함
   SPEED=+LOBBY.speed||1;
   hideModal();SCREEN='game';renderLobby();
   newGame({me:LOBBY.me,opp:LOBBY.ai,first:LOBBY.first});UI.logOpen=false;UI.hover=null;UI.hideHands=true;fxReset();render();runGame();
