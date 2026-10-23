@@ -7,8 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Noto+Sans+JP:wght@500;700;900&display=swap">
-<script src="config.js?v=202610240121"></script>
-<script src="fb.js?v=202610240121"></script>
+<script src="config.js?v=202610240137"></script>
+<script src="fb.js?v=202610240137"></script>
 </head>
 <body>
 <style>
@@ -84,19 +84,38 @@ button{font:inherit}
 .ccard.chosen{box-shadow:0 0 0 3px var(--up),0 0 14px 3px rgba(19,137,90,.75);animation:none}
 .card.fxhide{visibility:hidden}
 .z-field .card{touch-action:none}
-#ctray{position:absolute;left:470px;top:112px;width:960px;z-index:41;background:var(--glass);border-radius:18px;padding:12px 16px 14px;display:flex;flex-direction:column;gap:10px;box-shadow:0 10px 28px rgba(20,20,60,.3)}
-#ctray .tt{color:#dfe0f6;font-size:12.5px;font-weight:700;letter-spacing:.04em}
-.ctrow{display:flex;gap:10px;justify-content:center}
-.ctitem{width:118px;height:104px;border-radius:14px;border:0;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font:inherit;position:relative;
-  box-shadow:0 0 0 3px var(--gold),0 4px 14px rgba(0,0,0,.25);transition:transform .12s}
-.ctitem:hover,.ctitem.drop{transform:translateY(-4px) scale(1.04)}
-.ctitem.down{background:linear-gradient(115deg,#f6b7c9 0%,#f9d7a8 30%,#f4eea6 48%,#b9e6c8 64%,#b7dcf4 80%,#d2c2ef 100%);color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.25)}
-.ctitem.up{background:var(--cc);color:#fff}
-.ctitem b{font-family:var(--f-num);font-size:34px;line-height:1}
-.ctitem span{font-size:12.5px;font-weight:700}
-.ctitem em{font-style:normal;font-size:12px;font-weight:700;padding:2px 9px;border-radius:999px;background:rgba(14,24,40,.85);color:#fff;margin-top:4px}
-.ctitem em.ok{color:#7ef0b4}.ctitem em.no{color:#ff9a9a}
-.ctitem.chosen{box-shadow:0 0 0 4px var(--up),0 0 20px 4px rgba(19,137,90,.75);transform:translateY(-4px) scale(1.05)}
+#ctray{position:absolute;left:320px;top:250px;width:960px;z-index:46;background:rgba(22,26,54,.96);border-radius:22px;padding:16px 20px 16px;display:flex;flex-direction:column;gap:12px;
+  box-shadow:0 22px 60px rgba(20,16,50,.5),0 0 0 1px rgba(255,255,255,.08);color:#fff;animation:ccpin .22s cubic-bezier(.2,.8,.3,1)}
+@keyframes ccpin{from{transform:translateY(14px) scale(.97);opacity:0}}
+.ccp-head{display:flex;align-items:center;gap:14px}
+.ccp-head b{font-size:15px}
+.ccp-dir{margin-left:auto;display:flex;gap:18px;font-size:11.5px;font-weight:700;color:#aeb3dc}.ccp-dir i{font-style:normal}
+.ccp-x{border:0;background:rgba(255,255,255,.12);color:#fff;width:28px;height:28px;border-radius:8px;font-size:17px;cursor:pointer;line-height:1}
+.ccp-row{display:flex;gap:12px;justify-content:center}
+.ccp-c{appearance:none;border:0;background:none;padding:0;color:#fff;font:inherit;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;width:116px;transition:transform .14s}
+.ccp-c:disabled{cursor:default;opacity:.35}
+.ccp-c:not(:disabled):hover{transform:translateY(-6px)}
+.ccp-card{position:relative;width:104px;height:145px;border-radius:5px;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;box-shadow:0 6px 16px rgba(0,0,0,.4),inset 0 0 0 1.5px rgba(255,255,255,.35)}
+.ccp-c.down .ccp-card{background:linear-gradient(160deg,#f6b7c9,#f9d7a8 30%,#f4eea6 48%,#b9e6c8 64%,#b7dcf4 80%,#d2c2ef)}
+.ccp-c.up .ccp-card{background:linear-gradient(160deg,color-mix(in srgb,var(--cc) 70%,#fff),var(--cc) 60%)}
+.ccp-c.gone .ccp-card{background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.25);border:1.5px dashed rgba(255,255,255,.3)}
+.ccp-img{position:absolute;inset:0;background-size:cover;background-position:center}
+.ccp-l{font-family:var(--f-num);font-size:40px;line-height:1;text-shadow:0 2px 6px rgba(0,0,0,.25)}
+.ccp-c.down .ccp-l{font-style:italic}
+.ccp-n{font-style:normal;font-size:12px;font-weight:700}
+.ccp-tag{position:absolute;left:6px;top:6px;font-style:normal;display:flex;align-items:center;gap:4px;font-size:11px;font-weight:700;background:rgba(0,0,0,.35);padding:1px 7px 1px 2px;border-radius:999px}
+.ccp-tag b{width:18px;height:18px;border-radius:50%;background:var(--cc);display:inline-flex;align-items:center;justify-content:center;font-family:var(--f-num);box-shadow:0 0 0 1.5px #fff}
+.ccp-empty{font-style:normal;font-size:11px;color:#aeb3dc}
+.ccp-c.on .ccp-card{box-shadow:0 0 0 4px var(--up),0 0 24px 6px rgba(19,200,120,.6)}
+.ccp-c.on{transform:translateY(-8px)}
+.ccp-pos{font-size:11.5px;font-weight:700;color:#cfd2f2}
+.ccp-c em{font-style:normal;font-size:12px;font-weight:700;padding:2px 10px;border-radius:999px;background:rgba(255,255,255,.1)}
+.ccp-c em.ok{color:#7ef0b4}.ccp-c em.no{color:#ff9a9a}.ccp-c em.none{opacity:.4}
+.ccp-foot{display:flex;align-items:center;gap:10px;border-top:1px solid rgba(255,255,255,.1);padding-top:12px}
+.ccp-msg{flex:1;font-size:13px;color:#dfe0f6}
+.z-cl.cltarget .clcol{border-radius:8px;box-shadow:0 0 0 3px var(--gold),0 0 18px 4px rgba(255,190,60,.7);animation:pulse 1.1s ease-in-out infinite}
+.z-cl.droptgt .clcol{border-radius:8px;box-shadow:0 0 0 3px #ff4f8b,0 0 22px 6px rgba(255,79,139,.7)}
+.z-cl.p1{cursor:pointer}
 .fslot.drop .card,.card.droptgt{box-shadow:0 0 0 4px #fff,0 0 22px 6px var(--gold)!important}
 .fxfloat.ko{color:#fff;font-family:var(--f-jp);font-size:28px;font-weight:900;-webkit-text-stroke:1px rgba(20,10,40,.6);text-shadow:0 3px 0 rgba(214,51,122,.85),0 0 16px rgba(0,0,0,.35)}
 .card.chosen::after{content:"✓";position:absolute;right:.3em;top:2em;background:var(--up);color:#fff;border-radius:50%;width:1.6em;height:1.6em;font-size:1em;display:flex;align-items:center;justify-content:center}
@@ -196,7 +215,7 @@ button{font:inherit}
 .nslot .nc b{font-family:var(--f-num);font-weight:700;font-size:17px;line-height:1;text-shadow:0 1px 2px rgba(0,0,0,.25)}
 .nslot .nc i{font-style:normal;font-size:9.5px;font-weight:700;opacity:.95}
 .nslot .nc.img{background-color:#0e1828}
-.z-niji.p1 .nslot .nc{top:auto;bottom:4px;transform:rotate(180deg)}
+.z-niji.p1 .nslot .nc{top:auto;bottom:4px}
 
 .z-pile{width:84px;height:136px;display:flex;flex-direction:column;align-items:center;gap:4px}
 .z-pile.p1{flex-direction:column-reverse}
@@ -567,6 +586,9 @@ legend{font-size:12px;font-weight:700;color:var(--accent);padding:0 4px}
 .sect h4 i{width:10px;height:10px;border-radius:3px;display:inline-block}
 .abar{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
 .adsub{align-self:flex-start;flex:none}
+.sndlist{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 20px;overflow-y:auto;min-height:0;align-content:start}
+.sndrow{display:grid;grid-template-columns:120px minmax(0,1fr) auto auto auto;align-items:center;gap:8px;background:#fff;border-radius:10px;padding:8px 12px;box-shadow:inset 0 0 0 1px #eadcea}
+.sndrow b{font-size:13.5px}.sndsrc{font-size:12px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sndsrc.cu{color:var(--up);font-weight:700}
 .cdpanel{gap:12px;overflow:hidden}
 .cd-in{display:flex;gap:10px;align-items:stretch;flex:none}
 .cd-in textarea{flex:1;height:84px;resize:vertical;font:12px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace;padding:8px 10px;border-radius:10px;border:1.5px solid #e4d3e4;background:#fff;color:var(--ink);white-space:pre;tab-size:12}
@@ -711,8 +733,7 @@ legend{font-size:12px;font-weight:700;color:var(--accent);padding:0 4px}
 .ccard.a-glow{animation:ccglow .9s ease-in-out}
 @keyframes ccglow{50%{box-shadow:0 0 0 3px #fff,0 0 22px 8px var(--gold)}}
 .nslot.a-nj .nc{animation:njpop .7s cubic-bezier(.2,1.6,.4,1) backwards;animation-delay:var(--ad,0ms)} /* 다시 그려져도 이어서 재생 */
-.z-niji.p1 .nslot.a-nj .nc{animation-name:njpop1}
-@keyframes njpop1{from{transform:rotate(160deg) scale(0)}to{transform:rotate(180deg)}}
+
 @keyframes njpop{from{transform:scale(0) rotate(-20deg)}to{transform:none}}
 .nslot.a-nj{animation:njflash 1s ease-out}
 @keyframes njflash{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--cc) 90%,transparent)}30%{box-shadow:0 0 22px 8px color-mix(in srgb,var(--cc) 80%,transparent)}100%{box-shadow:none}}
@@ -787,6 +808,7 @@ legend{font-size:12px;font-weight:700;color:var(--accent);padding:0 4px}
   <nav id="toolbar" aria-label="도구">
    <button class="tb" data-act="togglelog" id="tbLog" title="진행 기록" aria-label="진행 기록"><svg viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01"/></svg></button>
    <button class="tb" data-act="rules" title="룰 · 가정" aria-label="룰과 가정 보기"><svg viewBox="0 0 24 24"><path d="M5 4.5h10.5A3.5 3.5 0 0 1 19 8v12H8.5A3.5 3.5 0 0 1 5 16.5z"/><path d="M5 16.5A3.5 3.5 0 0 1 8.5 13H19"/></svg></button>
+   <button class="tb" data-act="sndtoggle" id="tbSnd" title="소리 끄기" aria-label="소리 끄기"></button>
    <button class="tb" data-act="speed" id="tbSpeed" title="AI 빠르게" aria-label="AI 속도 빠르게"><svg viewBox="0 0 24 24"><path d="M4 6l7 6-7 6zM13 6l7 6-7 6z"/></svg></button>
    <button class="tb" data-act="fullscreen" id="tbFull" title="전체 화면" aria-label="전체 화면"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
    <button class="tb" data-act="newgame" title="로비로" aria-label="로비로 가기"><svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"/></svg></button>
@@ -801,6 +823,7 @@ legend{font-size:12px;font-weight:700;color:var(--accent);padding:0 4px}
   <div id="modal" hidden><div class="mbox" id="mbox"></div></div>
  </div>
  <input type="file" id="fileOne" accept="image/png,image/jpeg,image/webp,image/gif" hidden>
+ <input type="file" id="fileSnd" accept="audio/*" hidden>
  <input type="file" id="fileBulk" accept="image/png,image/jpeg,image/webp,image/gif" multiple hidden>
  <div id="rotate" hidden>가로 화면으로 돌리면 더 크게 보임</div>
 </div>
@@ -994,7 +1017,7 @@ async function takeTurn(){
     for(let i=0;i<need;i++){
       if(!P.deck.length){if(n)log(`${n}장 드로우 (손패 ${P.hand.length}장)`,pid);winGame(1-pid,`${P.name}의 덱에 드로우할 카드가 없음`)}
       P.hand.push(P.deck.shift());n++}
-    log(`${n}장 드로우 (손패 ${P.hand.length}장)`,pid);
+    log(`${n}장 드로우 (손패 ${P.hand.length}장)`,pid);sfx('draw');
   }
   render();await sleep(300);
   await phase('main');
@@ -1003,7 +1026,8 @@ async function takeTurn(){
   if(P.turns===1&&pid===G.first)log('선공 첫 턴이라 액션 페이즈를 건너뜀',pid);
   else if(P.ai)await aiAction(pid);else await humanWait();
   await phase('set');
-  if(P.ai)await aiSet(pid);else await humanWait();
+  if(!P.hand.length){log('패가 없어 세트 페이즈를 건너뜀',pid);render();await sleep(250)}
+  else if(P.ai)await aiSet(pid);else await humanWait();
   await phase('end');
   for(const pl of G.p)for(const c of pl.field){c.buff=0;c.noCC=false}
   render();await sleep(250);
@@ -1024,7 +1048,7 @@ async function doPlay(pid,c,payUids){
   const fromSet=P.set===c;if(fromSet)P.set=null;else take(P.hand,c.uid);
   if(fromSet)log(`세트 에어리어의 카드를 공개`,pid);
   for(const u of payUids){fxToLog(u,pid);let x=take(P.hand,u);if(!x){x=take(P.field,u);if(x)reset(x)}if(x)P.log.push(x)}
-  log(`${nm(c)} 플레이${d.lv?` (코스트 ${d.lv}장 → 로그)`:''}`,pid);
+  log(`${nm(c)} 플레이${d.lv?` (코스트 ${d.lv}장 → 로그)`:''}`,pid);if(d.type!=='event')sfx('play');
   render();
   if(d.type==='liver'){await enter(pid,c)}
   else if(d.type==='event'){render();await fx('event',{c});if(EFF[c.id]&&EFF[c.id].play)await EFF[c.id].play(pid,c);else if(d.text)log(`${nm(c)}: 효과 자동 처리 미구현 — 텍스트대로 직접 처리`,pid);P.log.push(c)}
@@ -1033,12 +1057,12 @@ async function doPlay(pid,c,payUids){
 }
 async function enter(pid,c,tapped=false){
   const P=G.p[pid];reset(c);c.tapped=tapped;c.entered=G.turnNo;P.field.push(c);
-  log(`${nm(c)} 등장${tapped?' (가로)':''}`,pid);render();await sleep(350);
+  log(`${nm(c)} 등장${tapped?' (가로)':''}`,pid);sfx('enter');render();await sleep(350);
   if(EFF[c.id]&&EFF[c.id].enter)await EFF[c.id].enter(pid,c);
 }
 async function destroy(c,byBattle){
   const P=G.p[c.owner];const i=P.field.indexOf(c);if(i<0)return;
-  fxToLog(c.uid,c.owner,!!byBattle);FXHIDE.delete(c.uid);P.field.splice(i,1);reset(c);P.log.push(c);
+  fxToLog(c.uid,c.owner,!!byBattle);sfx('destroy');FXHIDE.delete(c.uid);P.field.splice(i,1);reset(c);P.log.push(c);
   log(`${nm(c)} → 로그${byBattle?' (배틀 패배)':''}`,c.owner);render();
   if(byBattle&&EFF[c.id]&&EFF[c.id].logged&&G.cur!==c.owner)await EFF[c.id].logged(c.owner,c);
   const ce=EFF[P.ch.id];const k='chlg'+G.turnNo;
@@ -1048,7 +1072,7 @@ async function destroy(c,byBattle){
 function refill(pid){return G.p[pid].deck.length>0}
 // 패배는 스타트 페이즈 드로우에서만. 효과로 뽑을 때는 덱에 남은 만큼만 뽑음
 function drawN(pid,n,why){const P=G.p[pid];let k=0;for(let i=0;i<n;i++){if(!P.deck.length)break;P.hand.push(P.deck.shift());k++}
-  if(k)log(`${why||'효과'}: ${k}장 뽑음 (패 ${P.hand.length}장)`,pid);if(k<n)log(`${why||'효과'}: 덱이 비어 ${n-k}장은 뽑지 못함`,pid);render();return k}
+  if(k){log(`${why||'효과'}: ${k}장 뽑음 (패 ${P.hand.length}장)`,pid);sfx('draw')}if(k<n)log(`${why||'효과'}: 덱이 비어 ${n-k}장은 뽑지 못함`,pid);render();return k}
 function drawTo(pid,n,why){const P=G.p[pid];const need=Math.max(0,n-P.hand.length);if(!need){log(`${why}: 패가 이미 ${P.hand.length}장`,pid);return 0}return drawN(pid,need,why)}
 async function untapCard(c){if(!c.tapped)return;c.tapped=false;if(EFF[c.id]&&EFF[c.id].upright&&onField(c))await EFF[c.id].upright(c.owner,c)}
 async function orderToBottom(pid,cards,label){ // 원하는 순서로 덱 아래에: 나중에 고른 카드일수록 더 아래
@@ -1131,7 +1155,7 @@ async function checkTrigger(owner,color){
 }
 async function colorCall(att,idx,sp){
   const pid=att.owner,P=G.p[pid],O=G.p[1-pid];const cc=O.cl[idx];if(!cc||cc.gone)return;
-  const wasDown=!cc.up;cc.up=true;if(wasDown)mark('cl'+(1-pid)+':'+idx,'flip',650);
+  const wasDown=!cc.up;cc.up=true;if(wasDown)sfx('flip');if(wasDown)mark('cl'+(1-pid)+':'+idx,'flip',650);
   log(`${sp?'SP 콜':'컬러 콜'}: ${CNAME[cc.color]}(${cc.color}) 카드${wasDown?' 공개':''}`,pid);render();await fx('pause',{ms:wasDown?680:320});
   if(wasDown)await checkTrigger(1-pid,cc.color);
   if(!onField(att)){log(`${nm(att)}이(가) 필드를 떠나 판정 실패`,pid);render();return}
@@ -1638,6 +1662,94 @@ function backHTML(extra=''){const a=thumbOf('_back');return a?`<div class="back 
 function viewCard(id){return{uid:0,id,owner:0,tapped:false,noUntap:false,buff:0,entered:-1,noCC:false,once:{}}}
 function lsGet(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}}
+/* ================= SOUND =================
+   기본 효과음은 Web Audio로 합성(파일 없음). 관리자가 슬롯별로 파일을 올리면 그 소리로 바뀐다.
+   업로드한 소리는 db 'sound/{slot}' 문서에 base64로 저장 (짧은 효과음용, 450KB 이하). */
+const SOUND_SLOTS=[['play','카드 플레이'],['enter','라이버 등장'],['attack','공격 선언'],['hit','배틀 타격'],['destroy','로그로 이동'],
+  ['flip','컬러 카드 공개'],['ccwin','컬러 콜 성공'],['miss','컬러 콜 실패'],['draw','드로우'],['turn','턴 시작'],['trigger','트리거 발동'],
+  ['sp','SP 콜'],['click','버튼'],['win','승리'],['lose','패배']];
+const SND={ctx:null,on:lsGet('nijinana.snd.on',true)!==false,vol:Math.max(0,Math.min(1,+lsGet('nijinana.snd.vol',0.6)||0.6)),custom:{},buf:{},last:{}};
+const SND_MAX=450*1024;
+function sndCtx(){if(!SND.ctx){const A=window.AudioContext||window.webkitAudioContext;if(!A)return null;try{SND.ctx=new A()}catch(e){return null}}
+  if(SND.ctx.state==='suspended')SND.ctx.resume().catch(()=>{});return SND.ctx}
+document.addEventListener('pointerdown',()=>{if(SND.on)sndCtx()},{capture:true,passive:true});
+function tone(c,o){ // o: {f, f2, t, d, type, g, at}
+  const t0=c.currentTime+(o.at||0);const osc=c.createOscillator();const g=c.createGain();
+  osc.type=o.type||'sine';osc.frequency.setValueAtTime(o.f,t0);if(o.f2)osc.frequency.exponentialRampToValueAtTime(o.f2,t0+o.d);
+  g.gain.setValueAtTime(0.0001,t0);g.gain.exponentialRampToValueAtTime((o.g||0.3)*SND.vol,t0+0.012);g.gain.exponentialRampToValueAtTime(0.0001,t0+o.d);
+  osc.connect(g).connect(c.destination);osc.start(t0);osc.stop(t0+o.d+0.03)}
+function noise(c,o){ // o: {d, g, f (lowpass), at}
+  const t0=c.currentTime+(o.at||0);const n=Math.floor(c.sampleRate*o.d);const b=c.createBuffer(1,n,c.sampleRate);const ch=b.getChannelData(0);
+  for(let i=0;i<n;i++)ch[i]=(Math.random()*2-1)*Math.pow(1-i/n,2);
+  const s=c.createBufferSource();s.buffer=b;const f=c.createBiquadFilter();f.type='lowpass';f.frequency.value=o.f||2400;const g=c.createGain();g.gain.value=(o.g||0.3)*SND.vol;
+  s.connect(f).connect(g).connect(c.destination);s.start(t0)}
+const SYNTH={
+  play:c=>{noise(c,{d:.12,g:.25,f:3200});tone(c,{f:520,f2:880,d:.12,type:'triangle',g:.18})},
+  enter:c=>{tone(c,{f:392,d:.12,type:'triangle',g:.2});tone(c,{f:587,d:.18,type:'triangle',g:.2,at:.07})},
+  attack:c=>{noise(c,{d:.22,g:.22,f:1800});tone(c,{f:220,f2:660,d:.2,type:'sawtooth',g:.08})},
+  hit:c=>{noise(c,{d:.18,g:.45,f:900});tone(c,{f:140,f2:60,d:.22,type:'square',g:.18})},
+  destroy:c=>{tone(c,{f:330,f2:110,d:.35,type:'triangle',g:.18});noise(c,{d:.3,g:.12,f:700,at:.05})},
+  flip:c=>{noise(c,{d:.08,g:.25,f:5000});tone(c,{f:880,f2:1320,d:.1,type:'sine',g:.12,at:.03})},
+  ccwin:c=>{[523,659,784,1047].forEach((f,i)=>tone(c,{f,d:.28,type:'triangle',g:.18,at:i*.08}))},
+  miss:c=>{tone(c,{f:300,f2:200,d:.22,type:'square',g:.08});tone(c,{f:220,f2:150,d:.28,type:'square',g:.07,at:.12})},
+  draw:c=>{noise(c,{d:.09,g:.18,f:4500});tone(c,{f:1200,f2:900,d:.06,type:'sine',g:.06})},
+  turn:c=>{tone(c,{f:660,d:.12,type:'sine',g:.16});tone(c,{f:990,d:.2,type:'sine',g:.14,at:.1})},
+  trigger:c=>{[740,988,1245].forEach((f,i)=>tone(c,{f,d:.18,type:'square',g:.07,at:i*.06}));noise(c,{d:.25,g:.12,f:6000,at:.05})},
+  sp:c=>{tone(c,{f:330,f2:990,d:.35,type:'sawtooth',g:.09});[1047,1319].forEach((f,i)=>tone(c,{f,d:.22,type:'triangle',g:.15,at:.2+i*.08}))},
+  click:c=>{tone(c,{f:1400,d:.03,type:'sine',g:.06})},
+  win:c=>{[523,659,784,1047,784,1047].forEach((f,i)=>tone(c,{f,d:i===5?.6:.2,type:'triangle',g:.2,at:i*.12}))},
+  lose:c=>{[392,349,311,262].forEach((f,i)=>tone(c,{f,d:i===3?.7:.28,type:'triangle',g:.18,at:i*.2}))}
+};
+function sfx(name){
+  if(!SND.on||!SND.vol||(G&&G.cfg&&G.cfg.headless))return;
+  const now=performance.now();if(SND.last[name]&&now-SND.last[name]<45)return;SND.last[name]=now; // 같은 소리 연타 방지
+  const c=sndCtx();if(!c)return;
+  const cu=SND.custom[name];
+  if(cu){sndBuffer(name).then(b=>{if(!b)return SYNTH[name]&&SYNTH[name](c);const s=c.createBufferSource();s.buffer=b;const g=c.createGain();g.gain.value=SND.vol;s.connect(g).connect(c.destination);s.start()}).catch(()=>{});return}
+  try{SYNTH[name]&&SYNTH[name](c)}catch(e){}
+}
+async function sndBuffer(name){
+  const cu=SND.custom[name];if(!cu)return null;const key=name+':'+cu.at;if(SND.buf[key]!==undefined)return SND.buf[key];
+  const c=sndCtx();if(!c)return null;
+  try{const bin=atob(cu.d);const u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);SND.buf[key]=await c.decodeAudioData(u.buffer)}catch(e){SND.buf[key]=null}
+  return SND.buf[key];
+}
+function cleanSound(v){return v&&typeof v==='object'&&typeof v.d==='string'&&v.d.length<SND_MAX*1.4&&/^audio\//.test(String(v.t||''))?{d:v.d,t:v.t,n:String(v.n||'').slice(0,60),at:+v.at||0}:null}
+function setSndOn(on){SND.on=on;lsSet('nijinana.snd.on',on);if(on){sndCtx();sfx('click')}renderSndBtn()}
+function renderSndBtn(){const b=document.getElementById('tbSnd');if(b){b.classList.toggle('on',!SND.on);b.title=SND.on?'소리 끄기':'소리 켜기';b.setAttribute('aria-label',b.title);
+  b.innerHTML=SND.on?'<svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>':'<svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M17 9l5 6M22 9l-5 6"/></svg>'}}
+async function uploadSound(slot,file){
+  if(!CAP.db||!CAP.admin){ADMIN.msg='소리 저장 불가 (관리자 권한 필요)';ADMIN.err=true;renderLobby();return}
+  if(!file||!/^audio\//.test(file.type)){ADMIN.msg='오디오 파일만 가능 (mp3·ogg·wav·m4a)';ADMIN.err=true;renderLobby();return}
+  if(file.size>SND_MAX){ADMIN.msg=`파일이 너무 큼 (${Math.round(file.size/1024)}KB) — 450KB 이하의 짧은 효과음만 가능`;ADMIN.err=true;renderLobby();return}
+  const c=sndCtx();
+  try{const ab=await file.arrayBuffer();if(c)await c.decodeAudioData(ab.slice(0))}catch(e){ADMIN.msg='재생할 수 없는 오디오 파일';ADMIN.err=true;renderLobby();return}
+  const u=new Uint8Array(await file.arrayBuffer());let s='';for(let i=0;i<u.length;i+=0x8000)s+=String.fromCharCode.apply(null,u.subarray(i,i+0x8000));
+  const doc={d:btoa(s),t:file.type,n:file.name.slice(0,60),at:Date.now()};
+  ADMIN.busy=true;renderLobby();
+  try{await CAP.db.doc('sound/'+slot).set(doc);SND.custom[slot]=doc;ADMIN.msg=`${sndLabel(slot)} 소리 적용 완료.`;ADMIN.err=false;sfx(slot)}
+  catch(e){ADMIN.msg='저장 실패: '+errText(e);ADMIN.err=true}
+  ADMIN.busy=false;renderLobby();
+}
+async function removeSound(slot){
+  if(!CAP.db)return;ADMIN.busy=true;renderLobby();
+  try{await CAP.db.doc('sound/'+slot).delete();delete SND.custom[slot];ADMIN.msg=`${sndLabel(slot)}: 기본 소리로 되돌림.`;ADMIN.err=false}
+  catch(e){ADMIN.msg='삭제 실패: '+errText(e);ADMIN.err=true}
+  ADMIN.busy=false;renderLobby();
+}
+const sndLabel=k=>(SOUND_SLOTS.find(x=>x[0]===k)||[k,k])[1];
+function soundAdminHTML(){
+  return`<h3>사운드 <small>기본 소리는 자동 합성 · 파일을 올리면 그 소리로 바뀜 (모든 사용자에게 적용)</small></h3>
+   <div class="abar"><span class="hint">mp3·ogg·wav·m4a, 450KB 이하의 짧은 효과음. 내 볼륨</span>
+    <input type="range" min="0" max="100" value="${Math.round(SND.vol*100)}" id="sndVol" aria-label="볼륨" style="width:160px">
+    <button class="btn sm" data-act="snd-toggle">${SND.on?'소리 켜짐':'소리 꺼짐'}</button></div>
+   ${ADMIN.msg?`<p class="amsg ${ADMIN.err?'err':''}">${esc(ADMIN.msg)}</p>`:''}
+   <div class="sndlist">${SOUND_SLOTS.map(([k,l])=>{const cu=SND.custom[k];
+     return`<div class="sndrow"><b>${esc(l)}</b><span class="sndsrc ${cu?'cu':''}">${cu?'업로드: '+esc(cu.n||'파일'):'기본 (합성)'}</span>
+      <button class="btn sm" data-act="snd-play" data-k="${k}">▶ 듣기</button>
+      <button class="btn sm" data-act="snd-up" data-k="${k}" ${ADMIN.busy?'disabled':''}>${cu?'바꾸기':'올리기'}</button>
+      ${cu?`<button class="btn sm ${ADMIN.arm==='snd:'+k?'danger arm':''}" data-act="snd-del" data-k="${k}" ${ADMIN.busy?'disabled':''}>${ADMIN.arm==='snd:'+k?'확인':'기본으로'}</button>`:''}</div>`}).join('')}</div>`;
+}
 
 const CAP={db:null,user:null,assets:null,uid:null,admin:false,me:null,canEdit:false};
 let USERDECKS=[];let DECKSRC='local';
@@ -1690,6 +1802,7 @@ async function initCaps(){
   if(db){
     try{db.doc('cardart/map').onSnapshot(s=>{RAWART=s.exists?s.data():{};ART=cleanArt(RAWART);BAD.clear();cacheArtMaps();preloadThumbs();rerenderAll();thumbBackfill()},()=>{})}catch(e){}
     try{db.doc('cardart/thumbs').onSnapshot(s=>{RAWTHUMB=s.exists?s.data():{};THUMB=cleanThumbs(RAWTHUMB);cacheArtMaps();preloadThumbs();rerenderAll();thumbBackfill()},()=>{})}catch(e){}
+    try{db.collection('sound').onSnapshot(qs=>{const m={};for(const d of qs.docs){const v=cleanSound(d.data());if(v&&SOUND_SLOTS.some(x=>x[0]===d.id))m[d.id]=v}SND.custom=m;if(LOBBY.tab==='admin')renderLobby()},()=>{})}catch(e){}
     try{db.doc('carddata/custom').onSnapshot(s=>{CUSTOM=s.exists?cleanStored((s.data()||{}).cards):{};applyCardData()},()=>{})}catch(e){}
     let uid=null;try{uid=user?await user.id():null}catch(e){}
     if(uid){
@@ -1727,10 +1840,11 @@ function handleCardClick(uid){
 function handleColorClick(owner,idx){
   const p=UI.pending;
   if(p&&p.req.kind==='color'&&p.req.owner===owner&&p.req.idxs.includes(idx)){p.pick=p.pick===idx?null:idx;render();return}
-  if(UI.att&&!p&&owner===1&&attackTargets(0,UI.att).some(t=>t.kind==='color'&&t.idx===idx)){UI.tgt=UI.tgt&&UI.tgt.kind==='color'&&UI.tgt.idx===idx?null:{kind:'color',idx};render();return}
+  if(UI.att&&!p&&owner===1&&attackTargets(0,UI.att).some(t=>t.kind==='color')){UI.ccOpen=true;if(UI.tgt&&UI.tgt.kind!=='color')UI.tgt=null;render();return}
   UI.sel=`cl:${owner}:${idx}`;render();
 }
 function handleAct(a,el){
+  if(el&&el.tagName==='BUTTON'&&!/^(sndtoggle|snd-play)$/.test(a))sfx('click');
   const p=UI.pending;const ds=el.dataset;
   if(a.startsWith('lb-')||a.startsWith('b-')||a.startsWith('ad-')||a.startsWith('crop-')){lobbyAct(a,ds,el);return}
   switch(a){
@@ -1740,8 +1854,14 @@ function handleAct(a,el){
     case'confirm':if(p&&validSel(p))resolvePending([...p.sel]);break;
     case'cancel':if(p&&p.req.cancelable)resolvePending(null);else if(UI.tgt){UI.tgt=null;render()}else if(UI.att){UI.att=null;render()}break;
     case'pickok':if(p&&p.pick!=null&&(p.req.kind==='card'||p.req.kind==='color'))resolvePending(p.pick);break;
-    case'atkgo':if(UI.att&&UI.tgt&&humanCanAct()){const a=UI.att,t=UI.tgt;UI.att=null;UI.tgt=null;UI.sel=null;act(()=>doAttack(0,a,t))}break;
+    case'atkgo':if(UI.att&&UI.tgt&&humanCanAct()){const a=UI.att,t=UI.tgt;UI.att=null;UI.tgt=null;UI.sel=null;UI.ccOpen=false;act(()=>doAttack(0,a,t))}break;
     case'ctpick':handleColorClick(+ds.owner,+ds.idx);break;
+    case'ccp':{const o=+ds.owner,i=+ds.idx;
+      if(p&&p.req.kind==='color'){if(p.req.idxs.includes(i)){p.pick=p.pick===i?null:i;render()}}
+      else if(UI.att){UI.tgt=UI.tgt&&UI.tgt.kind==='color'&&UI.tgt.idx===i?null:{kind:'color',idx:i};render()}}break;
+    case'ccgo':if(UI.att&&UI.tgt&&UI.tgt.kind==='color'&&humanCanAct()){const a=UI.att,t=UI.tgt;UI.att=null;UI.tgt=null;UI.sel=null;UI.ccOpen=false;act(()=>doAttack(0,a,t))}break;
+    case'clzone':if(UI.att&&!p&&attackTargets(0,UI.att).some(t=>t.kind==='color')){UI.ccOpen=true;render()}break;
+    case'ccclose':UI.ccOpen=false;if(UI.tgt&&UI.tgt.kind==='color')UI.tgt=null;render();break;
     case'cspick':handleCardClick(+ds.uid);break;
     case'csrec':if(p&&p.req.cost){p.sel=costRec(p);render()}break;
     case'next':if(UI.phaseRes&&!UI.busy&&!p){const r=UI.phaseRes;UI.phaseRes=null;UI.att=null;UI.sel=null;r()}break;
@@ -1763,6 +1883,7 @@ function handleAct(a,el){
     case'zoomclose':$('#zoom').hidden=true;break;
     case'closeinsp':UI.hover=null;UI.sel=null;UI.att=null;render();break;
     case'togglelog':UI.logOpen=!UI.logOpen;render();break;
+    case'sndtoggle':setSndOn(!SND.on);break;
     case'speed':SPEED=SPEED<1?1:0.45;LOBBY.speed=String(SPEED);render();break;
     case'fullscreen':{const d=document;
       try{if(d.fullscreenElement)d.exitFullscreen().catch(()=>{});else{const r=d.documentElement.requestFullscreen&&d.documentElement.requestFullscreen();if(r&&r.catch)r.catch(()=>{})}}catch(e){}}break;
@@ -1771,7 +1892,7 @@ function handleAct(a,el){
 document.addEventListener('click',e=>{
   const el=e.target.closest('[data-act],[data-cl],[data-uid],[data-cid]');
   if(!el){
-    if(SCREEN==='game'&&!e.target.closest('#inspector,#logpanel,#modal,.bubble,#centerbar,#tray,#csheet,#toolbar')&&(UI.sel!=null||UI.att))deselect();
+    if(SCREEN==='game'&&!e.target.closest('#inspector,#logpanel,#modal,.bubble,#centerbar,#tray,#ctray,#csheet,#toolbar')&&(UI.sel!=null||UI.att))deselect();
     return;
   }
   if(el.dataset.act){handleAct(el.dataset.act,el);return}
@@ -1787,6 +1908,7 @@ document.addEventListener('keydown',e=>{
     else if(!$('#modal').hidden){if(CROP)closeCrop();else hideModal()}
     else if(SCREEN!=='game')return;
     else if(UI.pending&&UI.pending.pid===0&&UI.pending.req.cost){resolvePending(null)}
+    else if(UI.ccOpen){UI.ccOpen=false;if(UI.tgt&&UI.tgt.kind==='color')UI.tgt=null;render()}
     else if(UI.logOpen){UI.logOpen=false;render()}
     else if(UI.sel!=null||UI.att||UI.hover!=null){UI.hover=null;deselect()}
   }
@@ -1815,7 +1937,7 @@ document.addEventListener('focusin',e=>{
 function computeSel(){
   const s={uids:new Set(),cl:new Set()};const p=UI.pending;
   if(p&&p.pid===0){if(p.req.uids)p.req.uids.forEach(u=>s.uids.add(u));if(p.req.kind==='color')p.req.idxs.forEach(i=>s.cl.add(p.req.owner+':'+i));return s}
-  if(UI.att)attackTargets(0,UI.att).forEach(t=>t.kind==='liver'?s.uids.add(t.uid):s.cl.add('1:'+t.idx));
+  if(UI.att)attackTargets(0,UI.att).forEach(t=>{if(t.kind==='liver')s.uids.add(t.uid);else s.line=true});
   return s;
 }
 function onFieldSafe(c){try{return!!G&&onField(c)}catch(e){return false}}
@@ -1909,14 +2031,14 @@ function zonesHTML(pid){
   const top=P.log[P.log.length-1];
   return`
   <div class="z z-field ${p}" style="gap:${fg}px;--fs:${fs.toFixed(3)}"><span class="fcap">FIELD ${fn}</span>${slots}${P.field.length?'':'<span class="fempty">필드에 라이버 없음</span>'}</div>
-  <div class="z z-set boxz ${p}"><span class="zlab">세트</span>${P.set?(pid===0?cardHTML(P.set)+(UI.sel===P.set.uid&&!UI.pending&&G.phase==='main'?handBubble(P.set):''):`<div class="setback">${backHTML('sm')}</div>`):'<span class="note">비어 있음</span>'}</div>
+  <div class="z z-set boxz ${p}"><span class="zlab">SET</span>${P.set?(pid===0?cardHTML(P.set)+(UI.sel===P.set.uid&&!UI.pending&&G.phase==='main'?handBubble(P.set):''):`<div class="setback">${backHTML('sm')}</div>`):'<span class="note">비어 있음</span>'}</div>
   <div class="z z-ch ${p}">${chHTML(P)}${pid===0&&UI.sel===P.ch.uid?actBubble('ch'):''}</div>
-  <div class="z z-stage boxz ${p}"><span class="zlab">스테이지</span>${P.stage?cardHTML(P.stage):'<span class="note">비어 있음</span>'}${P.under.length?`<span class="under">아래 ${P.under.length}장</span>`:''}${pid===0&&P.stage&&UI.sel===P.stage.uid?actBubble('st'):''}</div>
-  <div class="z z-cl ${p}"><div class="clcol">${P.cl.map((x,i)=>clHTML(pid,x,i)).join('')}</div><span class="clcap">컬러 라인</span></div>
-  <div class="z z-niji ${p}"><div class="njcap"><span>니지 에리어</span><b>${P.niji.length}/7</b></div><div class="njrow">${COLORS.map(col=>{const has=P.niji.includes(col)&&!NJHIDE.has(pid+col);
+  <div class="z z-stage boxz ${p}"><span class="zlab">STAGE</span>${P.stage?cardHTML(P.stage):'<span class="note">비어 있음</span>'}${P.under.length?`<span class="under">아래 ${P.under.length}장</span>`:''}${pid===0&&P.stage&&UI.sel===P.stage.uid?actBubble('st'):''}</div>
+  <div class="z z-cl ${p}${pid===1&&SEL.line&&!UI.ccOpen?' cltarget':''}"${pid===1?' data-act="clzone"':''}><div class="clcol">${P.cl.map((x,i)=>clHTML(pid,x,i)).join('')}</div><span class="clcap">COLOR LINE</span></div>
+  <div class="z z-niji ${p}"><div class="njcap"><span>NIJI AREA</span><b>${P.niji.length}/7</b></div><div class="njrow">${COLORS.map(col=>{const has=P.niji.includes(col)&&!NJHIDE.has(pid+col);
     const na=animOf('nj'+pid+col);return`<div class="nslot${na?' '+na.cls:''}" style="--cc:var(--${col});${na?'--ad:'+na.delay+'ms;animation-delay:'+na.delay+'ms':''}">${has?(()=>{const a=thumbOf('_cl'+col);return`<div class="nc${a?' img':''}"${a?` style="background-image:url('${blobUrl(a)}')"`:''}>${a?'':`<b>${col}</b><i>${CNAME[col]}</i>`}</div>`})():''}<span class="nl">${col}</span></div>`}).join('')}</div></div>
-  <div class="z z-pile z-deck ${p}"><div class="pilecard deck" aria-label="덱 ${P.deck.length}장">${backHTML()}<span class="cnt">${P.deck.length}</span></div><span class="zlab">덱</span></div>
-  <div class="z z-pile z-log ${p}"><button class="pilecard log" data-act="viewlog" data-pid="${pid}" aria-label="로그 보기 ${P.log.length}장">${top?cardHTML(top,{plain:true}):''}<span class="cnt">${P.log.length}</span></button><span class="zlab">로그</span></div>`;
+  <div class="z z-pile z-deck ${p}"><div class="pilecard deck" aria-label="덱 ${P.deck.length}장">${backHTML()}<span class="cnt">${P.deck.length}</span></div><span class="zlab">DECK</span></div>
+  <div class="z z-pile z-log ${p}"><button class="pilecard log" data-act="viewlog" data-pid="${pid}" aria-label="로그 보기 ${P.log.length}장">${top?cardHTML(top,{plain:true}):''}<span class="cnt">${P.log.length}</span></button><span class="zlab">LOG</span></div>`;
 }
 function handBubble(c){
   if(!humanCanAct())return'';
@@ -1965,7 +2087,7 @@ function centerHTML(){
       if(p.req.optional)btns+='<button class="btn" data-act="skip">건너뛰기</button>'}
   }
   else if(UI.att&&UI.tgt){const pr=predict(UI.att,UI.tgt);t=pr.title;sub=pr.sub;btns='<button class="btn primary" data-act="atkgo">공격!</button><button class="btn" data-act="cancel">다시 고르기</button>'}
-  else if(UI.att){t=`${nm(UI.att)} (파워 ${power(UI.att)})의 공격 대상 선택`;sub=`대상을 누르거나 라이버를 대상까지 드래그 · 가로 라이버 = 배틀 · 컬러 카드 = 컬러 콜${UI.att.noCC?' (이 라이버는 이번 턴 컬러 콜 불가)':''}`;btns='<button class="btn" data-act="cancel">취소</button>'}
+  else if(UI.att){t=`${nm(UI.att)} (파워 ${power(UI.att)})의 공격 대상 선택`;sub=`대상을 누르거나 라이버를 대상까지 드래그 · 가로 라이버 = 배틀 · 상대 컬러 라인 = 컬러 콜 (위치는 다음 창에서 선택)${UI.att.noCC?' (이 라이버는 이번 턴 컬러 콜 불가)':''}`;btns='<button class="btn" data-act="cancel">취소</button>'}
   else if(UI.phaseRes&&!UI.busy&&mine){
     const h={main:['손패 플레이 또는 채널·스테이지 기동 효과 사용','파란 테두리 = 플레이 가능 · 카드에 마우스를 올리면 효과 표시'],
       action:['공격할 세로 라이버 선택','노란 테두리 = 공격 가능 · 대상은 상대 가로 라이버 또는 컬러 카드'],
@@ -1996,17 +2118,25 @@ function predict(a,t){
   const r=ch.known?(ch.ok?'같은 색 — 성공':`${nm(a)}에게 이 색 없음 — 실패`):`성공 확률 ${ch.pct}% (남은 뒷면 색 기준)`;
   return{title:`${nm(a)} 컬러 콜 → ${colorLabel(1,t.idx)}`,sub:`예상: ${r}${bl}`};
 }
-function ctrayHTML(){
-  if(!G||SCREEN!=='game')return'';
-  const p=UI.pending;let owner=null,idxs=[],att=null,pick=null,title='';
-  if(p&&p.pid===0&&p.req.kind==='color'){owner=p.req.owner;idxs=p.req.idxs;pick=p.pick;att=p.req.att!=null?byUid(p.req.att):null;title=p.req.text}
-  else if(UI.att&&!p&&humanCanAct()){owner=1;idxs=attackTargets(0,UI.att).filter(t=>t.kind==='color').map(t=>t.idx);att=UI.att;pick=UI.tgt&&UI.tgt.kind==='color'?UI.tgt.idx:null;title='컬러 콜 대상 · 상대 컬러 라인'}
+function ctrayHTML(){ // 컬러 콜 위치 선택 창: 컬러 라인 전체를 대상으로 고른 뒤 여기서 위치를 고름 (왼쪽=맨 아래, 오른쪽=맨 위)
+  if(!G||SCREEN!=='game'||G.winner!=null)return'';
+  const p=UI.pending;let owner=null,idxs=[],att=null,pick=null,title='',mode='';
+  if(p&&p.pid===0&&p.req.kind==='color'){mode='ask';owner=p.req.owner;idxs=p.req.idxs;pick=p.pick;att=p.req.att!=null?byUid(p.req.att):null;title=p.req.text}
+  else if(UI.att&&UI.ccOpen&&!p&&humanCanAct()){mode='atk';owner=1;idxs=attackTargets(0,UI.att).filter(t=>t.kind==='color').map(t=>t.idx);att=UI.att;pick=UI.tgt&&UI.tgt.kind==='color'?UI.tgt.idx:null;title=`${nm(UI.att)} (파워 ${power(UI.att)}) 컬러 콜`}
   if(owner==null||!idxs.length)return'';
   const cl=G.p[owner].cl;
-  return`<span class="tt">${esc(title)}</span><div class="ctrow">${idxs.map(i=>{const x=cl[i];const ch=att?ccChance(att,owner,i):null;
+  const order=owner===1?[0,1,2,3,4,5,6]:[6,5,4,3,2,1,0]; // 화면에서 맨 아래 칸부터
+  const cards=order.map((i,n)=>{const x=cl[i];const en=idxs.includes(i)&&!x.gone;const ch=att&&en?ccChance(att,owner,i):null;
     const pred=ch?(ch.known?(ch.ok?'성공':'실패'):`성공 ${ch.pct}%`):'';
-    return`<button class="ctitem ${x.up?'up':'down'} ${pick===i?'chosen':''}" data-act="ctpick" data-owner="${owner}" data-idx="${i}" style="--cc:var(--${x.color})">
-      <b>${x.up?x.color:'?'}</b><span>${x.up?CNAME[x.color]:`뒷면 ${i+1}`}</span>${pred?`<em class="${ch.ok?'ok':'no'}">${pred}</em>`:''}</button>`}).join('')}</div>`;
+    const a=x.gone?null:thumbOf(x.up?'_cl'+x.color:'_cl');
+    const face=x.gone?'<i class="ccp-empty">니지 에리어로</i>':a?`<i class="ccp-img" style="background-image:url('${blobUrl(a)}')"></i>${x.up?`<i class="ccp-tag"><b>${x.color}</b>${CNAME[x.color]}</i>`:''}`:x.up?`<b class="ccp-l">${x.color}</b><i class="ccp-n">${CNAME[x.color]}</i>`:'<b class="ccp-l">7</b><i class="ccp-n">뒷면</i>';
+    return`<button class="ccp-c ${x.gone?'gone':x.up?'up':'down'} ${pick===i?'on':''}" data-act="ccp" data-owner="${owner}" data-idx="${i}" ${en?'':'disabled'} style="--cc:var(--${x.color})">
+      <span class="ccp-card">${face}</span><span class="ccp-pos">${n===0?'맨 아래':n===6?'맨 위':`아래에서 ${n+1}번째`}</span>${pred?`<em class="${ch.known?(ch.ok?'ok':'no'):''}">${pred}</em>`:'<em class="none">—</em>'}</button>`}).join('');
+  const pr=mode==='atk'&&pick!=null?predict(att,{kind:'color',idx:pick}).sub:'';
+  const foot=mode==='atk'?`<span class="ccp-msg">${pick!=null?esc(pr):'콜할 위치를 고른다'}</span><button class="btn" data-act="ccclose">취소</button><button class="btn primary" data-act="ccgo" ${pick==null?'disabled':''}>컬러 콜!</button>`
+    :`<span class="ccp-msg">${pick!=null?'선택한 위치로 확정':'위치를 고른다'}</span>${p.req.optional?'<button class="btn" data-act="skip">건너뛰기</button>':''}<button class="btn primary" data-act="pickok" ${pick==null?'disabled':''}>확인</button>`;
+  return`<div class="ccp-head"><b>${esc(title)}</b><span class="ccp-dir"><i>← 맨 아래</i><i>맨 위 →</i></span>${mode==='atk'?'<button class="ccp-x" data-act="ccclose" aria-label="닫기">×</button>':''}</div>
+    <div class="ccp-row">${cards}</div><div class="ccp-foot">${foot}</div>`;
 }
 function costRec(p){
   const P=G.p[0];const ok=x=>p.req.uids.includes(x.uid);
@@ -2101,7 +2231,8 @@ function render(){
   $('#ticker').innerHTML=G.logs.slice(0,6).map((l,i)=>`<div class="${l.pid!=null?'p'+l.pid:''} ${l.kind||''}" style="opacity:${(1-i*.13).toFixed(2)}">${l.kind==='turn'?'':'<i></i>'}<span>${esc(l.msg)}</span></div>`).join('');
   const tr=trayHTML();const T=$('#tray');T.hidden=!tr;if(tr)T.innerHTML=tr;
   const cs=csheetHTML();const CS=$('#csheet');CS.hidden=!cs;if(cs)CS.innerHTML=cs;
-  $('#ctray').hidden=true; // 컬러 콜 대상 큰 선택 창은 사용 안 함 (컬러 라인에서 직접 선택)
+  if(!UI.att)UI.ccOpen=false;
+  const ct=ctrayHTML();const CT=$('#ctray');CT.hidden=!ct;if(ct)CT.innerHTML=ct;
   $('#logpanel').hidden=!UI.logOpen;$('#tbLog').classList.toggle('on',!!UI.logOpen);
   if(UI.logOpen)$('#gamelog').innerHTML=G.logs.slice(0,200).map(l=>`<li class="${l.pid!=null?'p'+l.pid:''} ${l.kind||''}">${esc(l.msg)}</li>`).join('');
   $('#tbSpeed').classList.toggle('on',SPEED<1);
@@ -2121,7 +2252,7 @@ function showLog(pid){
    <div class="loglist">${P.log.length?P.log.map(c=>cardHTML(c).replace('tabindex="0" role="button"','')).join(''):'<p>비어 있음.</p>'}</div>
    <div class="mfoot"><button class="btn primary" data-act="close">닫기</button></div>`,P.log.length>8);
 }
-function showWin(){fxEnd(G.winner).catch(()=>{}).then(()=>{if(SCREEN==='game'&&G&&G.winner!=null)showWinModal()})}
+function showWin(){sfx(G.winner===0?'win':'lose');fxEnd(G.winner).catch(()=>{}).then(()=>{if(SCREEN==='game'&&G&&G.winner!=null)showWinModal()})}
 function showWinModal(){
   const me=G.winner===0;
   showModal(`<div class="rainbow-bar"></div><div class="win-big ${me?'me':'ai'}">${me?'승리!':'패배'}</div>
@@ -2394,8 +2525,9 @@ function slotPreview(k){
 function adminHTML(){
   const u=ADMIN.usage;const has=SLOTS.filter(k=>artOf(k)).length;
   const meter=u?`<span class="meter"><span class="track"><i style="width:${Math.min(100,u.bytes/u.maxBytes*100).toFixed(1)}%"></i></span>${(u.bytes/1048576).toFixed(1)}MB / ${(u.maxBytes/1048576).toFixed(0)}MB · ${u.files}/${u.maxFiles}개</span>`:'';
-  const sub=`<div class="seg adsub">${[['art','카드 이미지'],['data','카드 데이터']].map(([v,l])=>`<button class="${(ADMIN.sub||'art')===v?'on':''}" data-act="ad-sub" data-v="${v}">${l}</button>`).join('')}</div>`;
+  const sub=`<div class="seg adsub">${[['art','카드 이미지'],['data','카드 데이터'],['snd','사운드']].map(([v,l])=>`<button class="${(ADMIN.sub||'art')===v?'on':''}" data-act="ad-sub" data-v="${v}">${l}</button>`).join('')}</div>`;
   if(ADMIN.sub==='data')return`<main class="lb-body admin"><section class="panel cdpanel">${sub}${cardDataHTML()}</section></main>`;
+  if(ADMIN.sub==='snd')return`<main class="lb-body admin"><section class="panel cdpanel">${sub}${soundAdminHTML()}</section></main>`;
   return`<main class="lb-body admin"><section class="panel">${sub}
    <h3>카드 이미지 관리 <small>이미지 ${has}/${SLOTS.length} 등록됨 · 업로드 즉시 모든 사용자에게 적용</small></h3>
    <div class="abar"><button class="btn primary" data-act="ad-bulk" ${ADMIN.busy?'disabled':''}>여러 장 한꺼번에 올리기</button>${SOLO&&window.claude.seed?`<button class="btn" data-act="ad-seed" ${ADMIN.busy?'disabled':''}>기존 이미지 가져오기 (claude.ai 버전)</button>`:''}
@@ -2435,6 +2567,10 @@ function lobbyAct(a,ds){
     case'b-del':if(!LOBBY.delArm){LOBBY.delArm=true;renderLobby()}else{const id=BUILD.id;LOBBY.delArm=false;BUILD=null;(async()=>{await removeDeck(id);toast('덱 삭제 완료');if(LOBBY.me==='u:'+id)LOBBY.me='SD01';if(LOBBY.ai==='u:'+id)LOBBY.ai='SD02';renderLobby()})()}break;
     case'ad-one':if(!ADMIN.busy){ADMIN.pending=ds.k;const f=$('#fileOne');f.value='';f.click()}break;
     case'ad-bulk':if(!ADMIN.busy){const f=$('#fileBulk');f.value='';f.click()}break;
+    case'snd-play':sndCtx();sfx(ds.k);break;
+    case'snd-toggle':setSndOn(!SND.on);renderLobby();break;
+    case'snd-up':if(!ADMIN.busy){ADMIN.sndSlot=ds.k;const f=$('#fileSnd');f.value='';f.click()}break;
+    case'snd-del':if(ADMIN.arm!=='snd:'+ds.k){ADMIN.arm='snd:'+ds.k;renderLobby()}else{ADMIN.arm=null;removeSound(ds.k)}break;
     case'ad-sub':ADMIN.sub=ds.v;ADMIN.msg='';ADMIN.arm=null;renderLobby();break;
     case'ad-cdcopy':cdCopy(false);break;
     case'ad-cdblank':cdCopy(true);break;
@@ -2451,7 +2587,7 @@ function lobbyAct(a,ds){
     case'crop-apply':cropApply();break;
   }
 }
-document.addEventListener('input',e=>{if(e.target&&e.target.id==='cdPaste'){ADMIN.cdText=e.target.value;return}if(e.target&&e.target.id==='srchQ'){SRCH.q=e.target.value;renderLobby();return}if(e.target&&e.target.id==='deckName'&&BUILD){BUILD.name=e.target.value;BUILD.dirty=true;const m=$('#dirtyMark');if(m)m.textContent='저장 안 됨'}});
+document.addEventListener('input',e=>{if(e.target&&e.target.id==='sndVol'){SND.vol=(+e.target.value||0)/100;lsSet('nijinana.snd.vol',SND.vol);return}if(e.target&&e.target.id==='cdPaste'){ADMIN.cdText=e.target.value;return}if(e.target&&e.target.id==='srchQ'){SRCH.q=e.target.value;renderLobby();return}if(e.target&&e.target.id==='deckName'&&BUILD){BUILD.name=e.target.value;BUILD.dirty=true;const m=$('#dirtyMark');if(m)m.textContent='저장 안 됨'}});
 
 /* ================= ADMIN: image upload ================= */
 const RATIO_CARD=63/88,RATIO_WIDE=88/63;
@@ -2540,6 +2676,7 @@ async function removeArt(slot){
 }
 function refreshUsage(){if(!CAP.assets)return;CAP.assets.list().then(r=>{ADMIN.usage=r&&r.usage||null;if(LOBBY.tab==='admin')renderLobby()}).catch(()=>{})}
 $('#fileOne').addEventListener('change',e=>{const f=e.target.files&&e.target.files[0];const k=ADMIN.pending;ADMIN.pending=null;if(f&&k)openCrop(k,f)});
+$('#fileSnd').addEventListener('change',e=>{const f=e.target.files&&e.target.files[0];const k=ADMIN.sndSlot;ADMIN.sndSlot=null;if(f&&k)uploadSound(k,f)});
 $('#fileBulk').addEventListener('change',e=>bulkUpload([...(e.target.files||[])]));
 async function bulkUpload(files){
   if(!files.length)return;
@@ -2681,7 +2818,9 @@ function fxMill(pid,k){
 function addBuff(c,n){c.buff+=n;render();fxNum(c.uid,n)}
 
 function fxShake(px){if(!FXON()||RM)return;for(const id of ['#z0','#z1']){const el=$(id);anim(el,[{transform:'none'},{transform:`translate(${-px}px,${px*.6}px)`},{transform:`translate(${px}px,${-px*.6}px)`},{transform:`translate(${-px*.5}px,0)`},{transform:'none'}],{duration:260})}}
+const FX_SND={turn:'turn',sp:'sp',event:'play',attack:'attack',strike:'hit',ccWin:'ccwin',miss:'miss',trigger:'trigger'};
 async function fx(kind,o={}){
+  if(FX_SND[kind])sfx(FX_SND[kind]);
   if(!FXON())return;
   switch(kind){
     case'start':{const f=G.p[o.first];await fxBanner('대전 시작!',`선공 ${f.name} · 손패 5장   /   후공 ${G.p[1-o.first].name} · 손패 7장`,'dark',1500);break}
@@ -2766,7 +2905,7 @@ async function fx(kind,o={}){
       if(from&&to&&!RM){const ta=thumbOf('_cl'+color);const ch=fxEl(ta?'':`<b>${color}</b>`,'fxchip fxnjc');ch.style.setProperty('--cc',`var(--${color})`);if(ta)ch.style.backgroundImage=`url('${blobUrl(ta)}')`;
         const f=center(from),t=center(to);const mx=(f.x+t.x)/2,my=Math.min(f.y,t.y)-130;
         fxRing(f,'',100);
-        await anim(ch,[{transform:`translate(${f.x-28}px,${f.y-39}px) scale(.6)`,opacity:1},{transform:`translate(${mx-28}px,${my-39}px) scale(1.35) rotate(180deg)`,offset:.5},{transform:`translate(${t.x-28}px,${t.y-39}px) scale(.9) rotate(${pid===1?540:360}deg)`}],{duration:fxT(720),easing:'cubic-bezier(.4,0,.2,1)'});
+        await anim(ch,[{transform:`translate(${f.x-28}px,${f.y-39}px) scale(.6)`,opacity:1},{transform:`translate(${mx-28}px,${my-39}px) scale(1.35) rotate(180deg)`,offset:.5},{transform:`translate(${t.x-28}px,${t.y-39}px) scale(.9) rotate(360deg)`}],{duration:fxT(720),easing:'cubic-bezier(.4,0,.2,1)'});
         if(TOKEN.dead)throw new Abort();
         kill(ch);fxRing(t,'',140);fxSparks(t,16,120)}
       NJHIDE.delete(pid+color);mark('nj'+pid+color,'nj',1000);render();
@@ -2820,8 +2959,7 @@ function stagePt(e){const s=$('#stage').getBoundingClientRect();return{x:(e.clie
 function dropTarget(e){
   if(!DRAGA)return null;const el=document.elementFromPoint(e.clientX,e.clientY);if(!el)return null;
   const tg=attackTargets(0,DRAGA.c);
-  const ci=el.closest('[data-act="ctpick"],[data-cl]');
-  if(ci){const owner=+ci.dataset.owner,idx=+(ci.dataset.idx??ci.dataset.cl);if(owner===1&&tg.some(t=>t.kind==='color'&&t.idx===idx))return{kind:'color',idx,el:ci}}
+  const zl=el.closest('.z-cl.p1');if(zl&&tg.some(t=>t.kind==='color'))return{kind:'cline',el:zl}; // 컬러 라인 전체가 대상
   const ce=el.closest('[data-uid]');if(ce){const uid=+ce.dataset.uid;if(tg.some(t=>t.kind==='liver'&&t.uid===uid))return{kind:'liver',uid,el:ce}}
   return null;
 }
@@ -2847,7 +2985,8 @@ function endDrag(e,commit){
   if(!DRAGA)return;const d=DRAGA;DRAGA=null;if(d.arrow)kill(d.arrow);if(d.hot)d.hot.classList.remove('droptgt','drop');
   if(!d.on)return;NOCLICK=true;setTimeout(()=>{NOCLICK=false},0);
   DRAGA=d;const t=commit?dropTarget(e):null;DRAGA=null;
-  if(t&&humanCanAct()&&canAttack(0,d.c)){UI.att=null;UI.tgt=null;UI.sel=null;act(()=>doAttack(0,d.c,t.kind==='liver'?{kind:'liver',uid:t.uid}:{kind:'color',idx:t.idx}))}
+  if(t&&t.kind==='cline'&&humanCanAct()&&canAttack(0,d.c)){UI.att=d.c;UI.tgt=null;UI.sel=d.c.uid;UI.ccOpen=true;render()}
+  else if(t&&humanCanAct()&&canAttack(0,d.c)){UI.att=null;UI.tgt=null;UI.sel=null;act(()=>doAttack(0,d.c,{kind:'liver',uid:t.uid}))}
   else{render()}
 }
 document.addEventListener('pointerup',e=>{if(!DRAGA)return;if(DRAGA.on)endDrag(e,true);else DRAGA=null});
@@ -2912,6 +3051,7 @@ newGame({me:'SD01',opp:'SD02',first:'me'});
   put(P,'SD01-011');put(P,'SD01-002');put(O,'SD02-008',true);put(O,'SD02-002');O.cl[2].up=true;})();
 USERDECKS=loadLocalDecks();
 fit();render();renderLobby();
+renderSndBtn();
 initCaps();
 </script>
 
