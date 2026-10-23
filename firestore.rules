@@ -10,6 +10,8 @@ service cloud.firestore {
     // 카드 이미지 목록·썸네일 목록·추가 카드 데이터: 누구나 읽기, 관리자만 쓰기
     match /cardart/{doc} { allow read: if true; allow write: if isAdmin(); }
     match /carddata/{doc} { allow read: if true; allow write: if isAdmin(); }
+    // 업로드한 효과음 (base64, 1MB 미만)
+    match /sound/{slot} { allow read: if true; allow write: if isAdmin(); }
     // 이미지 본문 (base64, 1MB 미만)
     match /img/{id} {
       allow read: if true;
