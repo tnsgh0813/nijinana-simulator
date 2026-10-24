@@ -18,8 +18,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Noto+Sans+JP:wght@500;700;900&display=swap">
-<script src="config.js?v=202610241404"></script>
-<script src="fb.js?v=202610241404"></script>
+<script src="config.js?v=202610241417"></script>
+<script src="fb.js?v=202610241417"></script>
 </head>
 <body>
 <style>
@@ -1107,7 +1107,7 @@ button,a,[role=button]{-webkit-tap-highlight-color:transparent}
 /* 작은 화면: 바깥 여백 없이 화면 전체 사용 (노치·홈 바 안전 영역만 비움) */
 @media (max-width:1199px),(max-height:659px){
  body{padding:0;height:100vh;height:100dvh}
- #app{box-sizing:border-box;padding:env(safe-area-inset-top,0) env(safe-area-inset-right,0) env(safe-area-inset-bottom,0) env(safe-area-inset-left,0)}
+ #app{box-sizing:border-box;padding:env(safe-area-inset-top,0) env(safe-area-inset-right,0) 0 env(safe-area-inset-left,0)}
 }
 #toolbar{zoom:var(--mob2,1)}
 .bubble{zoom:var(--mob2,1)}
@@ -1208,6 +1208,36 @@ button,a,[role=button]{-webkit-tap-highlight-color:transparent}
 /* 로비가 떠 있는 동안 뒤의 대전 판은 숨김 (브라우저마다 로비 크기 계산이 달라도 판이 비쳐 보이지 않게) */
 #stage.inlobby>:not(#lobby):not(#modal):not(#toast):not(#zoom):not(#coinov):not(#ldov):not(#rotate){visibility:hidden}
 #stage.inlobby{background-color:#f6e9f5}
+
+/* 화면 끝까지 로비를 채우고, 홈 바(안전 영역)만큼 내용 아래에 여백 */
+#stage.resp #lobby::after{content:"";display:block;flex:none;height:max(12px,env(safe-area-inset-bottom,0px))}
+#stage.resp #lobby[data-tab="login"]::after,#stage.resp #lobby[data-tab="boot"]::after{display:none}
+#stage.resp .auth-panel{padding-bottom:max(24px,env(safe-area-inset-bottom,0px))}
+@container lb (max-width:1199px){
+ .auth{flex:none}
+ .auth-art{overflow:visible}
+}
+/* 가로로 넓고 세로가 낮은 태블릿(아이패드 가로 등): 홈이 한 화면에 들어오게 */
+@container lb (min-width:860px) and (max-width:1199px) and (max-height:860px){
+ .home{gap:12px;padding-bottom:10px}
+ .home-hero{padding:22px 26px;gap:22px}
+ .home-tag b{font-size:24px;margin-bottom:2px}.home-tag{font-size:13px}
+ .home-start{padding:16px 20px;gap:16px}.hs-ic{width:56px;height:56px}.hs-ic svg{width:26px;height:26px}.hs-tx b{font-size:30px}.hs-tx small{font-size:13px}
+ .home-menu{grid-template-columns:repeat(6,minmax(0,1fr))}
+ .htile{flex-direction:row;align-items:center;padding:12px;gap:10px}
+ .ht-ic{width:42px;height:42px;border-radius:12px}.ht-ic svg{width:22px;height:22px}
+ .ht-tx b{font-size:15px}.htile small{display:none}
+ .home .copy{margin-top:0}
+ .home{flex:1;min-height:0;grid-template-rows:minmax(0,1fr) auto auto}
+ .home-hero{grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);align-items:center}
+ .hh-kv{order:0}
+ .home-menu{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr)}
+ .auth{flex:1;min-height:0;height:100%;grid-template-columns:minmax(0,1fr) minmax(380px,.8fr)}
+ .auth-art{overflow:hidden;padding:28px 30px;justify-content:center}
+ .auth-art .auth-kv{max-width:none;margin-top:16px}
+ .auth-panel{padding:26px 30px;overflow-y:auto}
+ .lb-logo.big .lg-name{font-size:30px}
+}
 </style>
 
 <div id="app">
