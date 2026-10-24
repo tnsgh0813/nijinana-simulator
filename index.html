@@ -9,8 +9,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Noto+Sans+JP:wght@500;700;900&display=swap">
-<script src="config.js?v=202610241240"></script>
-<script src="fb.js?v=202610241240"></script>
+<script src="config.js?v=202610241246"></script>
+<script src="fb.js?v=202610241246"></script>
 </head>
 <body>
 <style>
@@ -1059,6 +1059,37 @@ legend{font-size:12px;font-weight:700;color:var(--accent);padding:0 4px}
 
 /* 이미지 길게 누르기(모바일) 메뉴·끌기 막기 */
 img{-webkit-touch-callout:none;-webkit-user-drag:none;user-select:none}
+
+/* ---------- 홈 배너 ---------- */
+.bnr{position:relative;width:100%;aspect-ratio:16/9;border-radius:18px;overflow:hidden;background:rgba(10,8,30,.35);box-shadow:0 18px 44px rgba(10,5,30,.45),0 0 0 1px rgba(255,255,255,.16)}
+.bn-s{position:absolute;inset:0;display:block;opacity:0;visibility:hidden;transition:opacity .7s ease,visibility 0s .7s}
+.bn-s.on{opacity:1;visibility:visible;transition:opacity .7s ease}
+.bn-s img{width:100%;height:100%;object-fit:cover;display:block}
+a.bn-s{cursor:pointer}.bn-s.nolink{cursor:default}
+.bn-go{position:absolute;right:12px;top:12px;width:34px;height:34px;border-radius:50%;background:rgba(10,8,30,.55);color:#fff;display:grid;place-items:center;font-size:17px;font-weight:800;opacity:0;transition:opacity .2s}
+a.bn-s:hover .bn-go,a.bn-s:focus-visible .bn-go{opacity:1}
+a.bn-s:focus-visible{outline:3px solid var(--gold);outline-offset:-3px}
+.bn-dots{position:absolute;left:0;right:0;bottom:12px;display:flex;justify-content:center;gap:8px;z-index:2;pointer-events:none}
+.bn-dots button{pointer-events:auto;width:10px;height:10px;border-radius:999px;border:0;padding:0;background:rgba(255,255,255,.55);cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.35);transition:width .25s,background .25s}
+.bn-dots button.on{width:26px;background:#fff}
+.bn-nav{position:absolute;top:50%;transform:translateY(-50%);z-index:2;width:40px;height:40px;border-radius:50%;border:0;background:rgba(10,8,30,.5);color:#fff;font-size:26px;line-height:1;cursor:pointer;opacity:0;transition:opacity .2s}
+.bnr:hover .bn-nav,.bn-nav:focus-visible{opacity:1}
+.bn-nav.prev{left:12px}.bn-nav.next{right:12px}
+.auth-kv .bnr{border-radius:16px}
+@media (prefers-reduced-motion:reduce){.bn-s,.bn-s.on{transition:none}}
+.bnadm{display:flex;flex-direction:column;gap:10px;margin:0 0 10px}
+.bnrow{display:flex;gap:16px;align-items:center;background:rgba(255,255,255,.75);border-radius:14px;padding:10px 12px;box-shadow:inset 0 0 0 1px rgba(120,90,140,.14);border:1.5px dashed transparent}
+.bnrow.drop{border-color:var(--accent);background:rgba(214,51,122,.06)}
+.bnth{width:224px;aspect-ratio:16/9;border-radius:10px;overflow:hidden;flex:none;background:repeating-conic-gradient(#efe7f2 0 25%,#fff 0 50%) 0 0/16px 16px;display:flex;align-items:center;justify-content:center}
+.bnth img{width:100%;height:100%;object-fit:cover;display:block}.bnth span{font-size:12px;color:var(--ink-3);font-weight:700}
+.bnf{flex:1;display:flex;flex-direction:column;gap:8px;min-width:0}
+.bnf>b{font-size:15px}.nolinkt{font-style:normal;font-size:11px;font-weight:700;color:var(--ink-3);background:#f1e9f3;padding:2px 8px;border-radius:999px;margin-left:6px}
+.bnurl{display:flex;align-items:center;gap:10px}.bnurl span{font-size:12.5px;font-weight:700;color:var(--ink-2);flex:none}
+.bnurl input{flex:1;min-width:0;font:inherit;font-size:14px;padding:8px 12px;border-radius:10px;border:1.5px solid rgba(120,90,140,.25);background:#fff;color:var(--ink)}
+.bnurl input:focus{outline:none;border-color:var(--accent)}
+.bnbtns{display:flex;gap:6px;flex-wrap:wrap}
+.bnadd{border:2px dashed rgba(120,90,140,.3);background:transparent;border-radius:14px;padding:14px;font:inherit;font-weight:700;color:var(--ink-2);cursor:pointer}
+.bnadd:hover{border-color:var(--accent);color:var(--accent)}
 </style>
 
 <div id="app">
@@ -2108,6 +2139,7 @@ async function initCaps(){
     try{db.doc('cardart/map').onSnapshot(s=>{RAWART=s.exists?s.data():{};ART=cleanArt(RAWART);BAD.clear();cacheArtMaps();preloadThumbs();rerenderAll();thumbBackfill()},()=>{})}catch(e){}
     try{db.doc('cardart/thumbs').onSnapshot(s=>{RAWTHUMB=s.exists?s.data():{};THUMB=cleanThumbs(RAWTHUMB);cacheArtMaps();preloadThumbs();rerenderAll();thumbBackfill()},()=>{})}catch(e){}
     try{db.collection('sound').onSnapshot(qs=>{const m={};for(const d of qs.docs){const v=cleanSound(d.data());if(v&&SOUND_SLOTS.some(x=>x[0]===d.id))m[d.id]=v}SND.custom=m;if(LOBBY.tab==='admin')renderLobby()},()=>{})}catch(e){}
+    try{db.doc('cardart/banners').onSnapshot(s=>{BN.data=s.exists?cleanBanners(s.data()):BN_DEFAULT();bnTimer();if(SCREEN==='lobby')renderLobby()},()=>{})}catch(e){}
     try{db.doc('carddata/custom').onSnapshot(s=>{CUSTOM=s.exists?cleanStored((s.data()||{}).cards):{};applyCardData()},()=>{})}catch(e){}
     let uid=null;try{uid=user?await user.id():null}catch(e){}
     if(uid){
@@ -2186,6 +2218,8 @@ function handleAct(a,el){
     case'login':if(SOLO)window.claude.auth.google().then(()=>{setGuest(false);location.reload()},e=>{if(!/popup-closed|cancelled-popup/.test(e&&e.code||''))toast(authErr(e))});break;
     case'logout':if(SOLO)window.claude.auth.logout().then(()=>{setGuest(false);location.reload()},()=>location.reload());break;
     case'settings':showSettings();break;
+    case'bn-dot':bnShow(+ds.i);bnTimer();break;
+    case'bn-step':bnShow(BN.idx+(+ds.d));bnTimer();break;
     case'close':hideModal();break;
     case'rules':showRules();break;
     case'newgame':if(SCREEN==='game'&&G&&G.winner==null&&G.phase!=='setup')showLeave();else goLobby();break;
@@ -2737,7 +2771,7 @@ function homeHTML(){
     <button class="home-start" data-act="lb-go" data-v="play"><span class="hs-ic">${IC.play}</span><span class="hs-tx"><b>게임 시작</b><small>AI 대전 · 멀티 대전</small></span></button>
     ${quickHTML()}
     </div>
-    <div class="hh-kv">${kvHTML('kv')}</div>
+    <div class="hh-kv">${bannerHTML('home-bn')}</div>
    </section>
    <nav class="home-menu" aria-label="메뉴">${tiles.map(([k,t,d,ic])=>{const act=k==='rules'?'rules':k==='acct'?'acct':'lb-go';
      return`<button class="htile ${k==='admin'?'adm':''}" data-act="${act}" data-v="${k}"><span class="ht-ic">${ic}</span><span class="ht-tx"><b>${t}</b><small>${d}</small></span></button>`}).join('')}</nav>
@@ -2879,7 +2913,7 @@ function loginHTML(){
     <p class="hint">Google로 가입한 계정은 Google 계정 비밀번호를 사용</p>${backL}`;
   return`<main class="auth">
    <section class="auth-art ${resUrl('_uiLoginBg')?'img':''}"${bgStyle('_uiLoginBg')}>${logoHTML(true)}
-    <p class="auth-tag">팬메이드 웹 대전 시뮬레이터</p><div class="auth-kv">${kvHTML('kv')}</div><footer class="copy">${COPY}</footer></section>
+    <p class="auth-tag">팬메이드 웹 대전 시뮬레이터</p><div class="auth-kv">${bannerHTML('auth-bn')}</div><footer class="copy">${COPY}</footer></section>
    <section class="auth-panel">${body}</section></main>`;
 }
 function bootHTML(){return`<main class="boot">${logoHTML(true)}<div class="ld-spin" aria-hidden="true"></div><small>불러오는 중</small></main>`}
@@ -3193,15 +3227,76 @@ function adminHTML(){
       <div class="sb"><button data-act="ad-one" data-k="${k}" ${ADMIN.busy?'disabled':''}>${a?'바꾸기':'올리기'}</button>${a?`<button class="del ${ADMIN.arm===k?'arm':''}" data-act="ad-del" data-k="${k}" ${ADMIN.busy?'disabled':''}>${ADMIN.arm===k?'확인':'지우기'}</button>`:''}</div></div>`}).join('')}</div>
   </section></main>`;
 }
+/* ================= 홈 배너 (자동으로 넘어감 · 링크는 새 탭) =================
+   db 'cardart/banners' = {list:[{id,def,img,url}], iv(초)}. def=기본 이미지 이름, img=올린 이미지(우선) */
+const BN_DEF={kv:SOLO?'keyvisual.webp':'/_blob/1f5b990f5ab4db9be3f4e96be73afd52',bp01:SOLO?'banner-bp01.webp':'/_blob/dfaf22bfe62b304cdce131d08e86bc2d',howto:SOLO?'banner-howto.webp':'/_blob/61d7223ef158ba59b939f88aa59aed63'};
+const BN_DEFAULT=()=>({list:[{id:'b1',def:'kv',img:null,url:''},{id:'b2',def:'bp01',img:null,url:''},{id:'b3',def:'howto',img:null,url:''}],iv:6});
+const BN={data:BN_DEFAULT(),idx:0,timer:0,paused:false};
+function cleanUrl(u){u=String(u||'').trim();if(!u)return'';if(!/^[a-z][a-z0-9+.-]*:/i.test(u))u='https://'+u;
+  try{const x=new URL(u);if(!/^https?:$/.test(x.protocol)||!x.hostname.includes('.'))return null;return x.href.length>500?null:x.href}catch(e){return null}}
+function cleanBanners(o){if(!o||!Array.isArray(o.list))return BN_DEFAULT();const list=[],seen=new Set();
+  for(const b of o.list.slice(0,10)){if(!b||typeof b!=='object')continue;const id=String(b.id||'');if(!/^[a-z0-9]{1,16}$/.test(id)||seen.has(id))continue;seen.add(id);
+    list.push({id,def:BN_DEF[b.def]?b.def:null,img:okAsset(b.img)?b.img:null,url:typeof b.url==='string'?(cleanUrl(b.url)||''):''})}
+  return{list,iv:Math.max(3,Math.min(30,Math.round(+o.iv||6)))}}
+const bnSrc=b=>b.img?blobUrl(b.img):b.def?((b.def==='kv'&&resUrl('_uiKV'))||BN_DEF[b.def]):'';
+const bnList=()=>BN.data.list.filter(b=>bnSrc(b));
+function bannerHTML(cls){
+  const L=bnList();if(!L.length)return'';if(BN.idx>=L.length)BN.idx=0;
+  const slides=L.map((b,i)=>{const on=i===BN.idx;const img=`<img src="${bnSrc(b)}" alt="배너 ${i+1}" decoding="async" draggable="false" onerror="this.style.visibility='hidden'">`;
+    return b.url?`<a class="bn-s${on?' on':''}" href="${esc(b.url)}" target="_blank" rel="noopener noreferrer" title="새 탭에서 열기" aria-label="배너 ${i+1} — 새 탭에서 열기"${on?'':' tabindex="-1" aria-hidden="true"'}>${img}<span class="bn-go" aria-hidden="true">↗</span></a>`
+      :`<div class="bn-s nolink${on?' on':''}"${on?'':' aria-hidden="true"'}>${img}</div>`}).join('');
+  const many=L.length>1;
+  return`<div class="bnr ${cls}" role="region" aria-roledescription="carousel" aria-label="배너">${slides}${many?`<button class="bn-nav prev" data-act="bn-step" data-d="-1" aria-label="이전 배너">‹</button><button class="bn-nav next" data-act="bn-step" data-d="1" aria-label="다음 배너">›</button>
+    <div class="bn-dots">${L.map((_,i)=>`<button class="${i===BN.idx?'on':''}" data-act="bn-dot" data-i="${i}" aria-label="배너 ${i+1}"></button>`).join('')}</div>`:''}</div>`}
+function bnShow(i){const L=bnList();if(!L.length)return;BN.idx=((i%L.length)+L.length)%L.length;
+  document.querySelectorAll('.bnr').forEach(r=>{r.querySelectorAll('.bn-s').forEach((x,k)=>{const on=k===BN.idx;x.classList.toggle('on',on);if(on){x.removeAttribute('aria-hidden');if(x.tagName==='A')x.removeAttribute('tabindex')}else{x.setAttribute('aria-hidden','true');if(x.tagName==='A')x.setAttribute('tabindex','-1')}});
+    r.querySelectorAll('.bn-dots button').forEach((d,k)=>d.classList.toggle('on',k===BN.idx))})}
+function bnTimer(){clearInterval(BN.timer);BN.timer=setInterval(()=>{if(BN.paused||document.hidden||SCREEN!=='lobby'||!document.querySelector('.bnr'))return;bnShow(BN.idx+1)},BN.data.iv*1000)}
+document.addEventListener('pointerover',e=>{BN.paused=!!(e.target.closest&&e.target.closest('.bnr'))},true);
+document.addEventListener('focusin',e=>{if(e.target.closest&&e.target.closest('.bnr'))BN.paused=true},true);
+/* 관리자: 배너 편집 */
+function bannerAdminHTML(){const L=BN.data.list;
+  return`<h3>홈 배너 <small>정해진 간격마다 다음 배너로 넘어감 · 링크가 있으면 누를 때 새 탭으로 열림 · 링크가 비면 눌러도 이동 안 함</small></h3>
+   <div class="bnadm">${L.map((b,i)=>{const src=bnSrc(b);return`<div class="bnrow ${ADMIN.drop==='bn:'+b.id?'drop':''}" data-slot="bn:${b.id}">
+     <div class="bnth">${src?`<img src="${src}" alt="">`:'<span>이미지 없음 · 표시 안 됨</span>'}</div>
+     <div class="bnf"><b>배너 ${i+1}${b.url?'':' <em class="nolinkt">링크 없음</em>'}</b>
+      <label class="bnurl"><span>링크</span><input data-bnurl="${b.id}" type="url" inputmode="url" value="${esc(b.url)}" placeholder="https://… (비우면 클릭 안 됨)" ${ADMIN.busy?'disabled':''} spellcheck="false" autocomplete="off"></label>
+      <div class="bnbtns"><button class="btn sm" data-act="ad-bnimg" data-id="${b.id}" ${ADMIN.busy?'disabled':''}>${b.img||b.def?'이미지 바꾸기':'이미지 올리기'}</button>${b.img&&b.def?`<button class="btn sm" data-act="ad-bndef" data-id="${b.id}" ${ADMIN.busy?'disabled':''}>기본 이미지로</button>`:''}
+       <button class="btn sm" data-act="ad-bnmv" data-id="${b.id}" data-d="-1" ${i===0||ADMIN.busy?'disabled':''} aria-label="앞으로">↑</button><button class="btn sm" data-act="ad-bnmv" data-id="${b.id}" data-d="1" ${i===L.length-1||ADMIN.busy?'disabled':''} aria-label="뒤로">↓</button>
+       <button class="btn sm danger ${ADMIN.arm==='bn:'+b.id?'arm':''}" data-act="ad-bndel" data-id="${b.id}" ${ADMIN.busy?'disabled':''}>${ADMIN.arm==='bn:'+b.id?'확인':'삭제'}</button></div></div></div>`}).join('')}
+    ${L.length<10?`<button class="bnadd" data-act="ad-bnadd" ${ADMIN.busy?'disabled':''}>+ 배너 추가 (이미지 16:9)</button>`:''}</div>
+   <div class="abar"><span class="hint">넘어가는 간격</span>${segH('ad-bniv',String(BN.data.iv),[['4','4초'],['6','6초'],['8','8초'],['12','12초']])}</div>`}
+const bnUsed=(id,list)=>list.some(b=>b.img===id)||Object.values(ART).includes(id);
+async function saveBanners(next,msg){
+  if(!CAP.db||!CAP.admin){ADMIN.msg='저장 불가 (관리자 권한 필요)';ADMIN.err=true;renderLobby();return false}
+  ADMIN.busy=true;renderLobby();
+  try{await CAP.db.doc('cardart/banners').set({list:next.list.map(b=>({id:b.id,def:b.def||null,img:b.img||null,url:b.url||''})),iv:next.iv,at:Date.now()});
+    BN.data=next;bnTimer();ADMIN.msg=msg||'배너 저장 완료.';ADMIN.err=false;ADMIN.busy=false;rerenderAll();return true}
+  catch(e){ADMIN.msg='배너 저장 실패: '+errText(e);ADMIN.err=true;ADMIN.busy=false;renderLobby();return false}}
+const bnClone=()=>({list:BN.data.list.map(b=>({...b})),iv:BN.data.iv});
+async function uploadBanner(id,blob){
+  if(!CAP.assets){ADMIN.msg='이미지 저장 불가 (관리자 권한 필요)';ADMIN.err=true;renderLobby();return}
+  ADMIN.busy=true;ADMIN.msg='배너 이미지 올리는 중…';renderLobby();
+  let r;try{r=await CAP.assets.upload(blob,{type:blob.type})}catch(e){ADMIN.busy=false;ADMIN.msg='업로드 실패: '+errText(e);ADMIN.err=true;renderLobby();return}
+  const next=bnClone();const b=next.list.find(x=>x.id===id);if(!b){CAP.assets.delete(r.id).catch(()=>{});ADMIN.busy=false;renderLobby();return}
+  const old=b.img;b.img=r.id;
+  if(await saveBanners(next,'배너 이미지 적용 완료.')){if(old&&!bnUsed(old,next.list))CAP.assets.delete(old).catch(()=>{})}else CAP.assets.delete(r.id).catch(()=>{});
+  refreshUsage()}
+async function setBannerUrl(id,raw){
+  const u=cleanUrl(raw);if(u===null){ADMIN.msg='링크 형식이 올바르지 않음 (http:// 또는 https:// 주소)';ADMIN.err=true;renderLobby();return}
+  const next=bnClone();const b=next.list.find(x=>x.id===id);if(!b||b.url===u)return;b.url=u;await saveBanners(next,u?'링크 저장 완료 — 누르면 새 탭으로 열림.':'링크 삭제 — 이 배너는 눌러도 이동 안 함.')}
+document.addEventListener('change',e=>{const t=e.target;if(t&&t.dataset&&t.dataset.bnurl)setBannerUrl(t.dataset.bnurl,t.value)});
+document.addEventListener('keydown',e=>{const t=e.target;if(e.key==='Enter'&&t&&t.dataset&&t.dataset.bnurl){e.preventDefault();t.blur()}});
 function resTile(k){const a=artOf(k);const u=UIRES[k];
   return`<div class="slot rslot ${ADMIN.drop===k?'drop':''}" data-slot="${k}">${a?'<span class="has" title="이미지 있음"></span>':''}${slotPreview(k)}
    <span class="snm">${esc(SPECIAL[k])}</span><span class="sid">${u?esc(u.d):k.startsWith('_cl')?'컬러 카드 (일반 카드와 같은 세로 비율)':k==='_chback'?'채널 카드 뒷면 (가로)':'카드 뒷면 (세로)'}</span>
    <div class="sb"><button data-act="ad-one" data-k="${k}" ${ADMIN.busy?'disabled':''}>${a?'바꾸기':'올리기'}</button>${a?`<button class="del ${ADMIN.arm===k?'arm':''}" data-act="ad-del" data-k="${k}" ${ADMIN.busy?'disabled':''}>${ADMIN.arm===k?'확인':'기본으로'}</button>`:''}</div></div>`}
 function resAdminHTML(){
-  const grp=g=>Object.keys(UIRES).filter(k=>UIRES[k].g===g);
+  const grp=g=>Object.keys(UIRES).filter(k=>UIRES[k].g===g&&k!=='_uiKV');
   const sec=(t,keys,sm)=>`<h3>${t} <small>${sm}</small></h3><div class="slots rslots">${keys.map(resTile).join('')}</div>`;
   return`${ADMIN.msg?`<p class="amsg ${ADMIN.err?'err':''}">${esc(ADMIN.msg)}</p>`:''}<div class="resbox">
    <p class="hint">이미지를 올리면 바로 모든 사용자 화면에 적용. "기본으로"를 누르면 원래 디자인으로 돌아감. 파일을 칸 위로 끌어다 놓아도 됨.</p>
+   ${bannerAdminHTML()}
    ${sec('화면',grp('화면'),'로고 · 배너 · 배경')}
    ${sec('코인 토스',grp('코인'),'선후공 코인')}
    ${sec('카드 공통',['_back','_chback','_cl','_clR','_clO','_clY','_clG','_clB','_clI','_clV'],'카드 뒷면 · 채널 뒷면 · 컬러 카드')}</div>`;
@@ -3285,6 +3380,14 @@ function lobbyAct(a,ds){
     case'snd-toggle':setSndOn(!SND.on);renderLobby();break;
     case'snd-up':if(!ADMIN.busy){ADMIN.sndSlot=ds.k;const f=$('#fileSnd');f.value='';f.click()}break;
     case'snd-del':if(ADMIN.arm!=='snd:'+ds.k){ADMIN.arm='snd:'+ds.k;renderLobby()}else{ADMIN.arm=null;removeSound(ds.k)}break;
+    case'ad-bnimg':if(!ADMIN.busy){ADMIN.pending='bn:'+ds.id;const f=$('#fileOne');f.value='';f.click()}break;
+    case'ad-bnadd':if(!ADMIN.busy){const id='b'+Math.random().toString(36).slice(2,9);const next=bnClone();next.list.push({id,def:null,img:null,url:''});
+      ADMIN.pending='bn:'+id;const f=$('#fileOne');f.value='';f.click();saveBanners(next,'배너 추가 — 이미지를 올리면 표시됨.')}break;
+    case'ad-bndef':{const next=bnClone();const b=next.list.find(x=>x.id===ds.id);if(b&&b.img){const old=b.img;b.img=null;saveBanners(next,'기본 이미지로 되돌림.').then(ok=>{if(ok&&!bnUsed(old,next.list))CAP.assets.delete(old).catch(()=>{})})}break}
+    case'ad-bnmv':{const next=bnClone();const i=next.list.findIndex(x=>x.id===ds.id),j=i+(+ds.d);if(i>=0&&j>=0&&j<next.list.length){[next.list[i],next.list[j]]=[next.list[j],next.list[i]];saveBanners(next,'순서 변경 완료.')}break}
+    case'ad-bndel':if(ADMIN.arm!=='bn:'+ds.id){ADMIN.arm='bn:'+ds.id;renderLobby()}else{ADMIN.arm=null;const next=bnClone();const b=next.list.find(x=>x.id===ds.id);next.list=next.list.filter(x=>x.id!==ds.id);
+      saveBanners(next,'배너 삭제 완료.').then(ok=>{if(ok&&b&&b.img&&!bnUsed(b.img,next.list))CAP.assets.delete(b.img).catch(()=>{})})}break;
+    case'ad-bniv':{const v=+ds.v;if([4,6,8,12].includes(v)){const next=bnClone();next.iv=v;saveBanners(next,`${v}초마다 넘어가도록 저장.`)}break}
     case'ad-sub':ADMIN.sub=ds.v;ADMIN.msg='';ADMIN.arm=null;renderLobby();break;
     case'ad-cdcopy':cdCopy(false);break;
     case'ad-cdblank':cdCopy(true);break;
@@ -3308,7 +3411,8 @@ document.addEventListener('input',e=>{
 
 /* ================= ADMIN: image upload ================= */
 const RATIO_CARD=63/88,RATIO_WIDE=88/63;
-const slotRatio=k=>isUI(k)?UIRES[k].r:(k==='_chback'||(CARDS[k]&&CARDS[k].type==='channel'))?RATIO_WIDE:RATIO_CARD; // 컬러 카드는 일반 카드와 같은 세로 비율
+const isBn=k=>typeof k==='string'&&k.startsWith('bn:');
+const slotRatio=k=>isBn(k)?16/9:isUI(k)?UIRES[k].r:(k==='_chback'||(CARDS[k]&&CARDS[k].type==='channel'))?RATIO_WIDE:RATIO_CARD; // 컬러 카드는 일반 카드와 같은 세로 비율
 function coverRect(w,h,r){if(w/h>r){const cw=h*r;return{x:(w-cw)/2,y:0,w:cw,h}}const ch=w/r;return{x:0,y:(h-ch)/2,w,h:ch}}
 function autoRect(w,h,r,force){
   if(r<1&&r>0.6&&r<0.8&&(force||Math.abs(w/h-1)<0.04)){const cw=w*0.5778,ch=cw/r,x=w*0.2204,y=h*0.1435;if(y+ch<=h+1&&x+cw<=w+1)return{x,y,w:cw,h:Math.min(ch,h-y)}}
@@ -3429,13 +3533,13 @@ async function openCrop(slot,file){
   const k=Math.min(600/w,600/h);
   CROP={slot,img:L.img,url:L.url,w,h,ratio,k,rect:autoRect(w,h,ratio)};
   const pw=ratio<1?200:ratio===1?220:280,ph=Math.round(pw/ratio);
-  showModal(`<h2>이미지 자르기 · ${esc(SPECIAL[slot]||CARDS[slot].name)}</h2>
+  showModal(`<h2>이미지 자르기 · ${esc(isBn(slot)?'배너 '+(BN.data.list.findIndex(b=>'bn:'+b.id===slot)+1):SPECIAL[slot]||CARDS[slot].name)}</h2>
    <p>밝은 틀 안이 카드 이미지가 된다. 틀을 드래그해 이동, 오른쪽 아래 점을 드래그해 크기 조절.</p>
    <div class="cropgrid"><div class="cropbox" id="cropbox" style="width:${Math.round(w*k)}px;height:${Math.round(h*k)}px"><img src="${L.url}" alt="" draggable="false">
      <div class="croprect" id="croprect"><span class="crophandle" id="crophandle"></span></div></div>
     <div class="cropside"><canvas id="cropprev" width="${pw}" height="${ph}" style="width:${pw}px;height:${ph}px"></canvas>
-     <div class="row">${ratio<1&&!isUI(slot)?'<button class="btn sm" data-act="crop-center">가운데 카드 (홍보 이미지)</button>':''}<button class="btn sm" data-act="crop-full">최대로</button></div>
-     <p class="hint">${w}×${h} 이미지 · 저장 크기 ${isUI(slot)?`폭 ${UIRES[slot].w}px`:ratio<1?'744×1039':'1040×745'} 이하</p>
+     <div class="row">${ratio<1&&!isUI(slot)&&!isBn(slot)?'<button class="btn sm" data-act="crop-center">가운데 카드 (홍보 이미지)</button>':''}<button class="btn sm" data-act="crop-full">최대로</button></div>
+     <p class="hint">${w}×${h} 이미지 · 저장 크기 ${isBn(slot)?'폭 1600px':isUI(slot)?`폭 ${UIRES[slot].w}px`:ratio<1?'744×1039':'1040×745'} 이하</p>
      <div class="mfoot"><button class="btn" data-act="crop-cancel">취소</button><button class="btn primary" data-act="crop-apply">적용</button></div></div></div>`,'1000px');
   updateCrop();
 }
@@ -3460,7 +3564,8 @@ document.addEventListener('pointermove',e=>{
 document.addEventListener('pointerup',()=>{DRAG=null});
 function closeCrop(){if(CROP)URL.revokeObjectURL(CROP.url);CROP=null;hideModal()}
 async function cropApply(){
-  if(!CROP)return;const c=CROP;const blob=await cropToBlob(c.img,c.rect,c.ratio,isUI(c.slot)?UIRES[c.slot].w:0);closeCrop();
+  if(!CROP)return;const c=CROP;const blob=await cropToBlob(c.img,c.rect,c.ratio,isBn(c.slot)?1600:isUI(c.slot)?UIRES[c.slot].w:0);closeCrop();
+  if(isBn(c.slot)){if(blob)await uploadBanner(c.slot.slice(3),blob);else{ADMIN.msg='이미지 생성 실패';ADMIN.err=true;renderLobby()}return}
   if(!blob){ADMIN.msg='이미지 생성 실패';ADMIN.err=true;renderLobby();return}
   await uploadArt({[c.slot]:blob});
 }
@@ -3776,7 +3881,7 @@ newGame({me:'SD01',opp:'SD02',first:'me'});
   const put=(pl,id,t)=>{const i=pl.deck.findIndex(c=>c.id===id);if(i<0)return;const c=pl.deck.splice(i,1)[0];c.tapped=!!t;pl.field.push(c)};
   put(P,'SD01-011');put(P,'SD01-002');put(O,'SD02-008',true);put(O,'SD02-002');O.cl[2].up=true;})();
 USERDECKS=loadLocalDecks();
-applySettings();applyRes();
+applySettings();applyRes();bnTimer();
 fit();render();renderLobby();
 renderSndBtn();
 initCaps();
