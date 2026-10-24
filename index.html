@@ -18,9 +18,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Noto+Sans+JP:wght@500;700;900&display=swap">
-<script>window.NJ_BUILD="202610250230";window.NJ_NOTES=["보안 점검: 멀티 시드·선후공을 양쪽 난수로 공정하게 정함 (한쪽이 조작 불가)", "보안 점검: 멀티 비정상 메시지 차단 강화 · 공지 링크 표시 수정", "페이즈 알림, 멀티 끊김 자동 재연결 (지난 업데이트)"];</script>
-<script src="config.js?v=202610250230"></script>
-<script src="fb.js?v=202610250230"></script>
+<script>window.NJ_BUILD="202610250327";window.NJ_NOTES=["니지 에리어의 컬러 카드가 칸 크기에 맞게 표시되도록 수정", "보안 점검: 멀티 시드·선후공을 양쪽 난수로 공정하게 정함 · 비정상 메시지 차단 강화"];</script>
+<script src="config.js?v=202610250327"></script>
+<script src="fb.js?v=202610250327"></script>
 </head>
 <body>
 <style>
@@ -1368,6 +1368,13 @@ button,a,[role=button]{-webkit-tap-highlight-color:transparent}
 #mpov .mpo-s{font-size:12.5px;color:var(--ink-3)}
 #mpov .btn{margin-top:8px}
 #mpov .mpo-spin{width:38px;height:38px;border-radius:50%;border:4px solid rgba(214,51,122,.18);border-top-color:var(--accent);animation:ldspin .9s linear infinite}
+
+/* ---------- 니지 에리어 카드: 칸의 높이·너비 중 작은 쪽에 맞춰 카드 비율(63:88) 그대로 꽉 차게, 가운데 정렬 ---------- */
+.nslot{container-type:size}
+.nslot .nc{--nw:min(calc((100cqh - 24px) * 63 / 88), calc(100cqw - 6px));width:var(--nw);height:calc(var(--nw) * 88 / 63);aspect-ratio:auto;
+  left:calc((100cqw - var(--nw)) / 2);right:auto;top:3px}
+.z-niji.p1 .nslot .nc{top:3px;bottom:auto}
+@container (max-width:44px){.nslot .nc i{display:none}.nslot .nc b{font-size:15px}}
 </style>
 
 <div id="app">
