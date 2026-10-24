@@ -18,8 +18,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Noto+Sans+JP:wght@500;700;900&display=swap">
-<script src="config.js?v=202610241417"></script>
-<script src="fb.js?v=202610241417"></script>
+<script src="config.js?v=202610241426"></script>
+<script src="fb.js?v=202610241426"></script>
 </head>
 <body>
 <style>
@@ -1238,6 +1238,29 @@ button,a,[role=button]{-webkit-tap-highlight-color:transparent}
  .auth-panel{padding:26px 30px;overflow-y:auto}
  .lb-logo.big .lg-name{font-size:30px}
 }
+
+/* 창 닫기(X) 버튼 */
+.mx{width:38px;height:38px;border-radius:50%;border:0;background:rgba(40,28,70,.07);color:var(--ink);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;flex:none;padding:0;transition:background .15s}
+.mx:hover{background:rgba(40,28,70,.14)}
+.mx:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.mx svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round}
+.mbox>.mx{position:sticky;top:-8px;float:right;margin:-10px -14px 0 12px;z-index:5;background:var(--paper);box-shadow:inset 0 0 0 1px rgba(120,90,140,.18)}
+.mbox>.mx:hover{background:#f1e6f1}
+#zoom .zx{position:absolute;right:max(20px,calc(50% - var(--sw,1600px)/2 + 20px));top:max(20px,calc(50% - var(--sh,900px)/2 + 20px));width:48px;height:48px;background:rgba(255,255,255,.14);color:#fff;z-index:2}
+#zoom .zx:hover{background:rgba(255,255,255,.26)}
+#zoom .zx svg{width:24px;height:24px}
+#stage.resp #zoom .zx{position:fixed;right:16px;top:16px}
+
+/* 좁은 화면의 창: 여러 단 → 한 단 */
+#modal{container:md / inline-size}
+@container md (max-width:760px){
+ .mbox .cols3,.mbox .opts,.mbox .sumgrid{grid-template-columns:1fr;gap:14px}
+ .mbox{padding:20px 18px}
+ .mbox h2{font-size:21px;padding-right:44px}
+ .mbox .setgrid{grid-template-columns:1fr}
+ .mbox .srow{flex-wrap:wrap}.mbox .sc{width:100%;justify-content:flex-end;flex-wrap:wrap}
+ .mbox .sprev{display:none}.mbox .sbox2{padding:14px 16px}
+}
 </style>
 
 <div id="app">
@@ -1263,7 +1286,7 @@ button,a,[role=button]{-webkit-tap-highlight-color:transparent}
    <button class="tb" data-act="fullscreen" id="tbFull" title="전체 화면" aria-label="전체 화면"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
    <button class="tb" data-act="newgame" title="로비로" aria-label="로비로 가기"><svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"/></svg></button>
   </nav>
-  <section id="logpanel" hidden aria-label="진행 기록"><header><h2>진행 기록</h2><button class="btn" data-act="togglelog">닫기</button></header><ul id="gamelog"></ul></section>
+  <section id="logpanel" hidden aria-label="진행 기록"><header><h2>진행 기록</h2><button class="mx" data-act="togglelog" title="닫기" aria-label="진행 기록 닫기"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header><ul id="gamelog"></ul></section>
   <div id="mull" hidden></div>
   <div id="fx" aria-hidden="true"></div>
   <div id="lobby" hidden></div>
@@ -2411,6 +2434,7 @@ function handleAct(a,el){
     case'bn-dot':bnShow(+ds.i);bnTimer();break;
     case'bn-step':bnShow(BN.idx+(+ds.d));bnTimer();break;
     case'close':hideModal();break;
+    case'mclose':if(CROP)closeCrop();else hideModal();break;
     case'rules':showRules();break;
     case'newgame':if(SCREEN==='game'&&G&&G.winner==null&&G.phase!=='setup')showLeave();else goLobby();break;
     case'golobby':goLobby();break;
@@ -2820,7 +2844,10 @@ function render(){
 }
 
 /* ================= MODALS (game) ================= */
-function showModal(html,wide){const b=$('#mbox');b.className='mbox'+(wide?' wide':'');if(typeof wide==='string')b.style.width=wide;else b.style.width='';b.innerHTML=html;$('#modal').hidden=false;const f=b.querySelector('.btn.primary,button,input');if(f)f.focus()}
+const XICON='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+function showModal(html,wide){const b=$('#mbox');b.className='mbox'+(wide?' wide':'');if(typeof wide==='string')b.style.width=wide;else b.style.width='';
+  b.innerHTML=`<button class="mx" data-act="mclose" title="닫기 (Esc)" aria-label="닫기">${XICON}</button>`+html;$('#modal').hidden=false;b.scrollTop=0;
+  const f=b.querySelector('.btn.primary:not(.mx),button:not(.mx),input');if(f)f.focus()}
 function hideModal(){$('#modal').hidden=true}
 function showLog(pid){
   const P=G.p[pid];
@@ -3964,7 +3991,7 @@ function showZoom(id){
   const Z=$('#zoom');
   Z.innerHTML=`<div class="zin">${big}<div class="ztxt"><h3>${esc(d.name)}<small>${esc(d.jp)} · ${id}</small></h3><div class="zm">${meta}</div>
     ${d.tags.length?`<div class="tags">${d.tags.map(t=>`<span class="tag">#${esc(tagKo(t))}</span>`).join('')}</div>`:''}
-    <p>${d.text?kwText(d.text):'효과 없음'}${effStatus(id)==='미구현'?'<span class="noimpl">효과 자동 처리 미구현 — 직접 처리</span>':''}</p><span class="zclose">아무 곳이나 누르거나 Esc로 닫기</span></div></div>`;
+    <p>${d.text?kwText(d.text):'효과 없음'}${effStatus(id)==='미구현'?'<span class="noimpl">효과 자동 처리 미구현 — 직접 처리</span>':''}</p><span class="zclose">아무 곳이나 누르거나 Esc로 닫기</span></div></div><button class="mx zx" data-act="zoomclose" title="닫기 (Esc)" aria-label="닫기">${XICON}</button>`;
   Z.hidden=false;
 }
 function mullHTML(){
