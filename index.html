@@ -5,12 +5,21 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta http-equiv="Content-Security-Policy" content="object-src 'none'; base-uri 'self'; form-action 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="theme-color" content="#1c2440">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="7colors 시뮬">
+<meta name="format-detection" content="telephone=no">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <title>NIJISANJI 7 Colors Card Game Simulator</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Noto+Sans+JP:wght@500;700;900&display=swap">
-<script src="config.js?v=202610241327"></script>
-<script src="fb.js?v=202610241327"></script>
+<script src="config.js?v=202610241345"></script>
+<script src="fb.js?v=202610241345"></script>
 </head>
 <body>
 <style>
@@ -806,15 +815,15 @@ legend{font-size:12px;font-weight:700;color:var(--accent);padding:0 4px}
 
 @media (prefers-reduced-motion:reduce){.card,.hcard,.selectable{animation:none!important;transition:none!important}}
 /* ---------- 글씨 크기(--fs) · 손패 크기(--hs) ---------- */
-#lobby{inset:auto;left:0;top:0;width:calc(1600px / var(--fs,1));height:calc(900px / var(--fs,1));zoom:var(--fs,1)}
-#inspector,#toast{zoom:var(--fs,1)}
-#logpanel{zoom:var(--fs,1);height:calc(720px / var(--fs,1))}
-.mbox{zoom:var(--fs,1);max-height:calc(860px / var(--fs,1));overflow:auto}
+#lobby{inset:auto;left:0;top:0;width:calc(var(--sw,1600px) / var(--fs,1));height:calc(var(--sh,900px) / var(--fs,1));zoom:var(--fs,1);container:lb / size}
+#inspector,#toast{zoom:calc(var(--fs,1) * var(--mob,1))}
+#logpanel{zoom:calc(var(--fs,1) * var(--mob,1));height:calc(720px / (var(--fs,1) * var(--mob,1)))}
+.mbox{zoom:calc(var(--fs,1) * var(--mob,1));max-height:calc((var(--sh,900px) - 40px) / (var(--fs,1) * var(--mob,1)));max-width:calc((var(--sw,1600px) - 24px) / (var(--fs,1) * var(--mob,1)));overflow:auto}
 /* 카드가 빽빽한 편집 화면은 너무 커지지 않게 상한 */
-#lobby[data-tab="build"],#lobby[data-tab="admin"],#lobby[data-tab="cards"]{--fz:min(var(--fs,1),1.06);zoom:var(--fz);width:calc(1600px / var(--fz));height:calc(900px / var(--fz))}
+#lobby[data-tab="build"],#lobby[data-tab="admin"],#lobby[data-tab="cards"]{--fz:min(var(--fs,1),1.06);zoom:var(--fz);width:calc(var(--sw,1600px) / var(--fz));height:calc(var(--sh,900px) / var(--fz))}
 .mbox:has(canvas){zoom:1;max-height:none;overflow:visible}
-.hcard{top:calc(8px - 132px * (var(--hs,1) - 1))}
-.hcard .card{--s:calc(1.5 * var(--hs,1))}
+.hcard{top:calc(8px - 132px * (var(--hs,1) * var(--hsm,1) - 1))}
+.hcard .card{--s:calc(1.5 * var(--hs,1) * var(--hsm,1))}
 
 /* ---------- header ---------- */
 .lb-back{display:flex;align-items:center;gap:4px;border:0;font:inherit;font-weight:700;font-size:14px;color:var(--ink);background:rgba(255,255,255,.8);padding:8px 16px 8px 10px;border-radius:999px;cursor:pointer;box-shadow:inset 0 0 0 1px rgba(120,90,140,.16)}
@@ -1090,6 +1099,111 @@ a.bn-s:focus-visible{outline:3px solid var(--gold);outline-offset:-3px}
 .bnbtns{display:flex;gap:6px;flex-wrap:wrap}
 .bnadd{border:2px dashed rgba(120,90,140,.3);background:transparent;border-radius:14px;padding:14px;font:inherit;font-weight:700;color:var(--ink-2);cursor:pointer}
 .bnadd:hover{border-color:var(--accent);color:var(--accent)}
+
+/* ================= 모바일·폴드 ================= */
+html{touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{overscroll-behavior:none}
+button,a,[role=button]{-webkit-tap-highlight-color:transparent}
+/* 작은 화면: 바깥 여백 없이 화면 전체 사용 (노치·홈 바 안전 영역만 비움) */
+@media (max-width:1199px),(max-height:659px){
+ body{padding:0;height:100vh;height:100dvh}
+ #app{box-sizing:border-box;padding:env(safe-area-inset-top,0) env(safe-area-inset-right,0) env(safe-area-inset-bottom,0) env(safe-area-inset-left,0)}
+}
+#toolbar{zoom:var(--mob2,1)}
+.bubble{zoom:var(--mob2,1)}
+#centerbar .btn{zoom:var(--mob2,1)}
+.coin-box{max-width:calc(100% - 24px);box-sizing:border-box;zoom:calc(var(--fs,1) * var(--mob,1))}
+#ldov .ld-box{max-width:calc(100% - 32px);box-sizing:border-box}
+#rotate{position:absolute;inset:0;left:0;bottom:0;transform:none;z-index:200;background:rgba(20,16,44,.92);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:24px;white-space:normal;border-radius:0;font-size:15px}
+#rotate[hidden]{display:none}
+#rotate b{font-size:22px}#rotate p{margin:0;opacity:.8;max-width:300px;line-height:1.5}
+.rot-btns{display:flex;flex-direction:column;gap:10px;margin-top:8px;width:min(300px,100%)}
+.rot-btns .btn{padding:13px 18px;font-size:15px}
+.rot-ph{width:54px;height:90px;border:4px solid #fff;border-radius:12px;position:relative;animation:rotph 2.4s ease-in-out infinite}
+.rot-ph i{position:absolute;left:50%;bottom:6px;width:14px;height:3px;border-radius:2px;background:#fff;transform:translateX(-50%)}
+@keyframes rotph{0%,20%{transform:rotate(0)}50%,80%{transform:rotate(-90deg)}100%{transform:rotate(0)}}
+@media (prefers-reduced-motion:reduce){.rot-ph{animation:none;transform:rotate(-90deg)}}
+/* 작은 화면 로비: 화면 실제 크기 + 세로 스크롤 */
+#stage.resp #lobby{overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+@container lb (max-width:1199px){
+ .lb-head{height:auto;flex-wrap:wrap;padding:12px 16px 8px;gap:8px 10px}
+ .lb-nav{order:3;flex:1 1 100%;overflow-x:auto;scrollbar-width:none;flex-wrap:nowrap}
+ .lb-nav::-webkit-scrollbar{display:none}
+ .lb-nav button{flex:none}
+ .lb-mode{order:4}
+ .lb-body{flex:none;min-height:auto;padding:6px 16px 22px;gap:14px}
+ .panel{min-height:auto}
+ .dlist,.dgrid,.sres,.dkgrid,.filters,.slots,.resbox{overflow:visible;max-height:none;flex:none}
+ .lb-body.battle{grid-template-columns:1fr 1fr}
+ .lb-body.battle>.panel:nth-child(3){grid-column:1/-1}
+ .lb-body.cards{grid-template-columns:1fr}
+ .lb-body.build{grid-template-columns:1fr 1fr}
+ .lb-body .panel.detail{display:none}
+ .lb-body.multi{grid-template-columns:1fr 1fr}
+ .lb-body.mode{padding:8px 16px 24px;gap:16px}
+ .mcard{min-height:280px;padding:28px}.mcard b{font-size:34px}.mc-ic{margin-bottom:24px}
+ .lb-body.settings,.lb-body.admin{overflow:visible}
+ .cgrid{grid-template-columns:repeat(auto-fill,minmax(100px,1fr))}
+ .setgrid{grid-template-columns:1fr}
+ .home{flex:none;grid-template-rows:auto auto auto;padding:0 16px 14px;gap:14px}
+ .home-hero{grid-template-columns:1fr;padding:18px;gap:16px}
+ .hh-kv{order:-1}.hh-l{height:auto}
+ .home-menu{grid-auto-flow:row;grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:auto}
+ .htile{padding:14px;gap:8px}
+ .auth{grid-template-columns:1fr;height:auto}
+ .auth-art{padding:24px 24px 18px}.auth-panel{padding:24px}
+ .auth-art .auth-kv{margin-top:12px;max-width:640px}
+}
+@container lb (min-width:860px) and (max-width:1199px){
+ .home-hero{grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);align-items:center}
+ .hh-kv{order:0}
+}
+@container lb (max-width:759px){
+ .lb-who .pill{display:none}
+ .dt-ok{display:none}
+ .acct .an{max-width:90px}
+ .lb-body.battle,.lb-body.build,.lb-body.multi{grid-template-columns:1fr}
+ .lb-body.mode{grid-template-columns:1fr}
+ .mcard{min-height:190px;padding:22px}.mcard b{font-size:28px}.mc-ic{width:60px;height:60px;border-radius:18px;margin-bottom:12px}.mc-ic svg{width:32px;height:32px}
+ .lb-startbtn{position:sticky;bottom:10px;z-index:5}
+ .home-menu{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .home-tag b{font-size:22px}.home-tag{font-size:13px}
+ .home-start{padding:16px 18px;gap:14px}.hs-ic{width:54px;height:54px}.hs-ic svg{width:26px;height:26px}.hs-tx b{font-size:28px}.hs-tx small{font-size:13px}
+ .home-quick{padding:12px 14px}
+ .srow{flex-wrap:wrap}.sc{width:100%;justify-content:flex-end;flex-wrap:wrap}
+ .sprev{display:none}
+ .auth-art{padding:20px 18px 10px}.auth-art .auth-kv,.auth-tag{display:none}
+ .lb-logo.big .lg-name{font-size:24px}
+ .auth-panel{padding:18px}.auth-panel h2{font-size:24px}
+ .bnrow{flex-direction:column;align-items:stretch}.bnth{width:100%}
+ .lg-name{font-size:15px;white-space:normal}
+ .mp-code b{font-size:22px}
+}
+@container lb (max-height:540px) and (min-width:600px){
+ .home-hero{grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:center}
+ .hh-kv{order:0}
+ .home-tag{display:none}
+ .home-menu{grid-template-columns:repeat(6,minmax(0,1fr))}
+ .htile small{display:none}.htile{padding:10px;flex-direction:row;align-items:center}.ht-ic{width:40px;height:40px}
+ .auth{grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);height:100%}
+ .lb-logo.big .lg-name{font-size:24px}.auth-art{padding:20px}.auth-panel{padding:18px 22px;gap:10px}.auth-panel h2{font-size:22px}.af input{padding:10px 12px}
+ .auth-art .auth-kv,.auth-tag{display:none}
+ .lb-body.mode{grid-template-columns:1fr 1fr}
+ .mcard{min-height:200px}
+}
+
+/* 작은 화면: 카드 크게 보기 */
+#stage.resp #zoom{inset:0;align-items:flex-start;overflow-y:auto;padding:24px 16px}
+#stage.resp #zoom .zin{flex-direction:column;gap:16px;align-items:center;margin:auto}
+#stage.resp #zoom .card{--s:var(--zs,7.6)}
+#stage.resp #zoom .chbox{width:calc(176px * var(--zcs,3.8));height:calc(126px * var(--zcs,3.8))}
+#stage.resp #zoom .chbox .chcard{transform:scale(var(--zcs,3.8))}
+#stage.resp #zoom .ztxt{width:auto;max-width:min(520px,calc(var(--sw,1600px) - 40px))}
+#stage.resp #zoom .ztxt h3{font-size:24px}
+@container lb (max-width:759px){
+ .vs{gap:6px}.vs .chcard{zoom:.74}.vs>b{font-size:20px}
+ .cgrid{grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:10px 8px}
+}
 </style>
 
 <div id="app">
@@ -1127,7 +1241,8 @@ a.bn-s:focus-visible{outline:3px solid var(--gold);outline-offset:-3px}
  <input type="file" id="fileOne" accept="image/png,image/jpeg,image/webp,image/gif" hidden>
  <input type="file" id="fileSnd" accept="audio/*" hidden>
  <input type="file" id="fileBulk" accept="image/png,image/jpeg,image/webp,image/gif" multiple hidden>
- <div id="rotate" hidden>가로 화면으로 돌리면 더 크게 보임</div>
+ <div id="rotate" hidden role="dialog" aria-label="가로 화면 안내"><div class="rot-ph" aria-hidden="true"><i></i></div><b>가로로 돌려서 플레이</b><p>대전 판은 가로 화면에 맞춰져 있어서 세로로는 작게 보임</p>
+  <div class="rot-btns"><button class="btn primary" data-act="rotfs">전체 화면 + 가로로 보기</button><button class="btn" data-act="rotdismiss">세로로 계속하기</button></div></div>
 </div>
 
 <script>
@@ -2257,6 +2372,8 @@ function handleAct(a,el){
     case'login':if(SOLO)window.claude.auth.google().then(()=>{setGuest(false);location.reload()},e=>{if(!/popup-closed|cancelled-popup/.test(e&&e.code||''))toast(authErr(e))});break;
     case'logout':if(SOLO)window.claude.auth.logout().then(()=>{setGuest(false);location.reload()},()=>location.reload());break;
     case'settings':showSettings();break;
+    case'rotfs':goLandscape().then(ok=>{if(!ok)toast('이 기기는 자동 회전 고정을 지원하지 않음 — 기기를 가로로 돌려줘');fit()});break;
+    case'rotdismiss':ROT.dismiss=true;fit();break;
     case'bn-dot':bnShow(+ds.i);bnTimer();break;
     case'bn-step':bnShow(BN.idx+(+ds.d));bnTimer();break;
     case'close':hideModal();break;
@@ -2271,7 +2388,9 @@ function handleAct(a,el){
     case'sndtoggle':setSndOn(!SND.on);break;
     case'speed':SPEED=SPEED<1?1:0.45;SET.ai=String(SPEED);saveSet();render();break;
     case'fullscreen':{const d=document;
-      try{if(d.fullscreenElement)d.exitFullscreen().catch(()=>{});else{const r=d.documentElement.requestFullscreen&&d.documentElement.requestFullscreen();if(r&&r.catch)r.catch(()=>{})}}catch(e){}}break;
+      try{if(d.fullscreenElement)d.exitFullscreen().catch(()=>{});else{const r=d.documentElement.requestFullscreen&&d.documentElement.requestFullscreen({navigationUI:'hide'});
+        // 터치 기기에서는 전체 화면과 함께 가로 고정 시도 (안드로이드 크롬 등)
+        if(r&&r.then)r.then(()=>{try{if(matchMedia('(pointer:coarse)').matches&&screen.orientation&&screen.orientation.lock)screen.orientation.lock('landscape').catch(()=>{})}catch(_){}}).catch(()=>{})}}catch(e){}}break;
   }
 }
 document.addEventListener('click',e=>{
@@ -2715,7 +2834,7 @@ const LOBBY={tab:SOLO?'boot':'home',mode:null,me:'SD01',ai:'SD02',first:'random'
 let BUILD=null;
 const ADMIN={busy:false,msg:'',err:false,usage:null,arm:null,pending:null,drop:null};
 function goLobby(){
-  TOKEN.dead=true;SCREEN='lobby';hideModal();fxReset();if(UI)UI.logOpen=false;renderInspector();if(CD_PENDING){CD_PENDING=false;applyCardData()}renderLobby();
+  TOKEN.dead=true;SCREEN='lobby';fit();hideModal();fxReset();if(UI)UI.logOpen=false;renderInspector();if(CD_PENDING){CD_PENDING=false;applyCardData()}renderLobby();
 }
 /* ================= SETTINGS ================= */
 const SET_DEF={fx:'normal',shake:true,banner:true,ai:'1',hand:'m',font:'m'};
@@ -3023,7 +3142,7 @@ async function startGame(){
   }catch(e){}finally{LOADING=false}
   if(SCREEN!==scr)return; // 로딩 중 화면을 떠났으면 시작 안 함
   SPEED=+SET.ai||1;
-  hideModal();SCREEN='game';renderLobby();
+  hideModal();SCREEN='game';fit();renderLobby();
   newGame({me:LOBBY.me,opp:LOBBY.ai,first});UI.logOpen=false;UI.hover=null;UI.hideHands=true;fxReset();render();runGame();
 }
 function renderLobby(){
@@ -3396,11 +3515,11 @@ function lobbyAct(a,ds){
     case'lb-first':LOBBY.first=ds.v;saveLobbyPrefs();renderLobby();break;
     case'lb-speed':if(SETOPT.ai.some(o=>o[0]===ds.v)){SET.ai=ds.v;saveSet()}renderLobby();break;
     case'lb-start':saveLobbyPrefs();startGame();break;
-    case'lb-show':LOBBY.pin=ds.cid;LOBBY.hover=ds.cid;renderLobbyDetail();break;
+    case'lb-show':if(lbNoDetail()){showZoom(ds.cid);break}LOBBY.pin=ds.cid;LOBBY.hover=ds.cid;renderLobbyDetail();break;
     case'b-newblank':if(LOBBY.tab==='build')setTimeout(lbPush,0);BUILD={id:null,name:'새 덱',ch:null,list:{},dirty:true};SRCH=SRCH0();SRCH.type=['channel'];LOBBY.delArm=false;LOBBY.backArm=false;LOBBY.pin=null;renderLobby();break;
     case'b-back':if(BUILD&&BUILD.dirty&&!LOBBY.backArm){LOBBY.backArm=true;renderLobby()}else{BUILD=null;LOBBY.backArm=false;LOBBY.delArm=false;renderLobby()}break;
     case'b-pick':buildPick(ds.id);break;
-    case'b-info':LOBBY.pin=ds.cid;renderLobbyDetail();break;
+    case'b-info':if(lbNoDetail()){showZoom(ds.cid);break}LOBBY.pin=ds.cid;renderLobbyDetail();break;
     case'b-f':{const g=SRCH[ds.g];if(g){const i=g.indexOf(ds.v);if(i>=0)g.splice(i,1);else g.push(ds.v);renderLobby()}}break;
     case'b-freset':{const q=SRCH.q;SRCH=SRCH0();SRCH.q='';if(BUILD&&BUILD.ch)SRCH.cls=[CARDS[BUILD.ch].cls];else SRCH.type=['channel'];renderLobby()}break;
     case'b-copy':{setTimeout(lbPush,0);const s=STARTERS[ds.key];BUILD={id:null,name:s.short+' 개조 덱',ch:s.ch,list:{...s.list},dirty:true};SRCH=SRCH0();SRCH.cls=[CARDS[s.ch].cls];LOBBY.delArm=false;LOBBY.backArm=false;LOBBY.pin=s.ch;renderLobby()}break;
@@ -3901,12 +4020,34 @@ document.addEventListener('pointerup',e=>{if(!DRAGP)return;if(DRAGP.on)endDragP(
 document.addEventListener('pointercancel',e=>{if(DRAGP)endDragP(e,false)});
 
 /* ================= FIT TO WINDOW ================= */
+/* 화면 맞춤: 게임 판은 언제나 1600×900을 비율 그대로 축소·확대.
+   로비는 데스크톱 크기(가로 1200·세로 660 이상)에서만 1600×900, 그보다 작은 화면(폰·폴드·태블릿)에서는
+   실제 화면 크기를 그대로 써서 글씨가 작아지지 않게 하고, 배치는 #lobby 컨테이너 쿼리로 다시 짠다. */
+const LAYOUT={mode:'desk',w:1600,h:900};
+const ROT={dismiss:false};
 function fit(){
-  const a=$('#app');const w=a.clientWidth,h=a.clientHeight;if(!w||!h)return;
-  const s=Math.min(w/1600,h/900);STAGE_S=s;
-  $('#stage').style.transform=`translate(${((w-1600*s)/2).toFixed(1)}px,${((h-900*s)/2).toFixed(1)}px) scale(${s.toFixed(4)})`;
-  $('#rotate').hidden=!(h>w*1.1);
+  const a=$('#app');if(!a)return;const cs=getComputedStyle(a);
+  const pl=parseFloat(cs.paddingLeft)||0,pr=parseFloat(cs.paddingRight)||0,pt=parseFloat(cs.paddingTop)||0,pb=parseFloat(cs.paddingBottom)||0;
+  const w=a.clientWidth-pl-pr,h=a.clientHeight-pt-pb;if(w<=0||h<=0)return;
+  const desk=w>=1200&&h>=660;let W=1600,H=900,s;const prev=LAYOUT.mode+'|'+Math.round(LAYOUT.w);
+  if(SCREEN!=='game'&&!desk){s=Math.min(1,w/360,h/420);W=w/s;H=h/s;LAYOUT.mode='resp'}else{s=Math.min(w/1600,h/900);LAYOUT.mode='desk'}
+  LAYOUT.w=W;LAYOUT.h=H;STAGE_S=s;
+  const st=$('#stage');st.style.width=W+'px';st.style.height=H+'px';st.style.setProperty('--sw',W+'px');st.style.setProperty('--sh',H+'px');
+  st.style.transform=`translate(${(pl+(w-W*s)/2).toFixed(1)}px,${(pt+(h-H*s)/2).toFixed(1)}px) scale(${s.toFixed(4)})`;
+  st.classList.toggle('resp',LAYOUT.mode==='resp');
+  // 크게 보기(줌) 크기: 작은 화면에서는 화면 안에 들어오게
+  st.style.setProperty('--zs',Math.min(7.6,(W-48)/62,(H*0.58)/88).toFixed(3));st.style.setProperty('--zcs',Math.min(3.8,(W-48)/176,(H*0.5)/126).toFixed(3));
+  // 작은 화면의 게임: 카드 설명·창·버튼을 판 축소에 맞춰 키워서 읽고 누르기 쉽게
+  const mob=SCREEN==='game'?Math.max(1,Math.min(1.5,0.62/s)):1;
+  st.style.setProperty('--mob',mob.toFixed(3));st.style.setProperty('--mob2',Math.min(mob,1.25).toFixed(3));st.style.setProperty('--hsm',mob>1.2?'1.15':'1');
+  const r=$('#rotate');if(r)r.hidden=!(SCREEN==='game'&&h>w*1.05&&!ROT.dismiss);
+  if(SCREEN==='lobby'&&prev!==LAYOUT.mode+'|'+Math.round(W)&&typeof renderLobby==='function')renderLobby();
 }
+const lbNoDetail=()=>LAYOUT.mode==='resp'&&LAYOUT.w/(FSK[SET.font]||1)<1200; // 카드 상세 칸을 숨기고 탭하면 크게 보기
+async function goLandscape(){
+  try{if(!document.fullscreenElement&&document.documentElement.requestFullscreen)await document.documentElement.requestFullscreen({navigationUI:'hide'})}catch(e){}
+  try{if(screen.orientation&&screen.orientation.lock){await screen.orientation.lock('landscape');return true}}catch(e){}
+  return false}
 window.addEventListener('resize',fit);
 $('#app').addEventListener('scroll',e=>{const a=e.currentTarget;if(a.scrollTop||a.scrollLeft){a.scrollTop=0;a.scrollLeft=0}});
 try{new ResizeObserver(fit).observe($('#app'))}catch(e){}
