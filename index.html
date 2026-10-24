@@ -18,8 +18,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Noto+Sans+JP:wght@500;700;900&display=swap">
-<script src="config.js?v=202610241345"></script>
-<script src="fb.js?v=202610241345"></script>
+<script src="config.js?v=202610241404"></script>
+<script src="fb.js?v=202610241404"></script>
 </head>
 <body>
 <style>
@@ -815,12 +815,12 @@ legend{font-size:12px;font-weight:700;color:var(--accent);padding:0 4px}
 
 @media (prefers-reduced-motion:reduce){.card,.hcard,.selectable{animation:none!important;transition:none!important}}
 /* ---------- 글씨 크기(--fs) · 손패 크기(--hs) ---------- */
-#lobby{inset:auto;left:0;top:0;width:calc(var(--sw,1600px) / var(--fs,1));height:calc(var(--sh,900px) / var(--fs,1));zoom:var(--fs,1);container:lb / size}
+#lobby{position:absolute;inset:0;width:auto;height:auto;zoom:var(--fs,1);container:lb / size}
 #inspector,#toast{zoom:calc(var(--fs,1) * var(--mob,1))}
 #logpanel{zoom:calc(var(--fs,1) * var(--mob,1));height:calc(720px / (var(--fs,1) * var(--mob,1)))}
 .mbox{zoom:calc(var(--fs,1) * var(--mob,1));max-height:calc((var(--sh,900px) - 40px) / (var(--fs,1) * var(--mob,1)));max-width:calc((var(--sw,1600px) - 24px) / (var(--fs,1) * var(--mob,1)));overflow:auto}
 /* 카드가 빽빽한 편집 화면은 너무 커지지 않게 상한 */
-#lobby[data-tab="build"],#lobby[data-tab="admin"],#lobby[data-tab="cards"]{--fz:min(var(--fs,1),1.06);zoom:var(--fz);width:calc(var(--sw,1600px) / var(--fz));height:calc(var(--sh,900px) / var(--fz))}
+#lobby[data-tab="build"],#lobby[data-tab="admin"],#lobby[data-tab="cards"]{zoom:min(var(--fs,1),1.06)}
 .mbox:has(canvas){zoom:1;max-height:none;overflow:visible}
 .hcard{top:calc(8px - 132px * (var(--hs,1) * var(--hsm,1) - 1))}
 .hcard .card{--s:calc(1.5 * var(--hs,1) * var(--hsm,1))}
@@ -1204,6 +1204,10 @@ button,a,[role=button]{-webkit-tap-highlight-color:transparent}
  .vs{gap:6px}.vs .chcard{zoom:.74}.vs>b{font-size:20px}
  .cgrid{grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:10px 8px}
 }
+
+/* 로비가 떠 있는 동안 뒤의 대전 판은 숨김 (브라우저마다 로비 크기 계산이 달라도 판이 비쳐 보이지 않게) */
+#stage.inlobby>:not(#lobby):not(#modal):not(#toast):not(#zoom):not(#coinov):not(#ldov):not(#rotate){visibility:hidden}
+#stage.inlobby{background-color:#f6e9f5}
 </style>
 
 <div id="app">
@@ -3146,6 +3150,7 @@ async function startGame(){
   newGame({me:LOBBY.me,opp:LOBBY.ai,first});UI.logOpen=false;UI.hover=null;UI.hideHands=true;fxReset();render();runGame();
 }
 function renderLobby(){
+  {const st=$('#stage');if(st)st.classList.toggle('inlobby',SCREEN!=='game')}
   const L=$('#lobby');if(SCREEN!=='lobby'){L.hidden=true;return}
   L.hidden=false;L.dataset.tab=LOBBY.tab;
   const ae=document.activeElement;const fid=ae&&ae.id&&L.contains(ae)?ae.id:null;
@@ -4034,7 +4039,7 @@ function fit(){
   LAYOUT.w=W;LAYOUT.h=H;STAGE_S=s;
   const st=$('#stage');st.style.width=W+'px';st.style.height=H+'px';st.style.setProperty('--sw',W+'px');st.style.setProperty('--sh',H+'px');
   st.style.transform=`translate(${(pl+(w-W*s)/2).toFixed(1)}px,${(pt+(h-H*s)/2).toFixed(1)}px) scale(${s.toFixed(4)})`;
-  st.classList.toggle('resp',LAYOUT.mode==='resp');
+  st.classList.toggle('resp',LAYOUT.mode==='resp');st.classList.toggle('inlobby',SCREEN!=='game');
   // 크게 보기(줌) 크기: 작은 화면에서는 화면 안에 들어오게
   st.style.setProperty('--zs',Math.min(7.6,(W-48)/62,(H*0.58)/88).toFixed(3));st.style.setProperty('--zcs',Math.min(3.8,(W-48)/176,(H*0.5)/126).toFixed(3));
   // 작은 화면의 게임: 카드 설명·창·버튼을 판 축소에 맞춰 키워서 읽고 누르기 쉽게
@@ -4049,6 +4054,8 @@ async function goLandscape(){
   try{if(screen.orientation&&screen.orientation.lock){await screen.orientation.lock('landscape');return true}}catch(e){}
   return false}
 window.addEventListener('resize',fit);
+try{window.visualViewport&&visualViewport.addEventListener('resize',fit)}catch(e){}
+window.addEventListener('orientationchange',()=>setTimeout(fit,250));
 $('#app').addEventListener('scroll',e=>{const a=e.currentTarget;if(a.scrollTop||a.scrollLeft){a.scrollTop=0;a.scrollLeft=0}});
 try{new ResizeObserver(fit).observe($('#app'))}catch(e){}
 if(!document.fullscreenEnabled)$('#tbFull').hidden=true;
