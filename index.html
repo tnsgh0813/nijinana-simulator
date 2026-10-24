@@ -18,9 +18,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Noto+Sans+JP:wght@500;700;900&display=swap">
-<script>window.NJ_BUILD="202610250327";window.NJ_NOTES=["니지 에리어의 컬러 카드가 칸 크기에 맞게 표시되도록 수정", "보안 점검: 멀티 시드·선후공을 양쪽 난수로 공정하게 정함 · 비정상 메시지 차단 강화"];</script>
-<script src="config.js?v=202610250327"></script>
-<script src="fb.js?v=202610250327"></script>
+<script>window.NJ_BUILD="202610250439";window.NJ_NOTES=["로비 홈 화면 배치 정리 — 태블릿·폴드에서 버튼이 잘리거나 메뉴 글자가 깨지던 문제 수정", "폰·세로 화면은 배너 → 게임 시작 → 메뉴 순서, 가로 화면은 시작 버튼과 배너를 나란히", "니지 에리어의 컬러 카드가 칸 크기에 맞게 표시되도록 수정"];</script>
+<script src="config.js?v=202610250439"></script>
+<script src="fb.js?v=202610250439"></script>
 </head>
 <body>
 <style>
@@ -1151,18 +1151,9 @@ button,a,[role=button]{-webkit-tap-highlight-color:transparent}
  .lb-body.settings,.lb-body.admin{overflow:visible}
  .cgrid{grid-template-columns:repeat(auto-fill,minmax(100px,1fr))}
  .setgrid{grid-template-columns:1fr}
- .home{flex:none;grid-template-rows:auto auto auto;padding:0 16px 14px;gap:14px}
- .home-hero{grid-template-columns:1fr;padding:18px;gap:16px}
- .hh-kv{order:-1}.hh-l{height:auto}
- .home-menu{grid-auto-flow:row;grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:auto}
- .htile{padding:14px;gap:8px}
  .auth{grid-template-columns:1fr;height:auto}
  .auth-art{padding:24px 24px 18px}.auth-panel{padding:24px}
  .auth-art .auth-kv{margin-top:12px;max-width:640px}
-}
-@container lb (min-width:860px) and (max-width:1199px){
- .home-hero{grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);align-items:center}
- .hh-kv{order:0}
 }
 @container lb (max-width:759px){
  .lb-who .pill{display:none}
@@ -1172,10 +1163,6 @@ button,a,[role=button]{-webkit-tap-highlight-color:transparent}
  .lb-body.mode{grid-template-columns:1fr}
  .mcard{min-height:190px;padding:22px}.mcard b{font-size:28px}.mc-ic{width:60px;height:60px;border-radius:18px;margin-bottom:12px}.mc-ic svg{width:32px;height:32px}
  .lb-startbtn{position:sticky;bottom:10px;z-index:5}
- .home-menu{grid-template-columns:repeat(2,minmax(0,1fr))}
- .home-tag b{font-size:22px}.home-tag{font-size:13px}
- .home-start{padding:16px 18px;gap:14px}.hs-ic{width:54px;height:54px}.hs-ic svg{width:26px;height:26px}.hs-tx b{font-size:28px}.hs-tx small{font-size:13px}
- .home-quick{padding:12px 14px}
  .srow{flex-wrap:wrap}.sc{width:100%;justify-content:flex-end;flex-wrap:wrap}
  .sprev{display:none}
  .auth-art{padding:20px 18px 10px}.auth-art .auth-kv,.auth-tag{display:none}
@@ -1186,11 +1173,6 @@ button,a,[role=button]{-webkit-tap-highlight-color:transparent}
  .mp-code b{font-size:22px}
 }
 @container lb (max-height:540px) and (min-width:600px){
- .home-hero{grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:center}
- .hh-kv{order:0}
- .home-tag{display:none}
- .home-menu{grid-template-columns:repeat(6,minmax(0,1fr))}
- .htile small{display:none}.htile{padding:10px;flex-direction:row;align-items:center}.ht-ic{width:40px;height:40px}
  .auth{grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);height:100%}
  .lb-logo.big .lg-name{font-size:24px}.auth-art{padding:20px}.auth-panel{padding:18px 22px;gap:10px}.auth-panel h2{font-size:22px}.af input{padding:10px 12px}
  .auth-art .auth-kv,.auth-tag{display:none}
@@ -1225,19 +1207,6 @@ button,a,[role=button]{-webkit-tap-highlight-color:transparent}
 }
 /* 가로로 넓고 세로가 낮은 태블릿(아이패드 가로 등): 홈이 한 화면에 들어오게 */
 @container lb (min-width:860px) and (max-width:1199px) and (max-height:860px){
- .home{gap:12px;padding-bottom:10px}
- .home-hero{padding:22px 26px;gap:22px}
- .home-tag b{font-size:24px;margin-bottom:2px}.home-tag{font-size:13px}
- .home-start{padding:16px 20px;gap:16px}.hs-ic{width:56px;height:56px}.hs-ic svg{width:26px;height:26px}.hs-tx b{font-size:30px}.hs-tx small{font-size:13px}
- .home-menu{grid-template-columns:repeat(6,minmax(0,1fr))}
- .htile{flex-direction:row;align-items:center;padding:12px;gap:10px}
- .ht-ic{width:42px;height:42px;border-radius:12px}.ht-ic svg{width:22px;height:22px}
- .ht-tx b{font-size:15px}.htile small{display:none}
- .home .copy{margin-top:0}
- .home{flex:1;min-height:0;grid-template-rows:minmax(0,1fr) auto auto}
- .home-hero{grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);align-items:center}
- .hh-kv{order:0}
- .home-menu{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr)}
  .auth{flex:1;min-height:0;height:100%;grid-template-columns:minmax(0,1fr) minmax(380px,.8fr)}
  .auth-art{overflow:hidden;padding:28px 30px;justify-content:center}
  .auth-art .auth-kv{max-width:none;margin-top:16px}
@@ -1375,6 +1344,60 @@ button,a,[role=button]{-webkit-tap-highlight-color:transparent}
   left:calc((100cqw - var(--nw)) / 2);right:auto;top:3px}
 .z-niji.p1 .nslot .nc{top:3px;bottom:auto}
 @container (max-width:44px){.nslot .nc i{display:none}.nslot .nc b{font-size:15px}}
+
+/* =========== 홈(로비 첫 화면): 크기별 배치를 한 곳에서 정리 ===========
+   넓은 화면: [시작 버튼 | 배너] + 메뉴 한 줄(설명 포함) · 중간 화면: 같은 2단 + 메뉴 한 줄(아이콘·이름만)
+   좁은 화면: 배너 → 시작 버튼 → 메뉴 3칸씩. 내용이 화면보다 길면 잘리지 않고 아래로 스크롤 */
+.home{flex:1 0 auto;min-height:0;display:flex;flex-direction:column;gap:16px;padding:0 40px 14px}
+.home-hero{flex:1 0 auto;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.55fr);gap:44px;align-items:center;padding:34px 44px}
+.hh-l{height:auto;justify-content:center;gap:16px!important}
+.hh-kv{align-self:center;min-width:0}
+.hh-kv .bnr{width:min(100%,calc((100cqh - 280px) * 16 / 9));margin:0 auto}
+.home-tag b{font-size:34px}
+.home-start{padding:22px 26px}
+.home-menu{flex:none;display:grid;grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:14px}
+.htile{flex-direction:row;align-items:center;justify-content:flex-start;gap:16px;padding:22px 22px;min-width:0;word-break:keep-all}
+.ht-ic{width:54px;height:54px;border-radius:15px}
+.ht-tx{flex:1;min-width:0}
+.ht-tx b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.ht-tx small{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ht-tx b{font-size:18px}.ht-tx small{font-size:13px;margin-top:2px}
+.home .copy{margin-top:-4px}
+@container lb (max-width:1199px){
+ .home{padding:0 16px 12px;gap:12px}
+ .home-hero{grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:24px;padding:22px 26px;border-radius:24px}
+ .hh-kv .bnr{width:min(100%,calc((100cqh - 250px) * 16 / 9))}
+ .home-tag b{font-size:24px;margin-bottom:2px}.home-tag{font-size:13px}
+ .home-start{padding:16px 20px;gap:16px}.hs-ic{width:56px;height:56px}.hs-ic svg{width:26px;height:26px}.hs-tx b{font-size:30px}.hs-tx small{font-size:13px}
+ .home-quick{padding:12px 16px}
+ /* 메뉴: 아이콘 위, 이름 아래 (설명은 숨김) */
+ .htile{flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:8px;padding:12px 6px;border-radius:16px}
+ .ht-ic{width:42px;height:42px;border-radius:12px}.ht-ic svg{width:22px;height:22px}
+ .ht-tx{flex:none;width:100%;align-items:center}.ht-tx b{font-size:14.5px}.htile small{display:none}
+}
+@container lb (max-width:1199px) and (max-height:590px){
+ .home-tag{display:none}
+ .home-hero{padding:18px 22px}
+ .hh-kv .bnr{width:min(100%,calc((100cqh - 210px) * 16 / 9))}
+}
+/* 한 단(배너 위 → 시작 버튼): 폰이나 세로로 긴 화면만. 가로가 긴 폴드·태블릿은 2단 유지해서 시작 버튼이 첫 화면에 보이게 */
+@container lb (max-width:699px){
+ .home-hero{grid-template-columns:1fr;gap:16px;padding:16px}
+ .hh-kv{order:-1}.hh-kv .bnr{width:min(100%,calc((100cqh - 430px) * 16 / 9))}
+ .home-tag{display:block}
+ .home-menu{grid-auto-flow:row;grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@container lb (max-width:999px) and (orientation:portrait){
+ .home-hero{grid-template-columns:1fr;gap:16px;padding:16px}
+ .hh-kv{order:-1}.hh-kv .bnr{width:min(100%,calc((100cqh - 430px) * 16 / 9))}
+ .home-tag{display:block}
+ .home-menu{grid-auto-flow:row;grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@container lb (max-width:520px){
+ .home-tag b{font-size:21px}
+ .home-start{padding:14px 16px;gap:12px}.hs-ic{width:48px;height:48px}.hs-tx b{font-size:26px}
+ .ht-tx b{font-size:13.5px}
+}
 </style>
 
 <div id="app">
