@@ -18,9 +18,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Noto+Sans+JP:wght@500;700;900&display=swap">
-<script>window.NJ_BUILD="202610250039";window.NJ_NOTES=["페이즈가 바뀔 때 판 가운데에 '메인 페이즈' 같은 알림이 잠깐 뜸 (설정에서 끌 수 있음)", "멀티: 연결이 끊기면 판을 멈추고 최대 90초 동안 자동으로 다시 연결 — 이어지면 그대로 이어서 진행", "멀티: 끊긴 동안 보낸 입력도 다시 연결되면 빠짐없이 전달", "멀티: 상대가 돌아오지 않으면 승리 · 끊긴 화면에서 바로 기권하고 나가기 가능"];</script>
-<script src="config.js?v=202610250039"></script>
-<script src="fb.js?v=202610250039"></script>
+<script>window.NJ_BUILD="202610250230";window.NJ_NOTES=["보안 점검: 멀티 시드·선후공을 양쪽 난수로 공정하게 정함 (한쪽이 조작 불가)", "보안 점검: 멀티 비정상 메시지 차단 강화 · 공지 링크 표시 수정", "페이즈 알림, 멀티 끊김 자동 재연결 (지난 업데이트)"];</script>
+<script src="config.js?v=202610250230"></script>
+<script src="fb.js?v=202610250230"></script>
 </head>
 <body>
 <style>
@@ -3268,7 +3268,7 @@ function mpRejectAll(){const w=MPG.waiters;MPG.waiters=[];for(const x of w)try{x
 function mulberry32(a){return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
 function strHash(s){let h=5381;for(let i=0;i<s.length;i++)h=(h*33^s.charCodeAt(i))>>>0;return h.toString(36)}
 /* 멀티 호환 버전: 웹사이트는 빌드 번호(배포할 때마다 바뀜)까지 같아야 대전 가능 — 서로 다른 버전끼리 붙으면 게임이 어긋날 수 있음 */
-const MP_PROTO=3;
+const MP_PROTO=4;
 function mpVer(){return(window.NJ_BUILD||'a')+'.'+MP_PROTO+'.'+cardsVer()}
 function mpVerMsg(theirs){const a=String(theirs||'').split('.')[0],b=String(window.NJ_BUILD||'a');
   if(/^\d{12}$/.test(a)&&/^\d{12}$/.test(b)&&a!==b)return a>b?'내 화면이 예전 버전이라 대전할 수 없음 — 새로고침한 뒤 다시 참가':'상대가 예전 버전이라 대전할 수 없음 — 상대에게 새로고침을 부탁';
@@ -3292,7 +3292,7 @@ function mpValidAns(req,v){
     case'cards':return Array.isArray(v)&&new Set(v).size===v.length&&v.every(inU)&&(v.length===0&&req.optional||v.length>=(req.min??0)&&v.length<=(req.max??v.length));
     case'order':return Array.isArray(v)&&v.length===req.uids.length&&new Set(v).size===v.length&&v.every(inU);
   }
-  return v===null||typeof v==='boolean'||typeof v==='number';
+  return false; // 모르는 종류의 응답은 받지 않음
 }
 /* 상대 차례: 상대가 보낸 명령을 하나씩 실행 */
 async function mpRemoteTurn(pid){
@@ -3352,7 +3352,7 @@ function mpReset(graceful){
   const dc=MPG.dc,pc=MPG.pc;if(dc)dc.onclose=dc.onmessage=null;
   const shut=()=>{try{dc&&dc.close()}catch(e){}try{pc&&pc.close()}catch(e){}};
   if(graceful&&dc&&dc.readyState==='open')setTimeout(shut,600);else shut(); // 마지막 메시지(기권 등)가 도착할 시간을 줌
-  Object.assign(MPG,{on:false,role:null,pc:null,dc:null,q:[],waiters:[],sync:{},code:'',oppName:'',oppUid:'',start:null,cand:{},tx:0,rx:0,out:[],pend:{},lastRx:0,lost:null,ep:0,hb:0});
+  Object.assign(MPG,{on:false,role:null,pc:null,dc:null,q:[],waiters:[],sync:{},code:'',oppName:'',oppUid:'',start:null,cand:{},tx:0,rx:0,out:[],pend:{},lastRx:0,lost:null,ep:0,hb:0,hr:null,gr:null,hc:null});
 }
 function mpClose(sendBye){if(sendBye)mpSend({t:'bye'});const code=MPG.code,role=MPG.role;mpReset(true);if(role==='host'&&code)mpCleanRoom(code)}
 function mpCleanRoom(code){if(!CAP.db)return;CAP.db.doc('rooms/'+code).collection('join').doc('guest').delete().catch(()=>{});CAP.db.doc('rooms/'+code).delete().catch(()=>{})}
@@ -3362,18 +3362,20 @@ function setupDc(dc){
   // 이전 판의 연결이 늦게 닫히거나 메시지를 보내도 지금 연결에는 영향이 없게: 자기 채널일 때만 처리
   dc.onopen=()=>{if(MPG.dc!==dc)return;clearTimeout(MPG.connT);
     if(MPG.start){MPG.lastRx=Date.now();try{dc.send(JSON.stringify({t:'hello',rx:MPG.rx}))}catch(e){}return} // 다시 이어짐: 내가 어디까지 받았는지 알림
-    if(MPG.role==='host')mpHostStart()};
-  dc.onmessage=e=>{if(MPG.dc!==dc)return;let m;try{m=JSON.parse(e.data)}catch(_){return}if(!m||typeof m!=='object')return;
+    if(MPG.role==='host')mpCommit()};
+  dc.onmessage=e=>{if(MPG.dc!==dc)return;if(typeof e.data!=='string'||e.data.length>65536)return; // 비정상적으로 큰 메시지는 버림
+    let m;try{m=JSON.parse(e.data)}catch(_){return}if(!m||typeof m!=='object'||Array.isArray(m))return;
     MPG.lastRx=Date.now();
     if(m.t==='ping')return;
-    if(m.t==='hello'){const r=+m.rx||0;for(const x of MPG.out)if(x.s>r)try{dc.send(JSON.stringify(x))}catch(_){}mpRecovered();return}
+    if(m.t==='commit'||m.t==='rand'){mpHandshake(m);return}
+    if(m.t==='hello'){if(dc.__hello||!MPG.start)return;dc.__hello=true;const r=Math.max(0,+m.rx||0);for(const x of MPG.out)if(x.s>r)try{dc.send(JSON.stringify(x))}catch(_){}mpRecovered();return}
     if(MPG.lost&&MPG.lost.stage==='wait')mpRecovered(); // 잠깐 끊겼던 기존 연결이 그대로 살아남
     if(typeof m.s==='number'){ // 번호 순서대로만 처리 (중복은 버리고, 앞 번호가 빠졌으면 잠시 보관)
-      if(m.s<=MPG.rx)return;if(m.s!==MPG.rx+1){MPG.pend[m.s]=m;return}
+      if(!Number.isInteger(m.s)||m.s<=MPG.rx)return;if(m.s!==MPG.rx+1){if(m.s<=MPG.rx+500&&Object.keys(MPG.pend).length<500)MPG.pend[m.s]=m;return}
       mpDeliver(m);while(MPG.pend[MPG.rx+1]){const n=MPG.pend[MPG.rx+1];delete MPG.pend[MPG.rx+1];mpDeliver(n)}return}
     mpDeliver(m)};
   function mpDeliver(m){if(typeof m.s==='number')MPG.rx=m.s;
-    if(m.t==='sync'){if(typeof m.turn==='number'&&typeof m.h==='string'){(MPG.sync[m.turn]=MPG.sync[m.turn]||{}).opp=m.h;mpCheck(m.turn)}return}
+    if(m.t==='sync'){if(Number.isInteger(m.turn)&&typeof m.h==='string'&&m.h.length<=20&&G&&Math.abs(m.turn-G.turnNo)<=3){(MPG.sync[m.turn]=MPG.sync[m.turn]||{}).opp=m.h;mpCheck(m.turn)}return}
     if(m.t==='resign'){mpEnd(`${MPG.oppName||'상대'}이(가) 대전을 나감 — 승리`,0);return}
     if(m.t==='bye'){mpEnd(`${MPG.oppName||'상대'}이(가) 나감`,null);return}
     if(m.t==='start'){if(MPG.role==='guest')mpGuestStart(m);return}
@@ -3425,10 +3427,23 @@ async function mpJoinRoom(code){
   MP.st='conn';renderLobby();
   MPG.connT=setTimeout(()=>{if(!MPG.start)mpFail('방장과 연결되지 않음 — 방장이 방 화면을 켜 두고 있는지 확인하고 다시 참가해 줘. 계속 안 되면 둘 중 한 명이 Wi-Fi로 바꿔 줘. ('+candInfo()+')')},75000);
 }
+/* 시드·선후공 공정하게 정하기 (커밋-공개): 방장이 비밀 난수의 해시를 먼저 보내고 → 참가자가 자기 난수를 보내고 → 방장이 비밀 난수를 공개.
+   둘의 난수를 섞어서 시드와 선공을 정하므로 어느 한쪽이 원하는 패·선공이 나오게 고를 수 없음 */
+const hexOf=u=>[...u].map(b=>b.toString(16).padStart(2,'0')).join('');
+const rnd16=()=>hexOf(crypto.getRandomValues(new Uint8Array(16)));
+const sha1hex=t=>hexOf(sha1(new TextEncoder().encode(t)));
+function mpDerive(hr,gr){const h=sha1(new TextEncoder().encode('nj|'+hr+'|'+gr));return{seed:((h[0]<<24)|(h[1]<<16)|(h[2]<<8)|h[3])>>>0,first:h[4]&1?'host':'guest'}}
+function mpCommit(){MPG.hr=rnd16();mpSend({t:'commit',h:sha1hex(MPG.hr)});
+  clearTimeout(MPG.connT);MPG.connT=setTimeout(()=>{if(!MPG.start)mpFail('상대가 응답하지 않음 — 다시 시도해 줘')},20000)}
+function mpHandshake(m){
+  if(MPG.start)return;
+  if(m.t==='commit'&&MPG.role==='guest'&&typeof m.h==='string'&&/^[0-9a-f]{40}$/.test(m.h)&&!MPG.hc){MPG.hc=m.h;MPG.gr=rnd16();mpSend({t:'rand',r:MPG.gr});return}
+  if(m.t==='rand'&&MPG.role==='host'&&MPG.hr&&!MPG.gr&&typeof m.r==='string'&&/^[0-9a-f]{32}$/.test(m.r)){MPG.gr=m.r;mpHostStart()}
+}
 function mpHostStart(){
   MPG.tx=0;MPG.rx=0;MPG.out=[];MPG.pend={};MPG.ep=0;
-  const me=packDeck(getDeck(LOBBY.me));const seed=crypto.getRandomValues(new Uint32Array(1))[0];const first=crypto.getRandomValues(new Uint8Array(1))[0]&1?'host':'guest';
-  const st={t:'start',seed,first,hostDeck:me,guestDeck:MPG.oppDeck,hostName:myName(),guestName:MPG.oppName,v:mpVer()};
+  const me=packDeck(getDeck(LOBBY.me));const {seed,first}=mpDerive(MPG.hr,MPG.gr);
+  const st={t:'start',seed,first,hr:MPG.hr,hostDeck:me,guestDeck:MPG.oppDeck,hostName:myName(),guestName:MPG.oppName,v:mpVer()};
   mpSend(st);mpCleanRoom(MPG.code);startMulti(st);
 }
 function mpGuestStart(m){
@@ -3436,6 +3451,9 @@ function mpGuestStart(m){
   const hd=okDeck(m.hostDeck),gd=okDeck(m.guestDeck);
   if(!hd||!gd||typeof m.seed!=='number'||!['host','guest'].includes(m.first)){mpSend({t:'bye'});return mpFail('시작 정보가 올바르지 않음')}
   if(m.v!==mpVer()){mpSend({t:'bye'});return mpFail(mpVerMsg(m.v))}
+  // 방장이 처음에 약속한 난수와 같은지, 시드·선공을 정해진 방법으로 만들었는지 확인
+  const ok=typeof m.hr==='string'&&/^[0-9a-f]{32}$/.test(m.hr)&&MPG.hc&&MPG.gr&&sha1hex(m.hr)===MPG.hc&&(d=>d.seed===m.seed&&d.first===m.first)(mpDerive(m.hr,MPG.gr));
+  if(!ok){mpSend({t:'bye'});return mpFail('시작 정보가 올바르지 않음 (시드 확인 실패)')}
   startMulti({...m,hostDeck:hd,guestDeck:gd});
 }
 /* ---- 끊김 처리: 신호가 9초 넘게 없거나 연결이 닫히면 → 판을 멈추고 최대 90초 동안 다시 연결 ----
@@ -4032,7 +4050,9 @@ function cleanNotice(o){if(!o||typeof o!=='object'||!o.on)return null;const id=S
 const cleanNotes=a=>Array.isArray(a)?a.filter(x=>typeof x==='string'&&x.trim()).slice(0,12).map(x=>x.slice(0,160)):[];
 function lsRaw(k){try{return localStorage.getItem(k)}catch(e){return null}} // 문자열 그대로 (lsGet/lsSet은 JSON용이라 따로 둠)
 function lsRawSet(k,v){try{localStorage.setItem(k,v)}catch(e){}}
-function linkify(t){return esc(t).replace(/https?:\/\/[^\s<>"']+/g,u=>{const x=cleanUrl(u.replace(/&amp;/g,'&'));return x?`<a href="${esc(x)}" target="_blank" rel="noopener noreferrer">${u}</a>`:u})}
+function linkify(t){t=String(t||'');const re=/https?:\/\/[^\s<>"'`]+/g;let out='',i=0,m; // 원문에서 주소를 찾고, 나머지 글자는 모두 이스케이프
+  while((m=re.exec(t))){out+=esc(t.slice(i,m.index));const x=cleanUrl(m[0]);out+=x?`<a href="${esc(x)}" target="_blank" rel="noopener noreferrer">${esc(m[0])}</a>`:esc(m[0]);i=m.index+m[0].length}
+  return out+esc(t.slice(i))}
 const ntDate=ms=>{if(!ms)return'';const d=new Date(ms);return`${d.getFullYear()}.${d.getMonth()+1}.${d.getDate()}`};
 function ntBarHTML(){const n=NT.data;if(!n)return'';
   return`<button class="home-notice" data-act="lb-ntopen"><span class="hn-tag">공지</span><span class="hn-t">${esc(n.title)}</span><span class="hn-go">자세히 →</span></button>`}
