@@ -18,9 +18,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Noto+Sans+JP:wght@500;700;900&display=swap">
-<script>window.NJ_BUILD="202610242239";window.NJ_NOTES=["멀리건을 선공·후공이 동시에 고르고, 둘 다 준비되면 게임 시작", "멀티에서 서로 버전이 다르면 시작 전에 새로고침 안내", "새 버전이 나오면 로비 위에 알림 · 새로고침 후 바뀐 점 표시", "관리자 공지 기능 추가"];</script>
-<script src="config.js?v=202610242239"></script>
-<script src="fb.js?v=202610242239"></script>
+<script>window.NJ_BUILD="202610242327";window.NJ_NOTES=["설정·덱(게스트)·로비 선택이 저장되지 않던 문제 수정"];</script>
+<script src="config.js?v=202610242327"></script>
+<script src="fb.js?v=202610242327"></script>
 </head>
 <body>
 <style>
@@ -3814,8 +3814,8 @@ function cleanNotice(o){if(!o||typeof o!=='object'||!o.on)return null;const id=S
   const title=String(o.title||'').slice(0,60).trim(),body=String(o.body||'').slice(0,2000);if(!title&&!body.trim())return null;
   return{id,title:title||'공지',body,at:+o.at||0}}
 const cleanNotes=a=>Array.isArray(a)?a.filter(x=>typeof x==='string'&&x.trim()).slice(0,12).map(x=>x.slice(0,160)):[];
-function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
-function lsSet(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+function lsRaw(k){try{return localStorage.getItem(k)}catch(e){return null}} // 문자열 그대로 (lsGet/lsSet은 JSON용이라 따로 둠)
+function lsRawSet(k,v){try{localStorage.setItem(k,v)}catch(e){}}
 function linkify(t){return esc(t).replace(/https?:\/\/[^\s<>"']+/g,u=>{const x=cleanUrl(u.replace(/&amp;/g,'&'));return x?`<a href="${esc(x)}" target="_blank" rel="noopener noreferrer">${u}</a>`:u})}
 const ntDate=ms=>{if(!ms)return'';const d=new Date(ms);return`${d.getFullYear()}.${d.getMonth()+1}.${d.getDate()}`};
 function ntBarHTML(){const n=NT.data;if(!n)return'';
@@ -3827,14 +3827,14 @@ function noticeModal(withNew){const n=NT.data;const notes=withNew?cleanNotes(win
   showModal(`${notes.length?`<h2>업데이트 완료</h2><p class="nt-sub">이번 버전에서 바뀐 점</p><ul class="nt-notes">${notes.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:''}
    ${n?`${notes.length?'<hr class="nt-hr">':''}<p class="nt-kicker">공지${n.at?' · '+ntDate(n.at):''}</p><h2>${esc(n.title)}</h2>${n.body.trim()?`<div class="nt-body">${linkify(n.body)}</div>`:''}`:''}
    <div class="mfoot"><button class="btn primary" data-act="close">확인</button></div>`);
-  if(n)lsSet('nijinana.notice',n.id)}
+  if(n)lsRawSet('nijinana.notice',n.id)}
 function ntMaybe(){ // 홈 화면에서만, 다른 창이 없을 때 한 번씩
   if(SCREEN!=='lobby'||LOBBY.tab!=='home'||!$('#modal').hidden)return;
-  const wn=SOLO&&UPD.cur&&cleanNotes(window.NJ_NOTES).length&&lsGet('nijinana.build')&&lsGet('nijinana.build')!==UPD.cur;
-  if(SOLO&&UPD.cur&&!wn&&lsGet('nijinana.build')!==UPD.cur)lsSet('nijinana.build',UPD.cur); // 처음 온 사람은 "바뀐 점" 생략
-  const nn=NT.data&&lsGet('nijinana.notice')!==NT.data.id;
+  const wn=SOLO&&UPD.cur&&cleanNotes(window.NJ_NOTES).length&&lsRaw('nijinana.build')&&lsRaw('nijinana.build')!==UPD.cur;
+  if(SOLO&&UPD.cur&&!wn&&lsRaw('nijinana.build')!==UPD.cur)lsRawSet('nijinana.build',UPD.cur); // 처음 온 사람은 "바뀐 점" 생략
+  const nn=NT.data&&lsRaw('nijinana.notice')!==NT.data.id;
   if(!wn&&!nn)return;
-  if(wn)lsSet('nijinana.build',UPD.cur);
+  if(wn)lsRawSet('nijinana.build',UPD.cur);
   noticeModal(!!wn)}
 function ntSched(){if(!NT.chk)NT.chk=setTimeout(()=>{NT.chk=0;ntMaybe()},500)}
 async function updCheck(force){
