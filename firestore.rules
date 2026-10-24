@@ -15,7 +15,7 @@ service cloud.firestore {
     // 카드 이미지 목록·썸네일 목록·홈 배너·추가 카드 데이터: 누구나 읽기, 관리자만 쓰기
     match /cardart/{doc} {
       allow read: if true;
-      allow write: if isAdmin() && doc in ['map', 'thumbs', 'banners'];
+      allow write: if isAdmin() && doc in ['map', 'thumbs', 'banners', 'notice'];
     }
     match /carddata/{doc} {
       allow read: if true;

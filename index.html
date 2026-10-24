@@ -18,8 +18,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Noto+Sans+JP:wght@500;700;900&display=swap">
-<script src="config.js?v=202610242214"></script>
-<script src="fb.js?v=202610242214"></script>
+<script>window.NJ_BUILD="202610242239";window.NJ_NOTES=["멀리건을 선공·후공이 동시에 고르고, 둘 다 준비되면 게임 시작", "멀티에서 서로 버전이 다르면 시작 전에 새로고침 안내", "새 버전이 나오면 로비 위에 알림 · 새로고침 후 바뀐 점 표시", "관리자 공지 기능 추가"];</script>
+<script src="config.js?v=202610242239"></script>
+<script src="fb.js?v=202610242239"></script>
 </head>
 <body>
 <style>
@@ -1274,6 +1275,34 @@ button,a,[role=button]{-webkit-tap-highlight-color:transparent}
  .mp-code{flex-wrap:wrap;justify-content:center}
  .mp-wait{padding:20px 14px}
 }
+
+/* ---------- 공지 · 업데이트 알림 ---------- */
+.upd-bar{flex:none;display:flex;align-items:center;gap:12px;margin:10px 32px 0;padding:8px 8px 8px 16px;border-radius:14px;background:var(--navy);color:#fff;box-shadow:0 6px 18px rgba(28,36,64,.25);animation:ubin .3s ease}
+@keyframes ubin{from{transform:translateY(-8px);opacity:0}}
+.upd-bar .ub-dot{width:9px;height:9px;border-radius:50%;background:#5fd38d;flex:none;box-shadow:0 0 0 4px rgba(95,211,141,.25)}
+.upd-bar .ub-t{flex:1;min-width:0;display:flex;align-items:baseline;gap:10px}
+.upd-bar .ub-t b{font-size:14px;white-space:nowrap}
+.upd-bar .ub-t small{font-size:12.5px;color:#c8cdea;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.upd-bar .ub-x{flex:none;width:32px;height:32px;border:0;border-radius:9px;background:rgba(255,255,255,.1);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.upd-bar .ub-x svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round}
+.upd-bar .ub-x:hover{background:rgba(255,255,255,.2)}
+.home-notice{flex:none;appearance:none;border:0;font:inherit;color:var(--ink);display:flex;align-items:center;gap:12px;margin:0 40px 12px;padding:9px 16px 9px 10px;border-radius:12px;background:rgba(255,255,255,.88);box-shadow:inset 0 0 0 1.5px rgba(214,51,122,.28);cursor:pointer;text-align:left}
+.home-notice:hover{background:#fff;box-shadow:inset 0 0 0 1.5px var(--accent)}
+.home-notice .hn-tag{flex:none;font-size:12px;font-weight:800;color:#fff;background:var(--accent);padding:3px 10px;border-radius:999px}
+.home-notice .hn-t{flex:1;min-width:0;font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.home-notice .hn-go{flex:none;font-size:12.5px;font-weight:700;color:var(--accent)}
+.nt-kicker{margin:0 0 2px!important;font-size:12.5px;font-weight:800;color:var(--accent)!important;letter-spacing:.04em}
+.nt-sub{margin:0 0 8px!important}
+.nt-body{white-space:pre-wrap;word-break:break-word;font-size:14.5px;line-height:1.7;color:var(--ink);background:#f7f1f8;border-radius:12px;padding:14px 16px;max-height:52vh;overflow-y:auto;margin:8px 0 6px}
+.nt-body a{color:var(--accent);font-weight:700}
+.nt-notes{margin:0 0 6px!important;padding-left:20px!important;font-size:14px!important;line-height:1.65;color:var(--ink)!important}
+.nt-hr{border:0;border-top:1px dashed #e4d3e4;margin:14px 0}
+.ntadm{display:flex;flex-direction:column;gap:12px;max-width:820px}
+.ntstate{margin:0;font-size:13px;font-weight:700;color:var(--ink-3)}.ntstate.on{color:var(--up)}
+.ntf{display:flex;flex-direction:column;gap:6px}.ntf span{font-size:12.5px;font-weight:700;color:var(--ink-2)}
+.ntf input,.ntf textarea{font:inherit;font-size:14px;padding:9px 12px;border-radius:10px;border:1.5px solid rgba(120,90,140,.25);background:#fff;color:var(--ink);resize:vertical;user-select:text;-webkit-user-select:text}
+.ntf input:focus,.ntf textarea:focus{outline:none;border-color:var(--accent)}
+@container lb (max-width:760px){.upd-bar{margin:8px 16px 0}.upd-bar .ub-t{flex-direction:column;gap:0}.home-notice{margin:0 16px 10px}}
 </style>
 
 <div id="app">
@@ -1513,9 +1542,10 @@ function mullApply(pid,again){const P=G.p[pid];
 async function mulliganAll(){
   const order=[G.first,1-G.first];
   if(!G.p[0].ai&&!G.p[1].ai&&!G.p[0].remote&&!G.p[1].remote){for(const pid of order)mullApply(pid,await ask(pid,mullReq(pid)));return}
-  UI.mull={0:null,1:null};
-  const pick=pid=>ask(pid,mullReq(pid)).then(v=>{if(UI.mull)UI.mull[pid]=!!v;render();return!!v});
+  const t=TOKEN,M=UI.mull={0:null,1:null}; // 이 판의 준비 상태 — 도중에 새 판이 시작돼도 옛 응답이 새 판에 섞이지 않게 묶어 둠
+  const pick=pid=>ask(pid,mullReq(pid)).then(v=>{if(t.dead||UI.mull!==M)throw new Abort();M[pid]=!!v;render();return!!v});
   const got=await Promise.all([pick(0),pick(1)]);
+  if(t.dead||UI.mull!==M)throw new Abort();
   UI.mull=null;render();
   for(const pid of order)mullApply(pid,got[pid]);
 }
@@ -2411,6 +2441,7 @@ async function initCaps(){
     try{db.doc('cardart/map').onSnapshot(s=>{RAWART=s.exists?s.data():{};ART=cleanArt(RAWART);BAD.clear();cacheArtMaps();preloadThumbs();rerenderAll();thumbBackfill()},()=>{})}catch(e){}
     try{db.doc('cardart/thumbs').onSnapshot(s=>{RAWTHUMB=s.exists?s.data():{};THUMB=cleanThumbs(RAWTHUMB);cacheArtMaps();preloadThumbs();rerenderAll();thumbBackfill()},()=>{})}catch(e){}
     try{db.collection('sound').onSnapshot(qs=>{const m={};for(const d of qs.docs){const v=cleanSound(d.data());if(v&&SOUND_SLOTS.some(x=>x[0]===d.id))m[d.id]=v}SND.custom=m;if(LOBBY.tab==='admin')renderLobby()},()=>{})}catch(e){}
+    try{db.doc('cardart/notice').onSnapshot(s=>{NT.data=s.exists?cleanNotice(s.data()):null;if(SCREEN==='lobby')renderLobby()},()=>{})}catch(e){}
     try{db.doc('cardart/banners').onSnapshot(s=>{BN.data=s.exists?cleanBanners(s.data()):BN_DEFAULT();bnTimer();if(SCREEN==='lobby')renderLobby()},()=>{})}catch(e){}
     try{db.doc('carddata/custom').onSnapshot(s=>{CUSTOM=s.exists?cleanStored((s.data()||{}).cards):{};applyCardData()},()=>{})}catch(e){}
     let uid=null;try{uid=user?await user.id():null}catch(e){}
@@ -3129,6 +3160,12 @@ function mpRecv(){const t=TOKEN;return new Promise((res,rej)=>{MPG.waiters.push(
 function mpRejectAll(){const w=MPG.waiters;MPG.waiters=[];for(const x of w)try{x.rej(new Abort())}catch(e){}}
 function mulberry32(a){return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
 function strHash(s){let h=5381;for(let i=0;i<s.length;i++)h=(h*33^s.charCodeAt(i))>>>0;return h.toString(36)}
+/* 멀티 호환 버전: 웹사이트는 빌드 번호(배포할 때마다 바뀜)까지 같아야 대전 가능 — 서로 다른 버전끼리 붙으면 게임이 어긋날 수 있음 */
+const MP_PROTO=2;
+function mpVer(){return(window.NJ_BUILD||'a')+'.'+MP_PROTO+'.'+cardsVer()}
+function mpVerMsg(theirs){const a=String(theirs||'').split('.')[0],b=String(window.NJ_BUILD||'a');
+  if(/^\d{12}$/.test(a)&&/^\d{12}$/.test(b)&&a!==b)return a>b?'내 화면이 예전 버전이라 대전할 수 없음 — 새로고침한 뒤 다시 참가':'상대가 예전 버전이라 대전할 수 없음 — 상대에게 새로고침을 부탁';
+  return'버전이 서로 달라 대전할 수 없음 — 둘 다 새로고침한 뒤 다시 시도'}
 function cardsVer(){return strHash(Object.keys(CARDS).sort().map(k=>{const d=CARDS[k];return[k,d.type,d.lv,d.power,(d.colors||[]).join(''),(d.trigger||[]).join(''),d.text||''].join(':')}).join('|'))}
 function packDeck(dk){return{name:String(dk.name||'').slice(0,40),short:String(dk.short||dk.name||'').slice(0,40),ch:dk.ch,list:cleanList(dk.list)}}
 function okDeck(d){if(!d||typeof d!=='object'||!CARDS[d.ch]||CARDS[d.ch].type!=='channel')return null;
@@ -3237,7 +3274,7 @@ async function mpHostOpen(){
   let code='',tries=0;
   while(tries++<5){code=mpCode();try{const s=await CAP.db.doc('rooms/'+code).get();if(!s.exists)break}catch(e){return mpFail('방 만들기 실패 — 로그인 상태와 Firestore 규칙 확인')}}
   MPG.code=code;MP.code=code;
-  try{await CAP.db.doc('rooms/'+code).set({host:CAP.uid,hostName:myName(),deck:packDeck(me),offer:{type:'offer',sdp:pc.localDescription.sdp},status:'open',at:Date.now(),v:cardsVer()})}
+  try{await CAP.db.doc('rooms/'+code).set({host:CAP.uid,hostName:myName(),deck:packDeck(me),offer:{type:'offer',sdp:pc.localDescription.sdp},status:'open',at:Date.now(),v:mpVer()})}
   catch(e){return mpFail('방 만들기 실패: '+errText(e))}
   if(MPG.pc!==pc){mpCleanRoom(code);return}
   renderLobby();
@@ -3258,7 +3295,7 @@ async function mpJoinRoom(code){
   catch(e){return mpFail('방을 불러오지 못함 — 로그인 상태 확인')}
   if(!r||r.status!=='open'||Date.now()-(+r.at||0)>30*60*1000)return mpFail('이미 시작했거나 닫힌 방');
   if(r.host===CAP.uid)return mpFail('내가 만든 방에는 참가할 수 없음 — 다른 기기·계정으로 참가');
-  if(r.v!==cardsVer())return mpFail('카드 데이터가 서로 달라 대전할 수 없음 — 둘 다 새로고침 후 다시 시도');
+  if(r.v!==mpVer())return mpFail(mpVerMsg(r.v));
   const hd=okDeck(r.deck);if(!hd||!r.offer||typeof r.offer.sdp!=='string')return mpFail('방 정보가 올바르지 않음');
   MPG.oppName=String(r.hostName||'상대').slice(0,20);MPG.oppUid=String(r.host||'');MPG.oppDeck=hd;
   const pc=new RTCPeerConnection(ICE());MPG.pc=pc;watchPc(pc);pc.ondatachannel=e=>setupDc(e.channel);
@@ -3272,14 +3309,14 @@ async function mpJoinRoom(code){
 }
 function mpHostStart(){
   const me=packDeck(getDeck(LOBBY.me));const seed=crypto.getRandomValues(new Uint32Array(1))[0];const first=crypto.getRandomValues(new Uint8Array(1))[0]&1?'host':'guest';
-  const st={t:'start',seed,first,hostDeck:me,guestDeck:MPG.oppDeck,hostName:myName(),guestName:MPG.oppName,v:cardsVer()};
+  const st={t:'start',seed,first,hostDeck:me,guestDeck:MPG.oppDeck,hostName:myName(),guestName:MPG.oppName,v:mpVer()};
   mpSend(st);mpCleanRoom(MPG.code);startMulti(st);
 }
 function mpGuestStart(m){
   if(MPG.start)return;
   const hd=okDeck(m.hostDeck),gd=okDeck(m.guestDeck);
   if(!hd||!gd||typeof m.seed!=='number'||!['host','guest'].includes(m.first)){mpSend({t:'bye'});return mpFail('시작 정보가 올바르지 않음')}
-  if(m.v!==cardsVer()){mpSend({t:'bye'});return mpFail('카드 데이터가 서로 달라 대전할 수 없음 — 둘 다 새로고침 후 다시 시도')}
+  if(m.v!==mpVer()){mpSend({t:'bye'});return mpFail(mpVerMsg(m.v))}
   startMulti({...m,hostDeck:hd,guestDeck:gd});
 }
 window.addEventListener('pagehide',()=>{if(mpLive()&&G.winner==null&&G.phase!=='setup')mpSend({t:'resign'});else if(MPG.on)mpSend({t:'bye'})});
@@ -3474,6 +3511,7 @@ function renderLobby(){
   L.innerHTML=lobbyHTML();fillAcct(L);
   KS.forEach(k=>{const e=L.querySelector(k);if(e&&sc[k])e.scrollTop=sc[k]});
   if(fid){const n=document.getElementById(fid);if(n){n.focus();try{if(ss!=null)n.setSelectionRange(ss,se)}catch(e){}}}
+  ntSched();
 }
 function chThumb(ch){const a=thumbOf(ch);const d=CARDS[ch];return a?`<img src="${blobUrl(a)}" data-art="${a}" alt="">`:esc([...d.jp][0])}
 function deckTile(dk,sel,act,compact){
@@ -3506,7 +3544,7 @@ function lobbyHTML(){
   if(LOBBY.tab==='boot')return bootHTML();
   if(LOBBY.tab==='login')return loginHTML();
   const body={home:homeHTML,play:playHTML,build:buildHTML,cards:cardsHTML,admin:adminHTML,settings:()=>`<main class="lb-body settings">${settingsHTML()}</main>`}[LOBBY.tab]||homeHTML;
-  return lobbyHeadHTML()+body();
+  return updBarHTML()+lobbyHeadHTML()+(LOBBY.tab==='home'?ntBarHTML():'')+body();
 }
 function battleHTML(){
   const decks=allDecks();
@@ -3689,10 +3727,11 @@ function slotPreview(k){
 function adminHTML(){
   const u=ADMIN.usage;const has=SLOTS.filter(k=>artOf(k)).length;
   const meter=u?`<span class="meter"><span class="track"><i style="width:${Math.min(100,u.bytes/u.maxBytes*100).toFixed(1)}%"></i></span>${(u.bytes/1048576).toFixed(1)}MB / ${(u.maxBytes/1048576).toFixed(0)}MB · ${u.files}/${u.maxFiles}개</span>`:'';
-  const sub=`<div class="seg adsub">${[['art','카드 이미지'],['res','화면 리소스'],['data','카드 데이터'],['snd','사운드']].map(([v,l])=>`<button class="${(ADMIN.sub||'art')===v?'on':''}" data-act="ad-sub" data-v="${v}">${l}</button>`).join('')}</div>`;
+  const sub=`<div class="seg adsub">${[['art','카드 이미지'],['res','화면 리소스'],['data','카드 데이터'],['snd','사운드'],['ntc','공지 · 업데이트']].map(([v,l])=>`<button class="${(ADMIN.sub||'art')===v?'on':''}" data-act="ad-sub" data-v="${v}">${l}</button>`).join('')}</div>`;
   if(ADMIN.sub==='data')return`<main class="lb-body admin"><section class="panel cdpanel">${sub}${cardDataHTML()}</section></main>`;
   if(ADMIN.sub==='snd')return`<main class="lb-body admin"><section class="panel cdpanel">${sub}${soundAdminHTML()}</section></main>`;
   if(ADMIN.sub==='res')return`<main class="lb-body admin"><section class="panel cdpanel">${sub}${resAdminHTML()}</section></main>`;
+  if(ADMIN.sub==='ntc')return`<main class="lb-body admin"><section class="panel cdpanel">${sub}${noticeAdminHTML()}</section></main>`;
   return`<main class="lb-body admin"><section class="panel">${sub}
    <h3>카드 이미지 관리 <small>이미지 ${SLOTS.filter(k=>!k.startsWith('_')&&artOf(k)).length}/${SLOTS.filter(k=>!k.startsWith('_')).length} 등록됨 · 업로드 즉시 모든 사용자에게 적용 · 뒷면·컬러 카드·화면 이미지는 "화면 리소스" 탭</small></h3>
    <div class="abar"><button class="btn primary" data-act="ad-bulk" ${ADMIN.busy?'disabled':''}>여러 장 한꺼번에 올리기</button>${SOLO&&window.claude.seed?`<button class="btn" data-act="ad-seed" ${ADMIN.busy?'disabled':''}>기존 이미지 가져오기 (claude.ai 버전)</button>`:''}
@@ -3765,6 +3804,73 @@ async function setBannerUrl(id,raw){
   const next=bnClone();const b=next.list.find(x=>x.id===id);if(!b||b.url===u)return;b.url=u;await saveBanners(next,u?'링크 저장 완료 — 누르면 새 탭으로 열림.':'링크 삭제 — 이 배너는 눌러도 이동 안 함.')}
 document.addEventListener('change',e=>{const t=e.target;if(t&&t.dataset&&t.dataset.bnurl)setBannerUrl(t.dataset.bnurl,t.value)});
 document.addEventListener('keydown',e=>{const t=e.target;if(e.key==='Enter'&&t&&t.dataset&&t.dataset.bnurl){e.preventDefault();t.blur()}});
+
+/* ================= 공지 · 업데이트 알림 =================
+   공지: db 'cardart/notice' = {id,title,body,on,at}. 관리자가 게시하면 홈 위에 공지 줄 + 처음 한 번 팝업 (id가 바뀌면 다시 팝업)
+   업데이트(웹사이트만): 배포 때 만든 version.json 을 5분마다 확인 → 새 빌드가 있으면 로비 위에 "새 버전" 줄. 새로고침 후 처음 한 번 "바뀐 점" 표시 */
+const NT={data:null,draft:null,chk:0};
+const UPD={cur:String(window.NJ_BUILD||''),next:null,notes:[],snooze:null,last:0};
+function cleanNotice(o){if(!o||typeof o!=='object'||!o.on)return null;const id=String(o.id||'');if(!/^[a-z0-9]{1,24}$/.test(id))return null;
+  const title=String(o.title||'').slice(0,60).trim(),body=String(o.body||'').slice(0,2000);if(!title&&!body.trim())return null;
+  return{id,title:title||'공지',body,at:+o.at||0}}
+const cleanNotes=a=>Array.isArray(a)?a.filter(x=>typeof x==='string'&&x.trim()).slice(0,12).map(x=>x.slice(0,160)):[];
+function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
+function lsSet(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+function linkify(t){return esc(t).replace(/https?:\/\/[^\s<>"']+/g,u=>{const x=cleanUrl(u.replace(/&amp;/g,'&'));return x?`<a href="${esc(x)}" target="_blank" rel="noopener noreferrer">${u}</a>`:u})}
+const ntDate=ms=>{if(!ms)return'';const d=new Date(ms);return`${d.getFullYear()}.${d.getMonth()+1}.${d.getDate()}`};
+function ntBarHTML(){const n=NT.data;if(!n)return'';
+  return`<button class="home-notice" data-act="lb-ntopen"><span class="hn-tag">공지</span><span class="hn-t">${esc(n.title)}</span><span class="hn-go">자세히 →</span></button>`}
+function updBarHTML(){if(!UPD.next||UPD.snooze===UPD.next||LOBBY.tab==='boot')return'';
+  return`<div class="upd-bar" role="status"><span class="ub-dot"></span><span class="ub-t"><b>새 버전이 나왔어요</b>${UPD.notes[0]?`<small>${esc(UPD.notes[0])}${UPD.notes.length>1?` 외 ${UPD.notes.length-1}건`:''}</small>`:'<small>새로고침하면 바로 적용돼요</small>'}</span>
+   <button class="btn sm primary" data-act="lb-updgo">새로고침</button><button class="ub-x" data-act="lb-updlater" aria-label="나중에" title="나중에">${XICON}</button></div>`}
+function noticeModal(withNew){const n=NT.data;const notes=withNew?cleanNotes(window.NJ_NOTES):[];
+  showModal(`${notes.length?`<h2>업데이트 완료</h2><p class="nt-sub">이번 버전에서 바뀐 점</p><ul class="nt-notes">${notes.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:''}
+   ${n?`${notes.length?'<hr class="nt-hr">':''}<p class="nt-kicker">공지${n.at?' · '+ntDate(n.at):''}</p><h2>${esc(n.title)}</h2>${n.body.trim()?`<div class="nt-body">${linkify(n.body)}</div>`:''}`:''}
+   <div class="mfoot"><button class="btn primary" data-act="close">확인</button></div>`);
+  if(n)lsSet('nijinana.notice',n.id)}
+function ntMaybe(){ // 홈 화면에서만, 다른 창이 없을 때 한 번씩
+  if(SCREEN!=='lobby'||LOBBY.tab!=='home'||!$('#modal').hidden)return;
+  const wn=SOLO&&UPD.cur&&cleanNotes(window.NJ_NOTES).length&&lsGet('nijinana.build')&&lsGet('nijinana.build')!==UPD.cur;
+  if(SOLO&&UPD.cur&&!wn&&lsGet('nijinana.build')!==UPD.cur)lsSet('nijinana.build',UPD.cur); // 처음 온 사람은 "바뀐 점" 생략
+  const nn=NT.data&&lsGet('nijinana.notice')!==NT.data.id;
+  if(!wn&&!nn)return;
+  if(wn)lsSet('nijinana.build',UPD.cur);
+  noticeModal(!!wn)}
+function ntSched(){if(!NT.chk)NT.chk=setTimeout(()=>{NT.chk=0;ntMaybe()},500)}
+async function updCheck(force){
+  if(!SOLO||!/^\d{12}$/.test(UPD.cur))return;const now=Date.now();if(!force&&now-UPD.last<60000)return;UPD.last=now;
+  try{const r=await fetch('version.json?_='+now,{cache:'no-store'});if(!r.ok)return;const j=await r.json();const v=String(j&&j.v||'');
+    if(!/^\d{12}$/.test(v)||v<=UPD.cur||v===UPD.next)return;
+    const first=!UPD.next;UPD.next=v;UPD.notes=cleanNotes(j.notes);
+    if(SCREEN==='lobby')renderLobby();else if(first)toast('새 버전이 나왔어요 — 대전이 끝나면 로비에서 새로고침')}catch(e){}}
+function updGo(){const v=UPD.next||Date.now();location.replace(location.pathname+'?u='+encodeURIComponent(v)+location.hash)} // 주소를 바꿔서 브라우저 캐시에 남은 옛 화면을 피함
+if(SOLO){
+  try{if(/[?&]u=/.test(location.search))history.replaceState(null,'',location.pathname+location.hash)}catch(e){}
+  setTimeout(()=>updCheck(true),8000);setInterval(()=>updCheck(true),5*60*1000);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)updCheck(false)});
+}
+/* 관리자: 공지 */
+function noticeAdminHTML(){const n=NT.data;const d=NT.draft||(NT.draft={title:n?n.title:'',body:n?n.body:''});
+  return`<h3>공지 <small>게시하면 모든 사람의 홈 화면 위에 공지 줄이 생기고, 홈에 들어올 때 한 번 팝업으로 뜸</small></h3>
+   <div class="ntadm">
+    <p class="ntstate ${n?'on':''}">${n?`지금 게시 중 · ${ntDate(n.at)} · <b>${esc(n.title)}</b>`:'게시 중인 공지 없음'}</p>
+    <label class="ntf"><span>제목</span><input id="ntTitle" maxlength="60" value="${esc(d.title)}" placeholder="예: 신규 카드 6장 추가" ${ADMIN.busy?'disabled':''} autocomplete="off"></label>
+    <label class="ntf"><span>내용</span><textarea id="ntBody" maxlength="2000" rows="8" placeholder="여러 줄로 써도 됨 · https:// 주소는 누르면 새 탭으로 열리는 링크가 됨" ${ADMIN.busy?'disabled':''}>${esc(d.body)}</textarea></label>
+    <div class="abar"><button class="btn primary" data-act="ad-ntpost" ${ADMIN.busy?'disabled':''}>게시 (모두에게 팝업)</button>
+     ${n?`<button class="btn" data-act="ad-ntsave" ${ADMIN.busy?'disabled':''}>내용만 고치기 (팝업 다시 안 띄움)</button><button class="btn danger ${ADMIN.arm==='nt'?'arm':''}" data-act="ad-ntoff" ${ADMIN.busy?'disabled':''}>${ADMIN.arm==='nt'?'확인':'공지 내리기'}</button>`:''}
+     <button class="btn" data-act="ad-ntprev">미리 보기</button></div>
+   </div>
+   ${ADMIN.msg?`<p class="amsg ${ADMIN.err?'err':''}">${esc(ADMIN.msg)}</p>`:''}
+   <h3>업데이트 알림 <small>${SOLO?'자동':'웹사이트 전용'}</small></h3>
+   <p class="hint" style="max-width:820px">${SOLO?`새 버전을 올리면 접속 중인 사람에게 5분 안에 "새 버전이 나왔어요" 줄이 뜨고, 새로고침하면 처음 한 번 "바뀐 점"이 보임. 대전 중에는 방해하지 않고 끝난 뒤 로비에서 보여 줌. 멀티는 서로 버전이 다르면 시작 전에 새로고침하라고 안내함.<br>지금 이 화면의 버전: <b>${esc(UPD.cur||'알 수 없음')}</b>${UPD.next?` · 새 버전 <b>${esc(UPD.next)}</b> 있음`:''}`:'claude.ai 버전은 다시 열면 항상 최신이라 따로 알림이 필요 없음. 공지는 양쪽에 똑같이 뜸.'}</p>`}
+document.addEventListener('input',e=>{const t=e.target;if(!t||!t.id)return;if(t.id==='ntTitle'||t.id==='ntBody'){const d=NT.draft||(NT.draft={title:'',body:''});if(t.id==='ntTitle')d.title=t.value;else d.body=t.value}});
+async function saveNotice(o,msg){
+  if(!CAP.db||!CAP.admin){ADMIN.msg='저장 불가 (관리자 권한 필요)';ADMIN.err=true;renderLobby();return false}
+  ADMIN.busy=true;renderLobby();
+  try{await CAP.db.doc('cardart/notice').set(o);NT.data=cleanNotice(o);ADMIN.msg=msg;ADMIN.err=false;ADMIN.busy=false;renderLobby();return true}
+  catch(e){ADMIN.msg='공지 저장 실패: '+errText(e);ADMIN.err=true;ADMIN.busy=false;renderLobby();return false}}
+function ntDraftOk(){const d=NT.draft||{title:'',body:''};const title=d.title.trim().slice(0,60),body=d.body.slice(0,2000);
+  if(!title){ADMIN.msg='제목을 써 줘';ADMIN.err=true;renderLobby();return null}return{title,body}}
 function resTile(k){const a=artOf(k);const u=UIRES[k];
   return`<div class="slot rslot ${ADMIN.drop===k?'drop':''}" data-slot="${k}">${a?'<span class="has" title="이미지 있음"></span>':''}${slotPreview(k)}
    <span class="snm">${esc(SPECIAL[k])}</span><span class="sid">${u?esc(u.d):k.startsWith('_cl')?'컬러 카드 (일반 카드와 같은 세로 비율)':k==='_chback'?'채널 카드 뒷면 (가로)':'카드 뒷면 (세로)'}</span>
@@ -3867,7 +3973,14 @@ function lobbyAct(a,ds){
     case'ad-bndel':if(ADMIN.arm!=='bn:'+ds.id){ADMIN.arm='bn:'+ds.id;renderLobby()}else{ADMIN.arm=null;const next=bnClone();const b=next.list.find(x=>x.id===ds.id);next.list=next.list.filter(x=>x.id!==ds.id);
       saveBanners(next,'배너 삭제 완료.').then(ok=>{if(ok&&b&&b.img&&!bnUsed(b.img,next.list))CAP.assets.delete(b.img).catch(()=>{})})}break;
     case'ad-bniv':{const v=+ds.v;if([4,6,8,12].includes(v)){const next=bnClone();next.iv=v;saveBanners(next,`${v}초마다 넘어가도록 저장.`)}break}
-    case'ad-sub':ADMIN.sub=ds.v;ADMIN.msg='';ADMIN.arm=null;renderLobby();break;
+    case'ad-sub':ADMIN.sub=ds.v;ADMIN.msg='';ADMIN.arm=null;if(ds.v==='ntc')NT.draft=null;renderLobby();break;
+    case'lb-ntopen':if(NT.data)noticeModal(false);break;
+    case'lb-updgo':updGo();break;
+    case'lb-updlater':UPD.snooze=UPD.next;renderLobby();break;
+    case'ad-ntprev':{const d=NT.draft||{title:'',body:''};showModal(`<p class="nt-kicker">공지 미리 보기</p><h2>${esc(d.title.trim()||'(제목 없음)')}</h2>${d.body.trim()?`<div class="nt-body">${linkify(d.body)}</div>`:''}<div class="mfoot"><button class="btn primary" data-act="close">닫기</button></div>`);break}
+    case'ad-ntpost':{const d=ntDraftOk();if(d)saveNotice({id:Date.now().toString(36),title:d.title,body:d.body,on:true,at:Date.now()},'공지 게시 완료 — 모두에게 한 번 팝업으로 뜸.');break}
+    case'ad-ntsave':{const d=ntDraftOk();if(d&&NT.data)saveNotice({id:NT.data.id,title:d.title,body:d.body,on:true,at:NT.data.at||Date.now()},'공지 내용 수정 완료 (이미 본 사람에게는 다시 안 뜸).');break}
+    case'ad-ntoff':if(ADMIN.arm!=='nt'){ADMIN.arm='nt';renderLobby()}else{ADMIN.arm=null;saveNotice({id:'off',title:'',body:'',on:false,at:Date.now()},'공지를 내림.').then(ok=>{if(ok)NT.draft=null})}break;
     case'ad-cdcopy':cdCopy(false);break;
     case'ad-cdblank':cdCopy(true);break;
     case'ad-cdprev':cdPreview();break;
