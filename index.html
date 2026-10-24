@@ -18,9 +18,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Noto+Sans+JP:wght@500;700;900&display=swap">
-<script>window.NJ_BUILD="202610250439";window.NJ_NOTES=["로비 홈 화면 배치 정리 — 태블릿·폴드에서 버튼이 잘리거나 메뉴 글자가 깨지던 문제 수정", "폰·세로 화면은 배너 → 게임 시작 → 메뉴 순서, 가로 화면은 시작 버튼과 배너를 나란히", "니지 에리어의 컬러 카드가 칸 크기에 맞게 표시되도록 수정"];</script>
-<script src="config.js?v=202610250439"></script>
-<script src="fb.js?v=202610250439"></script>
+<script>window.NJ_BUILD="202610250447";window.NJ_NOTES=["모바일: 버튼을 누를 때 스크롤이 맨 위로 돌아가거나 화면이 튀던 문제 수정 — 누른 버튼이 그 자리에 그대로 있음", "로비 홈 화면 배치 정리 — 태블릿·폴드에서 버튼이 잘리거나 메뉴 글자가 깨지던 문제 수정", "니지 에리어의 컬러 카드가 칸 크기에 맞게 표시되도록 수정"];</script>
+<script src="config.js?v=202610250447"></script>
+<script src="fb.js?v=202610250447"></script>
 </head>
 <body>
 <style>
@@ -3765,6 +3765,19 @@ async function startGame(){
   hideModal();SCREEN='game';fit();renderLobby();
   newGame({me:LOBBY.me,opp:LOBBY.ai,first});UI.logOpen=false;UI.hover=null;UI.hideHands=true;fxReset();render();runGame();
 }
+/* 방금 누른 버튼이 다시 그린 뒤에도 화면의 같은 자리에 있게 (위쪽 내용 길이가 바뀌어도 화면이 튀지 않음) */
+const LBA={key:null,top:0,t:0};
+function lbKey(el){if(!el||!el.dataset)return null;const d=el.dataset;const ks=['act','v','k','id','key','cid','uid','i','d'].filter(k=>d[k]!=null);if(!ks.length)return null;
+  return ks.map(k=>`[data-${k}="${CSS.escape(d[k])}"]`).join('')}
+document.addEventListener('pointerdown',e=>{if(SCREEN!=='lobby')return;const el=e.target.closest&&e.target.closest('#lobby [data-act],#lobby [data-cid]');const k=lbKey(el);
+  if(k){LBA.key=k;LBA.top=el.getBoundingClientRect().top;LBA.t=Date.now()}},true);
+function lbKeepAnchor(L){
+  if(!LBA.key||Date.now()-LBA.t>1500||LAYOUT.mode!=='resp')return;
+  let n=null,best=1e9;try{for(const x of L.querySelectorAll(LBA.key)){const dd=Math.abs(x.getBoundingClientRect().top-LBA.top);if(dd<best){best=dd;n=x}}}catch(e){}if(!n)return; // 같은 버튼이 여러 개면 원래 자리에 가장 가까운 것
+  for(let i=0;i<3;i++){const d=n.getBoundingClientRect().top-LBA.top;if(Math.abs(d)<1)break;const b=L.scrollTop;L.scrollTop=b+d;
+    const moved=L.scrollTop-b;if(!moved)break;const d2=n.getBoundingClientRect().top-LBA.top;if(Math.abs(d2)<1)break;
+    const ratio=(d-d2)/moved;if(ratio>0.05)L.scrollTop+=d2/ratio;break}
+}
 function renderLobby(){
   {const st=$('#stage');if(st)st.classList.toggle('inlobby',SCREEN!=='game')}
   const L=$('#lobby');if(SCREEN!=='lobby'){L.hidden=true;return}
@@ -3772,9 +3785,12 @@ function renderLobby(){
   const ae=document.activeElement;const fid=ae&&ae.id&&L.contains(ae)?ae.id:null;
   let ss=null,se=null;try{if(fid&&ae.selectionStart!=null){ss=ae.selectionStart;se=ae.selectionEnd}}catch(e){}
   const KS=['.resbox','.sres','.dkgrid','.dgrid','.filters','.dlist','.slots','.cgrid','.lb-body.settings','.auth-panel'];const sc={};KS.forEach(k=>{const e=L.querySelector(k);if(e)sc[k]=e.scrollTop});
+  const top0=L.scrollTop;
   L.innerHTML=lobbyHTML();fillAcct(L);
   KS.forEach(k=>{const e=L.querySelector(k);if(e&&sc[k])e.scrollTop=sc[k]});
-  if(fid){const n=document.getElementById(fid);if(n){n.focus();try{if(ss!=null)n.setSelectionRange(ss,se)}catch(e){}}}
+  if(L.scrollTop!==top0)L.scrollTop=top0; // 다시 그려도 스크롤 위치 유지 (일부 모바일 브라우저는 내용을 바꾸면 맨 위로 감)
+  lbKeepAnchor(L);
+  if(fid){const n=document.getElementById(fid);if(n){try{n.focus({preventScroll:true})}catch(_){n.focus()}try{if(ss!=null)n.setSelectionRange(ss,se)}catch(e){}}}
   ntSched();
 }
 function chThumb(ch){const a=thumbOf(ch);const d=CARDS[ch];return a?`<img src="${blobUrl(a)}" data-art="${a}" alt="">`:esc([...d.jp][0])}
