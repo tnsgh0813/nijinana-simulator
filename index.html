@@ -9,8 +9,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Noto+Sans+JP:wght@500;700;900&display=swap">
-<script src="config.js?v=202610240342"></script>
-<script src="fb.js?v=202610240342"></script>
+<script src="config.js?v=202610241209"></script>
+<script src="fb.js?v=202610241209"></script>
 </head>
 <body>
 <style>
@@ -1032,6 +1032,30 @@ legend{font-size:12px;font-weight:700;color:var(--accent);padding:0 4px}
 .uiprev.free img{object-fit:contain}
 .uiprev span{font-size:12px;color:var(--ink-3);font-weight:700}
 .rslot .sid{white-space:normal;line-height:1.35}
+
+/* ---------- 로비 UX ---------- */
+.lb-head{gap:14px}
+.lb-back{padding:8px!important;width:40px;height:40px;justify-content:center}
+.lb-nav{display:flex;gap:2px;background:rgba(255,255,255,.7);padding:4px;border-radius:999px;box-shadow:inset 0 0 0 1px rgba(120,90,140,.14)}
+.lb-nav button{border:0;background:transparent;font:inherit;font-weight:700;font-size:14px;color:var(--ink-2);padding:8px 16px;border-radius:999px;cursor:pointer;white-space:nowrap}
+.lb-nav button:hover{color:var(--ink);background:rgba(255,255,255,.8)}
+.lb-nav button.on{background:var(--navy);color:#fff}
+.lb-nav button.adm{color:var(--accent)}.lb-nav button.adm.on{background:var(--accent);color:#fff}
+.lb-mode{background:#fff;box-shadow:inset 0 0 0 1px rgba(120,90,140,.16)}
+.lb-mode button{padding:7px 16px}
+.lb-mode button.on{background:var(--accent);color:#fff}
+.home-quick{position:relative;z-index:3;display:flex;align-items:center;gap:14px;border:0;cursor:pointer;font:inherit;text-align:left;color:#fff;width:100%;padding:14px 20px;border-radius:18px;
+  background:rgba(255,255,255,.12);box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.28);backdrop-filter:blur(6px);transition:background .15s}
+.home-quick:hover{background:rgba(255,255,255,.2)}
+.hq-ic{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.18);display:grid;place-items:center;flex:none}
+.hq-ic svg{width:18px;height:18px;fill:#fff;margin-left:3px}
+.hq-tx{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}.hq-tx b{font-size:17px}.hq-tx small{font-size:13px;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.hq-tx i{font-style:normal;opacity:.7;margin:0 2px}
+.hq-go{font-size:22px;font-weight:800;opacity:.8}
+.hh-l{gap:14px!important}
+.dl-acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+.lb-startbtn kbd{font:inherit;font-size:12px;font-weight:700;background:rgba(255,255,255,.22);padding:2px 8px;border-radius:6px;margin-left:8px;vertical-align:middle}
+.mcard.last{outline:3px solid var(--gold);outline-offset:4px}
+.mcard.last .mc-go::after{content:" · 지난번 선택"}
 </style>
 
 <div id="app">
@@ -2092,6 +2116,7 @@ async function initCaps(){
   }
   if(CAP.admin)refreshUsage();
   if(LOBBY.tab==='boot'||LOBBY.tab==='login')LOBBY.tab=(SOLO&&!(CAP.me&&CAP.me.id)&&!isGuest())?'login':'home';
+  try{if(!(history.state&&history.state.nj))history.replaceState(lbState(),'')}catch(e){}
   renderLobby();
 }
 function rerenderAll(){applyRes();render();renderLobby()}
@@ -2187,10 +2212,12 @@ document.addEventListener('click',e=>{
 });
 document.addEventListener('keydown',e=>{
   if(e.key==='Enter'&&e.target&&e.target.id==='mpJoin'){if(MP.join.length===6)lobbyAct('lb-mp',{v:'join'});return}
+  if(e.key==='Enter'&&SCREEN==='lobby'&&LOBBY.tab==='play'&&LOBBY.mode==='ai'&&$('#modal').hidden&&!document.getElementById('coinov')&&!(e.target&&e.target.matches&&e.target.matches('button,input,textarea,[role=button]'))){const b=$('#lobby [data-act="lb-start"]');if(b&&!b.disabled){e.preventDefault();b.click()}return}
   if((e.key==='Enter'||e.key===' ')&&e.target.matches&&e.target.matches('[data-uid],[data-cl],[data-cid]')){e.preventDefault();e.target.click()}
   if(e.key==='Escape'){
     if(!$('#zoom').hidden){$('#zoom').hidden=true}
     else if(!$('#modal').hidden){if(CROP)closeCrop();else hideModal()}
+    else if(SCREEN==='lobby'){if(!document.getElementById('coinov')&&!(e.target&&e.target.matches&&e.target.matches('input,textarea'))&&LOBBY.tab!=='home'&&LOBBY.tab!=='login'&&LOBBY.tab!=='boot')lbBack();return}
     else if(SCREEN!=='game')return;
     else if(UI.pending&&UI.pending.pid===0&&UI.pending.req.cost){resolvePending(null)}
     else if(UI.ccOpen){UI.ccOpen=false;if(UI.tgt&&UI.tgt.kind==='color')UI.tgt=null;render()}
@@ -2684,10 +2711,15 @@ function lobbyHeadHTML(){
   const store=DECKSRC==='account'?'<span class="pill ok">덱 저장: 내 계정</span>':'<span class="pill">덱 저장: 이 브라우저</span>';
   const who=`<div class="lb-who">${acctHTML()}${store}</div>`;
   if(LOBBY.tab==='home')return`<header class="lb-head home-head">${logoHTML(false)}${who}</header>`;
-  let back=['home','홈'],title=TABTITLE[LOBBY.tab]||'';
-  if(LOBBY.tab==='play'&&LOBBY.mode){back=['play','모드 선택'];title=LOBBY.mode==='ai'?'AI 대전':'멀티 대전'}
-  return`<header class="lb-head"><button class="lb-back" data-act="lb-go" data-v="${back[0]}">${IC.back}<span>${back[1]}</span></button><h1 class="lb-title">${title}</h1>${who}</header>`;
+  const nav=[['home','홈'],['play','게임 시작'],['build','덱 만들기'],['cards','카드 목록'],['settings','설정']];if(CAP.admin)nav.push(['admin','관리자']);
+  const modeSw=LOBBY.tab==='play'&&LOBBY.mode?`<div class="seg lb-mode">${[['ai','AI 대전'],['multi','멀티 대전']].map(([v,l])=>`<button class="${LOBBY.mode===v?'on':''}" data-act="lb-mode" data-v="${v}" aria-pressed="${LOBBY.mode===v}">${l}</button>`).join('')}</div>`:'';
+  return`<header class="lb-head"><button class="lb-back" data-act="lb-back" title="뒤로 (Esc)" aria-label="뒤로">${IC.back}</button>
+   <nav class="lb-nav" aria-label="로비 메뉴">${nav.map(([k,l])=>`<button class="${LOBBY.tab===k?'on':''} ${k==='admin'?'adm':''}" data-act="lb-go" data-v="${k}" ${LOBBY.tab===k?'aria-current="page"':''}>${l}</button>`).join('')}</nav>${modeSw}${who}</header>`;
 }
+function quickHTML(){ // 지난번 덱 그대로 한 번에 AI 대전
+  const me=getDeck(LOBBY.me),ai=getDeck(LOBBY.ai);if(!me||!ai||validateDeck(me).length||validateDeck(ai).length)return'';
+  const fl={random:'코인 토스',me:'내가 선공',ai:'AI 선공'}[LOBBY.first]||'코인 토스';
+  return`<button class="home-quick" data-act="lb-quick"><span class="hq-ic">${IC.play}</span><span class="hq-tx"><b>바로 대전</b><small>${esc(me.name)} <i>vs</i> AI ${esc(ai.name)} · ${fl}</small></span><span class="hq-go">→</span></button>`}
 function homeHTML(){
   const tiles=[['build','덱 만들기','50장 덱을 만들고 저장',IC.deck],['cards','카드 목록','모든 카드와 효과 보기',IC.cards],['settings','설정','연출 · 소리 · 카드 · 글씨 크기',IC.gear],
     ['rules','룰 · 가정','이 시뮬레이터의 규칙 정리',IC.book],['acct','계정',(CAP.me&&CAP.me.id)?'로그인 정보 · 로그아웃':'로그인 · 덱 저장 위치',IC.user]];
@@ -2697,6 +2729,7 @@ function homeHTML(){
     <div class="hh-l">
     <p class="home-tag"><b>덱을 고르고 바로 대전</b>팬메이드 웹 대전 시뮬레이터</p>
     <button class="home-start" data-act="lb-go" data-v="play"><span class="hs-ic">${IC.play}</span><span class="hs-tx"><b>게임 시작</b><small>AI 대전 · 멀티 대전</small></span></button>
+    ${quickHTML()}
     </div>
     <div class="hh-kv">${kvHTML('kv')}</div>
    </section>
@@ -2707,8 +2740,8 @@ function homeHTML(){
 }
 function modeHTML(){
   return`<main class="lb-body mode">
-   <button class="mcard ai ${resUrl('_uiModeAI')?'img':''}" data-act="lb-mode" data-v="ai"${bgStyle('_uiModeAI')}><span class="mc-ic">${IC.bot}</span><b>AI 대전</b><small>컴퓨터와 1:1. 내 덱과 AI 덱, 대전 설정을 고르고 바로 시작</small><span class="mc-go">덱 고르기 →</span></button>
-   <button class="mcard mp ${resUrl('_uiModeMP')?'img':''}" data-act="lb-mode" data-v="multi"${bgStyle('_uiModeMP')}><span class="mc-ic">${IC.ppl}</span><b>멀티 대전</b><small>다른 플레이어와 1:1. 빠른 매칭 · 방 만들기 · 코드로 참가</small><span class="mc-go">덱 고르기 →</span><em class="soon">준비 중</em></button>
+   <button class="mcard ai ${LOBBY.lastMode==='ai'?'last':''} ${resUrl('_uiModeAI')?'img':''}" data-act="lb-mode" data-v="ai"${bgStyle('_uiModeAI')}><span class="mc-ic">${IC.bot}</span><b>AI 대전</b><small>컴퓨터와 1:1. 내 덱과 AI 덱, 대전 설정을 고르고 바로 시작</small><span class="mc-go">덱 고르기 →</span></button>
+   <button class="mcard mp ${LOBBY.lastMode==='multi'?'last':''} ${resUrl('_uiModeMP')?'img':''}" data-act="lb-mode" data-v="multi"${bgStyle('_uiModeMP')}><span class="mc-ic">${IC.ppl}</span><b>멀티 대전</b><small>다른 플레이어와 1:1. 빠른 매칭 · 방 만들기 · 코드로 참가</small><span class="mc-go">덱 고르기 →</span><em class="soon">준비 중</em></button>
   </main>`;
 }
 function playHTML(){
@@ -2725,7 +2758,7 @@ function mpTick(){const el=document.getElementById('mpTime');if(!el){clearInterv
 function mpStart(st){mpStop();MP.st=st;MP.t0=Date.now();if(st==='host')MP.code=mpCode();MP.timer=setInterval(mpTick,1000);
   if(st==='join'){const c=MP.join;setTimeout(()=>{if(MP.st==='join'&&MP.join===c){MP.st='nf';clearInterval(MP.timer);MP.timer=0;renderLobby()}},1600)}}
 function multiHTML(){
-  const decks=allDecks();if(!decks.some(d=>d.key===LOBBY.me))LOBBY.me='SD01';
+  const decks=allDecks();if((DECKSRC!=='account'||DECKRAW!=null)&&!decks.some(d=>d.key===LOBBY.me))LOBBY.me='SD01';
   const me=getDeck(LOBBY.me);const pm=validateDeck(me);const ok=!pm.length;
   let box='';
   if(!MP.st)box=`<div class="mp-opts">
@@ -2847,7 +2880,7 @@ function bootHTML(){return`<main class="boot">${logoHTML(true)}<div class="ld-sp
 async function authDo(kind){
   const A=window.claude&&window.claude.auth;const f=AUTH.f;
   const fail=m=>{AUTH.busy=false;AUTH.msg=m;AUTH.err=true;renderLobby();const i=$('#lobby input[data-f]');if(i&&!i.value)i.focus()};
-  if(kind==='guest'){setGuest(true);LOBBY.tab='home';AUTH.msg='';renderLobby();return}
+  if(kind==='guest'){setGuest(true);LOBBY.tab='home';AUTH.msg='';try{history.replaceState(lbState(),'')}catch(e){}renderLobby();return}
   if(!A)return fail('로그인 기능을 불러오지 못함 — 새로고침 후 다시 시도');
   const email=f.email.trim();
   if(kind==='login'){if(!email||!f.pw)return fail('아이디와 비밀번호를 입력해 줘')}
@@ -2959,14 +2992,14 @@ function lobbyHTML(){
 }
 function battleHTML(){
   const decks=allDecks();
-  if(!decks.some(d=>(d.key)===LOBBY.me))LOBBY.me='SD01';
-  if(!decks.some(d=>(d.key)===LOBBY.ai))LOBBY.ai='SD02';
+  const dready=DECKSRC!=='account'||DECKRAW!=null;if(dready&&!decks.some(d=>(d.key)===LOBBY.me))LOBBY.me='SD01';
+  if(dready&&!decks.some(d=>(d.key)===LOBBY.ai))LOBBY.ai='SD02';
   const me=getDeck(LOBBY.me),ai=getDeck(LOBBY.ai);
   const pm=validateDeck(me),pa=validateDeck(ai);const ok=!pm.length&&!pa.length;
   const seg=(act,cur,opts)=>`<div class="seg">${opts.map(([v,l])=>`<button class="${cur===v?'on':''}" data-act="${act}" data-v="${v}">${l}</button>`).join('')}</div>`;
   return`<main class="lb-body battle">
    <section class="panel"><h3>내 덱 <small>${decks.length}개</small></h3><div class="dlist">${decks.map(d=>deckTile(d,d.key===LOBBY.me,'lb-me')).join('')}</div>
-    <p class="hint">내 덱은 "덱 만들기"에서 만든다. 50장이 아닌 덱은 대전 불가.</p></section>
+    <div class="dl-acts"><button class="btn sm" data-act="lb-editme">${LOBBY.me.startsWith('u:')?'선택한 덱 편집':'선택한 덱 복사해서 편집'}</button><button class="btn sm" data-act="lb-newdeck">+ 새 덱 만들기</button></div></section>
    <section class="panel"><h3>AI 덱 <small>${decks.length}개</small></h3><div class="dlist">${decks.map(d=>deckTile(d,d.key===LOBBY.ai,'lb-ai')).join('')}</div></section>
    <section class="panel">
     <h3>AI 대전 설정</h3>
@@ -2975,7 +3008,7 @@ function battleHTML(){
     <span class="field-l">AI 속도</span>${seg('lb-speed',SET.ai,SETOPT.ai)}
     <div style="flex:1"></div>
     ${ok?'':`<p class="why2">${esc((pm[0]?'내 덱: '+pm[0]:'AI 덱: '+pa[0]))}</p>`}
-    <button class="btn primary big" data-act="lb-start" ${ok?'':'disabled'}>대전 시작</button>
+    <button class="btn primary big lb-startbtn" data-act="lb-start" ${ok?'':'disabled'}>대전 시작 <kbd>Enter</kbd></button>
    </section></main>`;
 }
 /* ---------- deck builder: list + editor ---------- */
@@ -3175,10 +3208,36 @@ function logoHTML(big){const u=resUrl('_uiLogo');
   if(u)return`<div class="lb-logo ${big?'big':''}"><img class="lg-img" src="${u}" alt="NIJISANJI 7 Colors Card Game Simulator"></div>`;
   return`<div class="lb-logo ${big?'big':''}"><b class="lg-name">NIJISANJI <span class="rb">7 Colors</span>${big?'<br>':' '}Card Game Simulator</b></div>`}
 const bgStyle=k=>{const u=resUrl(k);return u?` style="background-image:url('${u}')"`:''};
+/* ---- 로비 이동 기록: 브라우저·마우스 뒤로 가기, Esc ---- */
+const LBKEY='nijinana.lobby';
+function saveLobbyPrefs(){lsSet(LBKEY,{me:LOBBY.me,ai:LOBBY.ai,first:LOBBY.first,mode:LOBBY.mode})}
+(function(){const v=lsGet(LBKEY,null);if(v&&typeof v==='object'){for(const k of ['me','ai'])if(typeof v[k]==='string'&&v[k].length<80)LOBBY[k]=v[k];
+  if(['random','me','ai'].includes(v.first))LOBBY.first=v.first;if(['ai','multi'].includes(v.mode))LOBBY.lastMode=v.mode}})();
+const lbState=()=>({nj:1,tab:LOBBY.tab,mode:LOBBY.mode||null,build:!!BUILD});
+function lbPush(){if(SCREEN!=='lobby'||LOBBY.tab==='login'||LOBBY.tab==='boot')return;const st=lbState();const cur=history.state;
+  if(cur&&cur.nj&&cur.tab===st.tab&&cur.mode===st.mode&&cur.build===st.build)return;try{history.pushState(st,'')}catch(e){}}
+function lbBack(){if(SCREEN!=='lobby')return;
+  if(history.state&&history.state.nj&&history.length>1){try{history.back();return}catch(e){}}
+  if(LOBBY.tab==='play'&&LOBBY.mode){LOBBY.mode=null}else if(LOBBY.tab==='build'&&BUILD){lobbyAct('b-back',{});return}else LOBBY.tab='home';mpStop();renderLobby()}
+window.addEventListener('popstate',e=>{const st=e.state;
+  if(SCREEN==='game'){try{history.pushState(lbState(),'')}catch(_){}if(G&&G.winner==null&&G.phase!=='setup')showLeave();return}
+  if(SCREEN!=='lobby'||LOBBY.tab==='login'||LOBBY.tab==='boot')return;
+  if(!$('#modal').hidden){if(CROP)closeCrop();else hideModal()}
+  mpStop();
+  if(BUILD&&!(st&&st.nj&&st.build)){ // 편집 중인 덱에서 나갈 때: 저장 안 됐으면 한 번 확인
+    if(BUILD.dirty&&!LOBBY.backArm){LOBBY.backArm=true;try{history.pushState({nj:1,tab:'build',mode:LOBBY.mode||null,build:true},'')}catch(_){}toast('저장하지 않은 덱 — 한 번 더 뒤로 가면 저장 없이 나감');renderLobby();return}
+    BUILD=null;LOBBY.backArm=false;LOBBY.delArm=false}
+  if(st&&st.nj){LOBBY.tab=(st.tab==='admin'&&!CAP.admin)?'home':st.tab;LOBBY.mode=st.mode||null}else{LOBBY.tab='home';LOBBY.mode=null}
+  LOBBY.hover=null;renderLobby()});
 function lobbyAct(a,ds){
   switch(a){
-    case'lb-go':{const v=ds.v;if(v==='admin'&&!CAP.admin)break;mpStop();if(v==='play')LOBBY.mode=null;LOBBY.tab=v;LOBBY.hover=null;LOBBY.delArm=false;LOBBY.backArm=false;ADMIN.arm=null;if(v==='admin')refreshUsage();renderLobby();break}
-    case'lb-mode':mpStop();LOBBY.mode=ds.v||null;LOBBY.hover=null;renderLobby();break;
+    case'lb-back':lbBack();break;
+    case'lb-quick':LOBBY.tab='play';LOBBY.mode='ai';lbPush();startGame();break;
+    case'lb-editme':{const k=LOBBY.me;if(k.startsWith('u:')){const d=USERDECKS.find(x=>x.id===k.slice(2));if(d){LOBBY.tab='build';lbPush();lobbyAct('b-edit',{id:d.id})}}
+      else if(STARTERS[k]){LOBBY.tab='build';lbPush();lobbyAct('b-copy',{key:k})}break}
+    case'lb-newdeck':LOBBY.tab='build';lbPush();lobbyAct('b-newblank',{});break;
+    case'lb-go':{const v=ds.v;if(v==='admin'&&!CAP.admin)break;mpStop();if(v==='play'&&LOBBY.tab!=='play')LOBBY.mode=null;LOBBY.tab=v;LOBBY.hover=null;LOBBY.delArm=false;LOBBY.backArm=false;ADMIN.arm=null;if(v==='admin')refreshUsage();lbPush();renderLobby();break}
+    case'lb-mode':mpStop();LOBBY.mode=ds.v||null;LOBBY.hover=null;if(LOBBY.mode){LOBBY.lastMode=LOBBY.mode;saveLobbyPrefs()}lbPush();renderLobby();break;
     case'lb-mp':{const v=ds.v;if(v==='cancel')mpStop();else if(v==='copy'){try{navigator.clipboard.writeText(MP.code).then(()=>toast('방 코드 복사 완료'),()=>toast('복사 실패 — 직접 적어 줘'))}catch(e){toast('복사 실패 — 직접 적어 줘')}break}
       else if(v==='join'){if(MP.join.length!==6)break;mpStart('join')}else mpStart(v);renderLobby();break}
     case'lb-set':{const k=ds.k;if(!(k in SET_DEF))break;if(k==='shake'||k==='banner')SET[k]=!SET[k];else if(SETOPT[k]&&SETOPT[k].some(o=>o[0]===ds.v))SET[k]=ds.v;else break;
@@ -3192,20 +3251,20 @@ function lobbyAct(a,ds){
     case'lb-tologin':hideModal();setGuest(false);AUTH.view='login';AUTH.msg='';if(SCREEN==='game')goLobby();LOBBY.tab='login';renderLobby();break;
     case'lb-verify':if(SOLO&&window.claude.auth&&window.claude.auth.verify)window.claude.auth.verify().then(()=>toast('인증 메일을 다시 보냄'),e=>toast(authErr(e)));break;
     case'lb-tab':LOBBY.tab=ds.v;LOBBY.hover=null;LOBBY.delArm=false;LOBBY.backArm=false;ADMIN.arm=null;if(ds.v==='admin')refreshUsage();renderLobby();break;
-    case'lb-me':LOBBY.me=ds.key;renderLobby();break;
-    case'lb-ai':LOBBY.ai=ds.key;renderLobby();break;
-    case'lb-first':LOBBY.first=ds.v;renderLobby();break;
+    case'lb-me':LOBBY.me=ds.key;saveLobbyPrefs();renderLobby();break;
+    case'lb-ai':LOBBY.ai=ds.key;saveLobbyPrefs();renderLobby();break;
+    case'lb-first':LOBBY.first=ds.v;saveLobbyPrefs();renderLobby();break;
     case'lb-speed':if(SETOPT.ai.some(o=>o[0]===ds.v)){SET.ai=ds.v;saveSet()}renderLobby();break;
-    case'lb-start':startGame();break;
+    case'lb-start':saveLobbyPrefs();startGame();break;
     case'lb-show':LOBBY.pin=ds.cid;LOBBY.hover=ds.cid;renderLobbyDetail();break;
-    case'b-newblank':BUILD={id:null,name:'새 덱',ch:null,list:{},dirty:true};SRCH=SRCH0();SRCH.type=['channel'];LOBBY.delArm=false;LOBBY.backArm=false;LOBBY.pin=null;renderLobby();break;
+    case'b-newblank':if(LOBBY.tab==='build')setTimeout(lbPush,0);BUILD={id:null,name:'새 덱',ch:null,list:{},dirty:true};SRCH=SRCH0();SRCH.type=['channel'];LOBBY.delArm=false;LOBBY.backArm=false;LOBBY.pin=null;renderLobby();break;
     case'b-back':if(BUILD&&BUILD.dirty&&!LOBBY.backArm){LOBBY.backArm=true;renderLobby()}else{BUILD=null;LOBBY.backArm=false;LOBBY.delArm=false;renderLobby()}break;
     case'b-pick':buildPick(ds.id);break;
     case'b-info':LOBBY.pin=ds.cid;renderLobbyDetail();break;
     case'b-f':{const g=SRCH[ds.g];if(g){const i=g.indexOf(ds.v);if(i>=0)g.splice(i,1);else g.push(ds.v);renderLobby()}}break;
     case'b-freset':{const q=SRCH.q;SRCH=SRCH0();SRCH.q='';if(BUILD&&BUILD.ch)SRCH.cls=[CARDS[BUILD.ch].cls];else SRCH.type=['channel'];renderLobby()}break;
-    case'b-copy':{const s=STARTERS[ds.key];BUILD={id:null,name:s.short+' 개조 덱',ch:s.ch,list:{...s.list},dirty:true};SRCH=SRCH0();SRCH.cls=[CARDS[s.ch].cls];LOBBY.delArm=false;LOBBY.backArm=false;LOBBY.pin=s.ch;renderLobby()}break;
-    case'b-edit':{const d=USERDECKS.find(x=>x.id===ds.id);if(d){BUILD={id:d.id,name:d.name,ch:d.ch,list:{...d.list},dirty:false};SRCH=SRCH0();if(CARDS[d.ch])SRCH.cls=[CARDS[d.ch].cls];LOBBY.delArm=false;LOBBY.backArm=false;LOBBY.pin=d.ch;renderLobby()}}break;
+    case'b-copy':{setTimeout(lbPush,0);const s=STARTERS[ds.key];BUILD={id:null,name:s.short+' 개조 덱',ch:s.ch,list:{...s.list},dirty:true};SRCH=SRCH0();SRCH.cls=[CARDS[s.ch].cls];LOBBY.delArm=false;LOBBY.backArm=false;LOBBY.pin=s.ch;renderLobby()}break;
+    case'b-edit':{setTimeout(lbPush,0);const d=USERDECKS.find(x=>x.id===ds.id);if(d){BUILD={id:d.id,name:d.name,ch:d.ch,list:{...d.list},dirty:false};SRCH=SRCH0();if(CARDS[d.ch])SRCH.cls=[CARDS[d.ch].cls];LOBBY.delArm=false;LOBBY.backArm=false;LOBBY.pin=d.ch;renderLobby()}}break;
     case'b-ch':if(BUILD.ch!==ds.ch){const cls=CARDS[ds.ch].cls;for(const k of Object.keys(BUILD.list))if(CARDS[k].cls!==cls)delete BUILD.list[k];BUILD.ch=ds.ch;BUILD.dirty=true;renderLobby()}break;
     case'b-inc':{const k=ds.id;const v=BUILD.list[k]||0;if(v<4&&countList(BUILD.list)<50){BUILD.list[k]=v+1;BUILD.dirty=true;LOBBY.pin=k;renderLobby()}}break;
     case'b-dec':{const k=ds.id;const v=BUILD.list[k]||0;if(v>0){if(v===1)delete BUILD.list[k];else BUILD.list[k]=v-1;BUILD.dirty=true;LOBBY.pin=k;renderLobby()}}break;
