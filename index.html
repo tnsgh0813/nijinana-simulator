@@ -18,9 +18,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Noto+Sans+JP:wght@500;700;900&display=swap">
-<script>window.NJ_BUILD="202610242327";window.NJ_NOTES=["설정·덱(게스트)·로비 선택이 저장되지 않던 문제 수정"];</script>
-<script src="config.js?v=202610242327"></script>
-<script src="fb.js?v=202610242327"></script>
+<script>window.NJ_BUILD="202610242336";window.NJ_NOTES=["화면 비율에 맞춰 게임 판 폭이 바뀜 — 폴드·태블릿·16:10 화면에서 카드와 필드가 더 크게 보임", "터치 화면: 카드 설명 창이 작아지고, 누른 카드를 가리지 않는 쪽에 뜸", "설명 창 위를 눌러도 아래 카드가 눌리고, 빈 곳을 누르면 닫힘", "카드를 길게 누르면 선택하지 않고 설명만 보기", "설정 → 화면에 '카드 정보 창(자동·크게·간단히)' 추가", "설정·덱(게스트)·로비 선택이 저장되지 않던 문제 수정"];</script>
+<script src="config.js?v=202610242336"></script>
+<script src="fb.js?v=202610242336"></script>
 </head>
 <body>
 <style>
@@ -1303,6 +1303,47 @@ button,a,[role=button]{-webkit-tap-highlight-color:transparent}
 .ntf input,.ntf textarea{font:inherit;font-size:14px;padding:9px 12px;border-radius:10px;border:1.5px solid rgba(120,90,140,.25);background:#fff;color:var(--ink);resize:vertical;user-select:text;-webkit-user-select:text}
 .ntf input:focus,.ntf textarea:focus{outline:none;border-color:var(--accent)}
 @container lb (max-width:760px){.upd-bar{margin:8px 16px 0}.upd-bar .ub-t{flex-direction:column;gap:0}.home-notice{margin:0 16px 10px}}
+
+/* ---------- 화면 비율에 맞춘 게임 판 폭 (--sw 1240~1600 · --dx = 줄어든 폭의 절반) ---------- */
+.arc.a1,.arc.a2{left:calc(250px + var(--dx,0px))}
+.z-field{width:calc(1240px + var(--DD,0px))}
+.z-set.p0,.z-stage.p1{left:calc(470px + var(--dx,0px))}
+.z-set.p1,.z-stage.p0{left:calc(1006px + var(--dx,0px))}
+.z-ch.p0,.z-ch.p1{left:calc(712px + var(--dx,0px))}
+.z-cl.p1{left:calc(1448px + var(--DD,0px))}
+.z-niji{width:var(--njw,428px)}
+.z-niji.p1{left:calc(var(--sw,1600px) - 28px - var(--njw,428px))}
+.z-deck.p0,.z-log.p0{left:calc(1478px + var(--DD,0px))}
+#myHand{left:calc((var(--sw,1600px) - var(--hw,800px)) / 2);width:var(--hw,800px)}
+#oppHand{left:calc(630px + var(--dx,0px))}
+#centerbar{width:calc(1320px + var(--DD,0px))}
+#ctray{left:calc(320px + var(--dx,0px))}
+#tray{left:calc(490px + var(--dx,0px))}
+#csheet{width:calc(1300px + var(--DD,0px))}
+#badge1{right:calc(980px + var(--dx,0px))}
+#ticker{left:calc(1146px + var(--dx,0px));width:calc(316px + var(--dx,0px))}
+#stage.narrow #badge1{right:auto;left:20px;top:74px}
+#stage.narrow2 #ticker{display:none}
+.fxsvg,.fxbanner,.fxclash,.fxintro,.fxevent,.fxend{width:var(--sw,1600px)}
+.fxend .arc2{left:calc(500px + var(--dx,0px))}
+
+/* ---------- 카드 정보 창: 간단히(작은 화면·터치) · 위치 바꾸기 · 터치 통과 ---------- */
+#inspector.rt{left:auto;right:20px}
+#inspector.pass{pointer-events:none}
+#inspector.pass .x,#inspector.pass .ins-img{pointer-events:auto}
+#inspector.pass .x{width:34px;height:34px;font-size:20px;right:8px;top:8px}
+#inspector.mini{width:372px;padding:12px 14px;gap:0}
+#inspector.mini .ins-txt{padding-right:0}
+#inspector.mini .ins-name{font-size:17px;padding-right:118px;min-height:30px;display:flex;align-items:center}
+#inspector.mini .ins-meta{margin-top:4px;font-size:12px;gap:2px 10px}
+#inspector.mini .ins-meta>span:first-child{display:none}
+#inspector.mini .tags{margin-top:6px!important}
+#inspector.mini .ins-text{margin-top:8px;font-size:13px;line-height:1.55}
+#inspector.mini .ins-img{position:absolute;right:48px;top:10px;margin:0;cursor:pointer}
+#inspector.mini .ins-img .card,#inspector.mini .ins-img .chcard{display:none}
+#inspector.mini .ins-img .zhint{position:static;transform:none;display:block;font-size:12px;padding:6px 11px;box-shadow:none}
+#inspector.mini.pass .ins-img{right:50px;top:9px}
+#stage{-webkit-touch-callout:none}
 </style>
 
 <div id="app">
@@ -1553,6 +1594,7 @@ async function phase(name){G.phase=name;UI.att=null;UI.tgt=null;render();await s
 async function takeTurn(){
   const pid=G.cur,P=G.p[pid];
   G.turnNo++;P.turns++;P.once={};for(const c of P.field)c.once={};
+  UI.sel=null;if(TOUCH||UI.peek){UI.hover=null;UI.peek=false}
   log(`${G.turnNo}턴 · ${P.name}의 턴`,pid,'turn');render();await fx('turn',{pid});
   await phase('start');
   if(P.turns===1)log('첫 턴이라 스타트 페이즈를 건너뜀',pid);
@@ -2533,7 +2575,7 @@ function handleAct(a,el){
     case'rematch':if(mpLive()){goLobby();LOBBY.tab='play';LOBBY.mode='multi';renderLobby()}else startGame();break;
     case'zoom':showZoom(ds.id);break;
     case'zoomclose':$('#zoom').hidden=true;break;
-    case'closeinsp':UI.hover=null;UI.sel=null;UI.att=null;render();break;
+    case'closeinsp':UI.hover=null;UI.peek=false;UI.sel=null;UI.att=null;render();break;
     case'togglelog':UI.logOpen=!UI.logOpen;render();break;
     case'sndtoggle':setSndOn(!SND.on);break;
     case'speed':SPEED=SPEED<1?1:0.45;SET.ai=String(SPEED);saveSet();render();break;
@@ -2590,6 +2632,7 @@ document.addEventListener('focusin',e=>{
   if(!e.target.closest)return;
   if(SCREEN==='lobby'){const el=e.target.closest('[data-cid]');if(el){LOBBY.hover=el.dataset.cid;renderLobbyDetail()}return}
   if(!G)return;const el=e.target.closest('[data-uid],[data-cl]');if(!el)return;
+  try{if(!el.matches(':focus-visible'))return}catch(_){} // 터치·클릭으로 생긴 포커스는 무시 (키보드 이동일 때만 설명 표시)
   UI.hover=hoverKey(el);renderInspector();
 });
 
@@ -2698,7 +2741,7 @@ function clHTML(pid,x,i){
 }
 function zonesHTML(pid){
   const P=G.p[pid],p='p'+pid;
-  const fn=P.field.length,sn=fn;let fw=124,fg=10;const room=1240-60;
+  const fn=P.field.length,sn=fn;let fw=124,fg=10;const room=GW()-360-60;
   if(sn*fw+(sn-1)*fg>room){fg=6;fw=Math.floor((room-(sn-1)*fg)/sn)}
   const fs=Math.min(1.33,(fw-4)/88);
   let slots='';for(let i=0;i<sn;i++){const c=P.field[i];
@@ -2727,10 +2770,10 @@ function handBubble(c){
 }
 function myHandHTML(){
   const H=G.p[0].hand;const n=H.length;if(!n)return'<span class="hempty">손패 없음</span>';
-  const CW=93;const step=n>1?Math.min(98,640/(n-1)):0;let nw=0;
-  return H.map((c,i)=>{const o=i-(n-1)/2;const x=400+o*step-CW/2;const r=o*2.4;const y=o*o*1.5;
+  const CW=93;const HW=LAYOUT.hw||800,HL=(GW()-HW)/2,spr=640*HW/800;const step=n>1?Math.min(98,spr/(n-1)):0;let nw=0;
+  return H.map((c,i)=>{const o=i-(n-1)/2;const x=HW/2+o*step-CW/2;const r=o*2.4;const y=o*o*1.5;
     const sel=UI.sel===c.uid&&!UI.pending&&!(DRAGP&&DRAGP.on);
-    if(FXON()&&!SEEN.h0.has(c.uid)&&!ANIM.has('h'+c.uid)){{const fx0=SEEN.dealCenter?800:1520,fy0=SEEN.dealCenter?450:533;mark('h'+c.uid,'deal',SEEN.dealCenter?620:540,nw*(SEEN.dealCenter?80:95),`--dx:${(fx0-46-400-x).toFixed(0)}px;--dy:${(fy0-66-764)}px;`)}nw++}
+    if(FXON()&&!SEEN.h0.has(c.uid)&&!ANIM.has('h'+c.uid)){{const fx0=SEEN.dealCenter?GW()/2:GW()-80,fy0=SEEN.dealCenter?450:533;mark('h'+c.uid,'deal',SEEN.dealCenter?620:540,nw*(SEEN.dealCenter?80:95),`--dx:${(fx0-46-HL-x).toFixed(0)}px;--dy:${(fy0-66-764)}px;`)}nw++}
     const a=animOf('h'+c.uid);
     return`<div class="hcard${sel?' up':''}${a?' '+a.cls:''}${DRAGP&&DRAGP.on&&DRAGP.c===c?' dragging':''}" style="--x:${x.toFixed(1)}px;--y:${y.toFixed(1)}px;--r:${r.toFixed(2)}deg;z-index:${sel?50:i+1};${a?a.vars+'animation-delay:'+a.delay+'ms':''}">${cardHTML(c)}${sel?handBubble(c):''}</div>`}).join('');
 }
@@ -2770,7 +2813,7 @@ function centerHTML(){
   else if(UI.att&&UI.tgt){const pr=predict(UI.att,UI.tgt);t=pr.title;sub=pr.sub;btns='<button class="btn primary" data-act="atkgo">공격!</button><button class="btn" data-act="cancel">다시 고르기</button>'}
   else if(UI.att){t=`${nm(UI.att)} (파워 ${power(UI.att)})의 공격 대상 선택`;sub=`대상을 누르거나 라이버를 대상까지 드래그 · 가로 라이버 = 배틀 · 상대 컬러 라인 = 컬러 콜 (위치는 다음 창에서 선택)${UI.att.noCC?' (이 라이버는 이번 턴 컬러 콜 불가)':''}`;btns='<button class="btn" data-act="cancel">취소</button>'}
   else if(UI.phaseRes&&!UI.busy&&mine){
-    const h={main:['손패 플레이 또는 채널·스테이지 기동 효과 사용','파란 테두리 = 플레이 가능 · 카드에 마우스를 올리면 효과 표시'],
+    const h={main:['손패 플레이 또는 채널·스테이지 기동 효과 사용','파란 테두리 = 플레이 가능 · '+(TOUCH?'카드를 길게 누르면 효과만 보기':'카드에 마우스를 올리면 효과 표시')],
       action:['공격할 세로 라이버 선택','노란 테두리 = 공격 가능 · 대상은 상대 가로 라이버 또는 컬러 카드'],
       set:['손패 1장을 세트 에어리어에 뒷면으로 세트','기존 세트 카드는 로그로 · 세트한 카드는 다음 메인 페이즈부터 플레이 가능']}[G.phase]||['',''];
     t=h[0];sub=h[1];
@@ -2910,7 +2953,31 @@ function renderInspector(){
   const html=t==null?'':inspHTML(t);
   if(!html){el.hidden=true;return}
   el.innerHTML=`<button class="x" data-act="closeinsp" aria-label="닫기">×</button>`+html;el.hidden=false;
+  const mini=SET.insp==='mini'||(SET.insp!=='full'&&(TOUCH||STAGE_S<0.62));
+  el.classList.toggle('mini',mini);el.classList.toggle('pass',TOUCH);
+  // 설명하는 카드를 가리지 않게: 카드가 창 자리(왼쪽 위)에 있으면 오른쪽으로 옮김. 터치에서는 항상 카드 반대쪽
+  let right=false;const a=inspAnchor(t);
+  if(a){const r=stageRect(a);if(r){const cx=r.x+r.w/2,pw=el.offsetWidth*(parseFloat(getComputedStyle(el).zoom)||1);
+    right=TOUCH?cx<GW()/2:(cx<pw+60&&r.y<66+el.offsetHeight*(parseFloat(getComputedStyle(el).zoom)||1)+20)}}
+  el.classList.toggle('rt',right);
 }
+function inspAnchor(t){if(t==null)return null;
+  if(typeof t==='string'&&t.startsWith('cl:')){const[,o,i]=t.split(':');return document.querySelector(`#stage [data-cl="${i}"][data-owner="${o}"]`)}
+  return document.querySelector(`#stage [data-uid="${t}"]:not(#inspector *)`)}
+/* 터치: 카드를 길게 누르면 설명만 보기 (선택·플레이는 안 됨). 다음에 아무 데나 누르면 닫힘 */
+let TOUCH=false;try{TOUCH=matchMedia('(hover:none)').matches}catch(e){}
+const LP={t:0,x:0,y:0,fired:false};
+document.addEventListener('pointerdown',e=>{
+  TOUCH=e.pointerType!=='mouse';
+  if(SCREEN!=='game'||!G)return;
+  if(UI.peek&&!e.target.closest('#inspector')){UI.peek=false;UI.hover=null;renderInspector()}
+  clearTimeout(LP.t);LP.fired=false;if(e.pointerType==='mouse')return;
+  const el=e.target.closest('#stage [data-uid],#stage [data-cl]');if(!el||el.closest('#inspector,#modal,#zoom'))return;
+  LP.x=e.clientX;LP.y=e.clientY;const k=hoverKey(el);
+  LP.t=setTimeout(()=>{LP.fired=true;UI.hover=k;UI.peek=true;renderInspector();try{navigator.vibrate&&navigator.vibrate(12)}catch(_){}},430)},true);
+document.addEventListener('pointermove',e=>{if(LP.t&&Math.hypot(e.clientX-LP.x,e.clientY-LP.y)>10){clearTimeout(LP.t);LP.t=0}},true);
+document.addEventListener('pointerup',()=>{clearTimeout(LP.t);LP.t=0;if(LP.fired){LP.fired=false;NOCLICK=true;setTimeout(()=>{NOCLICK=false},400)}},true);
+document.addEventListener('pointercancel',()=>{clearTimeout(LP.t);LP.t=0},true);
 function badgeHTML(pid){
   const P=G.p[pid];const act=G.cur===pid&&G.phase!=='setup'&&G.winner==null;
   return`<span class="dot"></span><b>${pid===0?'나':esc(OPP())}</b><span class="dk">${esc(P.deckShort||'')}</span><span class="nj">니지 ${P.niji.length}/7</span>${act?`<em>${pid===0?'내 차례':mpLive()?'상대 차례':'AI 차례'}</em>`:''}`;
@@ -2973,7 +3040,7 @@ function showRules(){
     <h3>준비 · 덱</h3><ul><li>채널 카드 1장 + 같은 클래스 메인 덱 50장 + 7색 컬러 카드(뒷면, 무작위 순서).</li><li>같은 카드는 4장까지. 한정 카드는 채널과 같은 #가 있어야 넣을 수 있다.</li><li>선공 5장, 후공 7장. 1회 다시 뽑을 수 있다.</li></ul>
     <h3>턴의 흐름</h3><ol><li><b>스타트</b> — 가로 라이버를 세로로. 손패가 5장이 될 때까지 드로우(5장 이상이면 1장).</li><li><b>메인</b> — 카드 플레이, 기동 효과. 레벨만큼의 카드를 손패·필드에서 로그로 보내는 게 코스트.</li><li><b>액션</b> — 세로 라이버로 공격 또는 컬러 콜. 행동한 라이버는 가로가 된다.</li><li><b>세트</b> — 손패 1장까지 세트 에어리어에 뒷면으로.</li><li><b>엔드</b> — "이번 턴 동안" 효과가 끝난다.</li></ol></div>
    <div><h3>배틀 · 컬러 콜</h3><ul><li>공격 대상은 상대의 가로 라이버 또는 컬러 카드.</li><li>배틀은 파워가 큰 쪽이 승리, 진 쪽은 로그로. 같으면 둘 다 로그로.</li><li>컬러 콜: 상대 컬러 카드 1장을 앞면으로 하고, 공격 라이버가 그 색을 가지고 있으면 그 카드는 상대의 니지 에리어로. 아니면 앞면인 채로 남는다.</li><li>블로커: 세로 상태에서 가로로 눕혀 상대의 공격·컬러 콜을 중지하고 대신 배틀. SP 콜은 막을 수 없다.</li><li>채널 트리거: 상대 턴 중 지정 색의 내 컬러 카드가 앞면이 되면 발동.</li></ul>
-    <h3>조작</h3><ul><li>카드에 마우스를 올리면 왼쪽 위에 효과 표시. 터치 화면은 한 번 누르면 표시.</li><li>손패 카드를 누르면 위에 "플레이" 버튼. 한 번 더 눌러도 플레이. 필드로 드래그해도 플레이.</li><li>코스트가 있는 카드는 아래에서 올라오는 판에서 로그로 보낼 카드를 고른다.</li><li>액션 페이즈: 세로 라이버 → 대상 순서로 누르거나, 라이버를 대상까지 드래그.</li><li>로그 더미를 누르면 로그의 카드 확인.</li></ul></div>
+    <h3>조작</h3><ul><li>카드에 마우스를 올리면 효과 표시. 터치 화면은 한 번 누르면 표시되고, <b>길게 누르면</b> 선택하지 않고 효과만 봄. 설명 창은 누른 카드를 가리지 않는 쪽에 뜨고, 창 위를 눌러도 아래 카드가 눌림.</li><li>손패 카드를 누르면 위에 "플레이" 버튼. 한 번 더 눌러도 플레이. 필드로 드래그해도 플레이.</li><li>코스트가 있는 카드는 아래에서 올라오는 판에서 로그로 보낼 카드를 고른다.</li><li>액션 페이즈: 세로 라이버 → 대상 순서로 누르거나, 라이버를 대상까지 드래그.</li><li>로그 더미를 누르면 로그의 카드 확인.</li></ul></div>
    <div><h3>이 시뮬레이터의 룰 (공식 룰 공개 전 임시)</h3><ul>
     <li>필드에 놓을 수 있는 라이버 수는 제한 없음.</li>
     <li>첫 턴은 선공·후공 모두 스타트 페이즈를 건너뛰고, 선공의 첫 턴은 액션 페이즈도 건너뛴다.</li>
@@ -2997,9 +3064,9 @@ function goLobby(){
   TOKEN.dead=true;SCREEN='lobby';fit();hideModal();fxReset();if(UI)UI.logOpen=false;renderInspector();if(CD_PENDING){CD_PENDING=false;applyCardData()}renderLobby();
 }
 /* ================= SETTINGS ================= */
-const SET_DEF={fx:'normal',shake:true,banner:true,ai:'1',hand:'m',font:'m'};
+const SET_DEF={fx:'normal',shake:true,banner:true,ai:'1',hand:'m',font:'m',insp:'auto'};
 const SETOPT={fx:[['normal','보통'],['fast','빠르게'],['faster','매우 빠르게'],['off','끄기']],ai:[['1','보통'],['0.45','빠르게']],
-  hand:[['s','작게'],['m','보통'],['l','크게'],['xl','아주 크게']],font:[['s','작게'],['m','보통'],['l','크게'],['xl','아주 크게']]};
+  insp:[['auto','자동'],['full','크게'],['mini','간단히']],hand:[['s','작게'],['m','보통'],['l','크게'],['xl','아주 크게']],font:[['s','작게'],['m','보통'],['l','크게'],['xl','아주 크게']]};
 const SET=(()=>{const v=lsGet('nijinana.set',null);const o=Object.assign({},SET_DEF,v&&typeof v==='object'?v:{});
   for(const k of Object.keys(SETOPT))if(!SETOPT[k].some(x=>x[0]===o[k]))o[k]=SET_DEF[k];
   for(const k of ['shake','banner'])o[k]=o[k]!==false;
@@ -3033,6 +3100,7 @@ function settingsHTML(){
      <div class="sprev-ctl">
       ${row('손패 카드 크기','게임 중 내 손패 카드 크기',seg('hand'))}
       ${row('글씨 크기','로비·카드 설명·진행 기록·창의 글씨 크기',seg('font'))}
+      ${row('카드 정보 창','카드를 누르면 뜨는 설명 창. 자동 = 터치 화면·작은 화면에서는 간단히 · 카드를 길게 누르면 언제든 설명 보기',seg('insp'))}
      </div>
      <div class="sprev" aria-hidden="true"><div class="sprev-card" style="--ps:${(1.5*(HSK[SET.hand]||1)).toFixed(3)}">${CARDS['SD01-002']?cardHTML(viewCard('SD01-002'),{plain:true}):''}</div><small>손패 미리보기</small></div>
     </div>
@@ -4210,7 +4278,7 @@ function fxArrow(a,b,col){
   if(!FXON()||RM||!a||!b)return;
   const p0=center(a),p1=center(b);const mx=(p0.x+p1.x)/2+(p1.y-p0.y)*.14,my=(p0.y+p1.y)/2-(p1.x-p0.x)*.14;
   const id='g'+Math.random().toString(36).slice(2,8);
-  const el=fxEl(`<svg class="fxsvg" viewBox="0 0 1600 900"><defs><linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="${p0.x}" y1="${p0.y}" x2="${p1.x}" y2="${p1.y}"><stop offset="0" stop-color="#ffffff" stop-opacity=".15"/><stop offset=".45" stop-color="${col}"/><stop offset="1" stop-color="#ffd166"/></linearGradient></defs>
+  const el=fxEl(`<svg class="fxsvg" viewBox="0 0 ${GW()} 900"><defs><linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="${p0.x}" y1="${p0.y}" x2="${p1.x}" y2="${p1.y}"><stop offset="0" stop-color="#ffffff" stop-opacity=".15"/><stop offset=".45" stop-color="${col}"/><stop offset="1" stop-color="#ffd166"/></linearGradient></defs>
     <path d="M${p0.x.toFixed(1)},${p0.y.toFixed(1)} Q${mx.toFixed(1)},${my.toFixed(1)} ${p1.x.toFixed(1)},${p1.y.toFixed(1)}" fill="none" stroke="url(#${id})" stroke-width="11" stroke-linecap="round" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100" style="filter:drop-shadow(0 0 8px ${col})"/></svg>`,'');
   const path=el.querySelector('path');
   anim(path,[{strokeDashoffset:100},{strokeDashoffset:0}],{duration:fxT(300),easing:'ease-out',fill:'forwards'});
@@ -4262,7 +4330,7 @@ async function fx(kind,o={}){
       // 뒷면으로 들어와서 앞면으로 뒤집기
       el.querySelectorAll('.fl-b').forEach(b=>anim(b,[{transform:'rotateY(0deg)',opacity:1},{transform:'rotateY(0deg)',opacity:1,offset:.3},{transform:'rotateY(90deg)',opacity:1,offset:.37},{transform:'rotateY(90deg)',opacity:0,offset:.371},{transform:'rotateY(90deg)',opacity:0}],{duration:d,fill:'forwards'}));
       el.querySelectorAll('.fl-f').forEach(f=>anim(f,[{transform:'rotateY(90deg)'},{transform:'rotateY(90deg)',offset:.37},{transform:'rotateY(0deg)',offset:.44},{transform:'rotateY(0deg)'}],{duration:d,fill:'forwards'}));
-      setTimeout(()=>{fxRing({x:800,y:420},'',300);fxSparks({x:800,y:420},20,220)},Math.round(d*.27*fxk()));
+      setTimeout(()=>{fxRing({x:GW()/2,y:420},'',300);fxSparks({x:GW()/2,y:420},20,220)},Math.round(d*.27*fxk()));
       await fxWait(Math.round(d*.92));break}
     case'sp':await fxBanner('SP 콜!','블로커로 막을 수 없는 컬러 콜','sp',800);break;
     case'event':{
@@ -4296,7 +4364,7 @@ async function fx(kind,o={}){
       anim(R,[{transform:'translateX(380px)'},{transform:'translateX(-22px)',offset:.32},{transform:'none',offset:.42},{transform:'none'}],{duration:d,easing:'ease-out',fill:'forwards'});
       anim(V,[{transform:'scale(0)'},{transform:'scale(0)',offset:.3},{transform:'scale(1.6)',offset:.38},{transform:'scale(1)',offset:.5},{transform:'scale(1)'}],{duration:d,fill:'forwards'});
       await fxWait(Math.round(d*.4));
-      fxRing({x:800,y:450},'',280);fxSparks({x:800,y:450},18,210);
+      fxRing({x:GW()/2,y:450},'',280);fxSparks({x:GW()/2,y:450},18,210);
       if(pm>po){L.classList.add('win');R.classList.add('lose')}else if(po>pm){R.classList.add('win');L.classList.add('lose')}else{L.classList.add('lose');R.classList.add('lose')}
       el.querySelectorAll('.side.lose').forEach(s=>anim(s,[{transform:'none'},{transform:'translateX(-9px)',offset:.15},{transform:'translateX(9px)',offset:.3},{transform:'translateY(34px) rotate(7deg)',opacity:.35}],{duration:Math.round(d*.42),fill:'forwards'}));
       await fxWait(Math.round(d*.5));break}
@@ -4330,7 +4398,7 @@ async function fx(kind,o={}){
         if(TOKEN.dead)throw new Abort();
         kill(ch);fxRing(t,'',140);fxSparks(t,16,120)}
       NJHIDE.delete(pid+color);mark('nj'+pid+color,'nj',1000);render();
-      fxFloatAt({x:800,y:pid===0?560:340},`컬러 콜 성공! ${pid===0?'내':OPP()} 니지 에리어 ${G.p[pid].niji.length}/7`,'good');
+      fxFloatAt({x:GW()/2,y:pid===0?560:340},`컬러 콜 성공! ${pid===0?'내':OPP()} 니지 에리어 ${G.p[pid].niji.length}/7`,'good');
       await fxWait(fxT(520));break}
     case'miss':{
       const r=stageRect(document.querySelector(`.z-cl.p${o.owner} [data-cl="${o.idx}"]`));if(r)fxFloatAt(center(r),'색 불일치','miss');
@@ -4348,7 +4416,7 @@ async function fxEnd(w){
   const b=el.querySelector('b');
   anim(b,me?[{transform:'scale(.3)',opacity:0},{transform:'scale(1.15)',opacity:1,offset:.6},{transform:'scale(1)',opacity:1}]:[{transform:'translateY(-90px)',opacity:0},{transform:'translateY(10px)',opacity:1,offset:.7},{transform:'none',opacity:1}],{duration:850,easing:'ease-out',fill:'forwards'});
   if(me){const arc=el.querySelector('.arc2');anim(arc,[{transform:'rotate(-120deg) scale(.6)',opacity:0},{transform:'rotate(0) scale(1)',opacity:.85}],{duration:1300,easing:'ease-out',fill:'forwards'});
-    for(let i=0;i<80;i++){const c=fxEl('','fxdot');c.style.background=`var(--${COLORS[i%7]})`;const x=Math.random()*1600;
+    for(let i=0;i<80;i++){const c=fxEl('','fxdot');c.style.background=`var(--${COLORS[i%7]})`;const x=Math.random()*GW();
       anim(c,[{transform:`translate(${x}px,-30px) rotate(0)`},{transform:`translate(${x+(Math.random()-.5)*240}px,940px) rotate(${Math.random()*900|0}deg)`}],{duration:1800+Math.random()*1500,delay:Math.random()*800,easing:'cubic-bezier(.3,.1,.6,1)',fill:'backwards'}).then(()=>kill(c))}}
   await new Promise(r=>setTimeout(r,1900));
   anim(el,[{opacity:1},{opacity:0}],{duration:450,fill:'forwards'}).then(()=>kill(el));
@@ -4370,7 +4438,7 @@ function mullHTML(){
   const P=G.p[0];
   return`<h2>첫 손패</h2><p>${G.first===0?'선공':'후공'} · ${P.hand.length}장 · 다시 뽑기 1회 가능</p>
    <div class="mrow">${P.hand.map((c,i)=>cardHTML(c).replace(/ (playable|ready|picked)/g,'').replace('class="card ',`style="animation-delay:${i*70}ms" class="card `)).join('')}</div>
-   <p style="font-size:13px;opacity:.85">카드에 마우스를 올리거나 누르면 왼쪽 위에 효과 표시</p>
+   <p style="font-size:13px;opacity:.85">${TOUCH?'카드를 길게 누르면 효과 표시':'카드에 마우스를 올리거나 누르면 효과 표시'}</p>
    <div class="mbtns"><button class="btn" data-act="yes">다시 뽑기</button><button class="btn primary" data-act="no">${UI.mull?'이대로 준비':'이대로 시작'}</button></div>
    ${UI.mull?'<p class="mopp"></p>':''}`;
 }
@@ -4403,7 +4471,7 @@ document.addEventListener('pointermove',e=>{
   if(!DRAGA.on){if(Math.hypot(e.clientX-DRAGA.sx,e.clientY-DRAGA.sy)<8)return;
     DRAGA.on=true;UI.att=DRAGA.c;UI.tgt=null;UI.sel=DRAGA.c.uid;$('#stage').classList.add('dragatk');render();
     DRAGA.from=center(stageRect(cardEl(DRAGA.c.uid))||{x:0,y:0,w:0,h:0});
-    DRAGA.arrow=fxEl(`<svg class="fxsvg" viewBox="0 0 1600 900"><path fill="none" stroke="#ff4f8b" stroke-width="10" stroke-linecap="round" stroke-dasharray="2 16" style="filter:drop-shadow(0 0 6px #ff4f8b)"/><circle r="16" fill="none" stroke="#ffd166" stroke-width="5"/></svg>`,'');
+    DRAGA.arrow=fxEl(`<svg class="fxsvg" viewBox="0 0 ${GW()} 900"><path fill="none" stroke="#ff4f8b" stroke-width="10" stroke-linecap="round" stroke-dasharray="2 16" style="filter:drop-shadow(0 0 6px #ff4f8b)"/><circle r="16" fill="none" stroke="#ffd166" stroke-width="5"/></svg>`,'');
     DRAGA.arrow.style.zIndex='5'}
   const pt=stagePt(e),f=DRAGA.from;const mx=(f.x+pt.x)/2,my=Math.min(f.y,pt.y)-60;
   const svg=DRAGA.arrow&&DRAGA.arrow.firstChild;if(svg){svg.querySelector('path').setAttribute('d',`M${f.x},${f.y} Q${mx},${my} ${pt.x},${pt.y}`);const c=svg.querySelector('circle');c.setAttribute('cx',pt.x);c.setAttribute('cy',pt.y)}
@@ -4463,17 +4531,23 @@ document.addEventListener('pointercancel',e=>{if(DRAGP)endDragP(e,false)});
 /* 화면 맞춤: 게임 판은 언제나 1600×900을 비율 그대로 축소·확대.
    로비는 데스크톱 크기(가로 1200·세로 660 이상)에서만 1600×900, 그보다 작은 화면(폰·폴드·태블릿)에서는
    실제 화면 크기를 그대로 써서 글씨가 작아지지 않게 하고, 배치는 #lobby 컨테이너 쿼리로 다시 짠다. */
-const LAYOUT={mode:'desk',w:1600,h:900};
+const LAYOUT={mode:'desk',w:1600,h:900,gw:1600,hw:800};
+const GW=()=>LAYOUT.gw||1600; // 게임 판 폭 (1240~1600)
 const ROT={dismiss:false};
 function fit(){
   const a=$('#app');if(!a)return;const cs=getComputedStyle(a);
   const pl=parseFloat(cs.paddingLeft)||0,pr=parseFloat(cs.paddingRight)||0,pt=parseFloat(cs.paddingTop)||0,pb=parseFloat(cs.paddingBottom)||0;
   const w=a.clientWidth-pl-pr,h=a.clientHeight-pt-pb;if(w<=0||h<=0)return;
   const desk=w>=1200&&h>=660;let W=1600,H=900,s;const prev=LAYOUT.mode+'|'+Math.round(LAYOUT.w);
-  if(SCREEN!=='game'&&!desk){s=Math.min(1,w/360,h/420);W=w/s;H=h/s;LAYOUT.mode='resp'}else{s=Math.min(w/1600,h/900);LAYOUT.mode='desk'}
-  LAYOUT.w=W;LAYOUT.h=H;STAGE_S=s;
+  if(SCREEN!=='game'&&!desk){s=Math.min(1,w/360,h/420);W=w/s;H=h/s;LAYOUT.mode='resp'}
+  else{ // 게임 판: 세로가 넉넉한 화면(폴드·태블릿·4:3)에서는 판 폭을 1240까지 줄여서 그만큼 카드·필드가 크게 보이게
+    if(SCREEN==='game')W=Math.round(Math.max(1240,Math.min(1600,900*w/h)));s=Math.min(w/W,h/900);LAYOUT.mode='desk'}
+  const gw0=LAYOUT.gw;LAYOUT.w=W;LAYOUT.h=H;STAGE_S=s;if(LAYOUT.mode==='desk')LAYOUT.gw=W;
   const st=$('#stage');st.style.width=W+'px';st.style.height=H+'px';st.style.setProperty('--sw',W+'px');st.style.setProperty('--sh',H+'px');
   st.style.transform=`translate(${(pl+(w-W*s)/2).toFixed(1)}px,${(pt+(h-H*s)/2).toFixed(1)}px) scale(${s.toFixed(4)})`;
+  {const D=LAYOUT.mode==='desk'?W-1600:0;st.style.setProperty('--dx',(D/2)+'px');st.style.setProperty('--DD',D+'px');
+   st.style.setProperty('--njw',Math.round(428+D*0.45)+'px');LAYOUT.hw=Math.round(800+D*0.5);st.style.setProperty('--hw',LAYOUT.hw+'px');
+   st.classList.toggle('narrow',D<-80);st.classList.toggle('narrow2',D<-220)}
   st.classList.toggle('resp',LAYOUT.mode==='resp');st.classList.toggle('inlobby',SCREEN!=='game');
   // 크게 보기(줌) 크기: 작은 화면에서는 화면 안에 들어오게
   st.style.setProperty('--zs',Math.min(7.6,(W-48)/62,(H*0.58)/88).toFixed(3));st.style.setProperty('--zcs',Math.min(3.8,(W-48)/176,(H*0.5)/126).toFixed(3));
@@ -4482,6 +4556,7 @@ function fit(){
   st.style.setProperty('--mob',mob.toFixed(3));st.style.setProperty('--mob2',Math.min(mob,1.25).toFixed(3));st.style.setProperty('--hsm',mob>1.2?'1.15':'1');
   const r=$('#rotate');if(r)r.hidden=!(SCREEN==='game'&&h>w*1.05&&!ROT.dismiss);
   if(SCREEN==='lobby'&&prev!==LAYOUT.mode+'|'+Math.round(W)&&typeof renderLobby==='function')renderLobby();
+  if(SCREEN==='game'&&gw0!==LAYOUT.gw&&G&&typeof render==='function')render();
 }
 const lbNoDetail=()=>LAYOUT.mode==='resp'&&LAYOUT.w/(FSK[SET.font]||1)<1200; // 카드 상세 칸을 숨기고 탭하면 크게 보기
 async function goLandscape(){
