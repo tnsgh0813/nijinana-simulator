@@ -18,8 +18,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Noto+Sans+JP:wght@500;700;900&display=swap">
-<script src="config.js?v=202610241426"></script>
-<script src="fb.js?v=202610241426"></script>
+<script src="config.js?v=202610241805"></script>
+<script src="fb.js?v=202610241805"></script>
 </head>
 <body>
 <style>
@@ -1393,7 +1393,8 @@ const PNAME=Object.fromEntries(PHASES);
 
 /* ================= UTIL ================= */
 const $=s=>document.querySelector(s);
-const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+let RNG=Math.random; // 멀티 대전에서는 양쪽이 같은 시드의 난수를 씀
+const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=RNG()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
 const D=c=>CARDS[c.id];
 const nm=c=>D(c).name;
 const hasTag=(c,t)=>(D(c).tags||[]).includes(t);
@@ -1428,12 +1429,18 @@ function log(msg,pid,kind){G.logs.unshift({msg,pid,kind});if(G.logs.length>300)G
 /* ================= ENGINE ================= */
 function newGame(cfg){
   TOKEN.dead=true; TOKEN={dead:false}; uidc=0;
-  const mk=(pid,deckId,ai)=>{const dk=getDeck(deckId);const deck=[];
+  RNG=cfg.mp?mulberry32(cfg.mp.seed>>>0):Math.random;
+  const mk=(pid,deckId,ai)=>{const dk=deckId&&typeof deckId==='object'?deckId:getDeck(deckId);const deck=[];
     for(const [id,n] of Object.entries(dk.list))for(let i=0;i<n;i++)deck.push(mkCard(id,pid));
     shuffle(deck);
     return{pid,name:ai&&pid===1?'AI':(ai?'AI-1':'나'),ai,deckId,deckShort:dk.short,deck,hand:[],field:[],log:[],stage:null,under:[],chUnder:[],set:null,
       cl:shuffle(COLORS.map(c=>({color:c,up:false,gone:false}))),niji:[],ch:mkCard(dk.ch,pid),once:{},turns:0}};
-  G={p:[mk(0,cfg.me,!!cfg.ai0),mk(1,cfg.opp,true)],cur:0,first:0,turnNo:0,phase:'setup',winner:null,reason:'',logs:[],reveal:null,cfg};
+  let ps;
+  if(cfg.mp){ // 카드 uid·셔플 순서를 양쪽이 같게: 항상 방장 → 참가자 순으로 만든다
+    let a,b;if(cfg.mp.role==='host'){a=mk(0,cfg.me,false);b=mk(1,cfg.opp,false)}else{b=mk(1,cfg.opp,false);a=mk(0,cfg.me,false)}
+    a.name='나';b.name=cfg.mp.oppName||'상대';b.remote=true;ps=[a,b];
+  }else ps=[mk(0,cfg.me,!!cfg.ai0),mk(1,cfg.opp,true)];
+  G={p:ps,cur:0,first:0,turnNo:0,phase:'setup',winner:null,reason:'',logs:[],reveal:null,cfg};
   UI={sel:null,pending:null,att:null,phaseRes:null,busy:false};
   const first=cfg.first==='me'?0:cfg.first==='ai'?1:(Math.random()<.5?0:1);
   G.first=first;G.cur=first;
@@ -1442,12 +1449,18 @@ function newGame(cfg){
 }
 async function ask(pid,req){
   if(G.p[pid].ai){await sleep(320);return req.ai()}
+  if(G.p[pid].remote){ // 상대의 선택을 기다림
+    UI.remoteWait=true;render();const m=await mpRecv();UI.remoteWait=false;render();
+    if(!m||m.t!=='ans'||!mpValidAns(req,m.v)){mpEnd('상대의 응답이 규칙에 맞지 않아 대전을 멈춤',null);throw new Abort()}
+    return m.v;
+  }
   const t=TOKEN;
   const v=await new Promise(res=>{UI.pending={pid,req,res,sel:[]};render()});
   if(t.dead)throw new Abort();
+  if(G.cfg.mp&&!req.local)mpSend({t:'ans',v:v===undefined?null:v});
   return v;
 }
-function humanWait(){const t=TOKEN;return new Promise(res=>{UI.phaseRes=res;render()}).then(()=>{if(t.dead)throw new Abort()})}
+function humanWait(){const t=TOKEN;return new Promise(res=>{UI.phaseRes=()=>{if(G.cfg.mp)mpSend({t:'next'});res()};render()}).then(()=>{if(t.dead)throw new Abort()})}
 function winGame(pid,reason){
   if(G.winner!=null)throw new GameOver();
   G.winner=pid;G.reason=reason;log(`${G.p[pid].name} 승리 — ${reason}`,pid,'win');
@@ -1497,17 +1510,18 @@ async function takeTurn(){
   }
   render();await sleep(300);
   await phase('main');
-  if(P.ai)await aiMain(pid);else await humanWait();
+  if(P.ai)await aiMain(pid);else if(P.remote)await mpRemoteTurn(pid);else await humanWait();
   await phase('action');
   if(P.turns===1&&pid===G.first)log('선공 첫 턴이라 액션 페이즈를 건너뜀',pid);
-  else if(P.ai)await aiAction(pid);else await humanWait();
+  else if(P.ai)await aiAction(pid);else if(P.remote)await mpRemoteTurn(pid);else await humanWait();
   await phase('set');
   if(!P.hand.length){log('패가 없어 세트 페이즈를 건너뜀',pid);render();await sleep(250)}
-  else if(P.ai)await aiSet(pid);else await humanWait();
+  else if(P.ai)await aiSet(pid);else if(P.remote)await mpRemoteTurn(pid);else await humanWait();
   await phase('end');
   // 【자신의 턴 종료 시】 효과 (채널·스테이지·필드)
   for(const src of [P.ch,P.stage,...P.field].filter(Boolean)){const e=EFF[src.id];if(e&&e.turnEnd&&(src===P.ch||src===P.stage||onField(src)))await e.turnEnd(pid,src)}
   for(const pl of G.p)for(const c of pl.field){c.buff=0;c.noCC=false}
+  mpTurnSync();
   render();await sleep(250);
 }
 
@@ -1522,6 +1536,7 @@ function playBlock(pid,c){
   return null;
 }
 async function doPlay(pid,c,payUids){
+  if(pid===0&&mpLive())mpSend({t:'cmd',c:'play',uid:c.uid,pay:[...payUids]});
   const P=G.p[pid],d=D(c);
   const fromSet=P.set===c;if(fromSet)P.set=null;else take(P.hand,c.uid);
   if(fromSet)log(`세트 에어리어의 카드를 공개`,pid);
@@ -1590,6 +1605,7 @@ function canActivate(pid,src){
 }
 async function activate(pid,src){
   if(!canActivate(pid,src))return;
+  if(pid===0&&mpLive())mpSend({t:'cmd',c:'act',src});
   const P=G.p[pid];const card=src==='ch'?P.ch:P.stage;P.once[src]=true;
   log(`${nm(card)} 기동 효과 사용`,pid);await EFF[card.id].act(pid);render();
 }
@@ -1603,6 +1619,7 @@ function attackTargets(pid,att){
   return t;
 }
 async function doAttack(pid,att,tg){
+  if(pid===0&&mpLive())mpSend({t:'cmd',c:'atk',att:att.uid,tg:tg.kind==='liver'?{kind:'liver',uid:tg.uid}:{kind:'color',idx:tg.idx}});
   const O=G.p[1-pid];const def=1-pid;
   att.tapped=true;
   const tCard=tg.kind==='liver'?byUid(tg.uid):null;
@@ -1997,6 +2014,7 @@ async function aiSet(pid){
   setCard(pid,best);
 }
 function setCard(pid,c){
+  if(pid===0&&mpLive())mpSend({t:'cmd',c:'set',uid:c.uid});
   const P=G.p[pid];take(P.hand,c.uid);
   if(P.set){P.log.push(P.set);log('기존 세트 카드를 로그에 두고 새 카드를 세트 에어리어에 놓음',pid)}
   else log('세트 에어리어에 카드 1장을 뒷면으로 놓음',pid);
@@ -2014,7 +2032,7 @@ async function humanPlay(c){
   let pay=[];
   if(d.lv>0){UI.sel=null;UI.hover=null;
     const opts=[...P.hand.filter(h=>h!==c),...P.field];
-    pay=await ask(0,{kind:'cards',uids:opts.map(x=>x.uid),min:d.lv,max:d.lv,cancelable:true,
+    pay=await ask(0,{kind:'cards',local:true,uids:opts.map(x=>x.uid),min:d.lv,max:d.lv,cancelable:true,
       cost:true,play:c.uid,fromSet:P.set===c,text:`${d.name} 코스트 지불: 로그로 보낼 카드 ${d.lv}장 선택`,
 });
     if(!pay)return;
@@ -2438,7 +2456,7 @@ function handleAct(a,el){
     case'rules':showRules();break;
     case'newgame':if(SCREEN==='game'&&G&&G.winner==null&&G.phase!=='setup')showLeave();else goLobby();break;
     case'golobby':goLobby();break;
-    case'rematch':startGame();break;
+    case'rematch':if(mpLive()){goLobby();LOBBY.tab='play';LOBBY.mode='multi';renderLobby()}else startGame();break;
     case'zoom':showZoom(ds.id);break;
     case'zoomclose':$('#zoom').hidden=true;break;
     case'closeinsp':UI.hover=null;UI.sel=null;UI.att=null;render();break;
@@ -2657,7 +2675,7 @@ function visibleOnBoard(u){
 function centerHTML(){
   const setup=G.phase==='setup';const mine=G.cur===0;const p=UI.pending;
   const phases=PHASES.map(([k,l])=>`<span class="ph ${!setup&&G.phase===k?'on':''}">${l.replace(' 페이즈','')}</span>`).join('');
-  const left=`<div class="cb-left"><span class="cb-turn ${setup?'setup':mine?'':'ai'}">${setup?'준비':`TURN ${G.turnNo} · ${mine?'나':'AI'}`}</span><div class="phases ${mine?'':'ai'}">${phases}</div></div>`;
+  const left=`<div class="cb-left"><span class="cb-turn ${setup?'setup':mine?'':'ai'}">${setup?'준비':`TURN ${G.turnNo} · ${mine?'나':esc(OPP())}`}</span><div class="phases ${mine?'':'ai'}">${phases}</div></div>`;
   let t='',sub='',btns='';
   if(G.winner!=null){t=G.winner===-1?'무승부':`${G.p[G.winner].name} 승리`;sub=G.reason;btns='<button class="btn" data-act="golobby">로비로</button><button class="btn primary" data-act="rematch">다시 대전</button>'}
   else if(p&&p.pid===0){
@@ -2685,8 +2703,10 @@ function centerHTML(){
     btns=`<button class="btn primary" data-act="next">${{main:'액션 페이즈로',action:'세트 페이즈로',set:'턴 종료'}[G.phase]||'다음'}</button>`;
   }
   else if(p&&p.pid===1)t='AI 응답 대기 중…';
+  else if(UI.remoteWait&&!mine)t=`${OPP()} 진행 중…`;
+  else if(UI.remoteWait)t=`${OPP()}의 선택을 기다리는 중…`;
   else if(setup)t='대전 준비 중';
-  else if(!mine)t='AI 진행 중…';
+  else if(!mine)t=`${OPP()} 진행 중…`;
   else if(UI.busy)t='처리 중…';
   return left+`<div class="cb-msg"><span class="t">${esc(t)}</span>${sub?`<small>${esc(sub)}</small>`:''}</div>`+(btns?`<div class="cb-btns">${btns}</div>`:'');
 }
@@ -2819,7 +2839,7 @@ function renderInspector(){
 }
 function badgeHTML(pid){
   const P=G.p[pid];const act=G.cur===pid&&G.phase!=='setup'&&G.winner==null;
-  return`<span class="dot"></span><b>${pid===0?'나':'AI'}</b><span class="dk">${esc(P.deckShort||'')}</span><span class="nj">니지 ${P.niji.length}/7</span>${act?`<em>${pid===0?'내 차례':'AI 차례'}</em>`:''}`;
+  return`<span class="dot"></span><b>${pid===0?'나':esc(OPP())}</b><span class="dk">${esc(P.deckShort||'')}</span><span class="nj">니지 ${P.niji.length}/7</span>${act?`<em>${pid===0?'내 차례':mpLive()?'상대 차례':'AI 차례'}</em>`:''}`;
 }
 function render(){
   if(!G||G.cfg.headless)return;
@@ -2836,6 +2856,7 @@ function render(){
   $('#logpanel').hidden=!UI.logOpen;$('#tbLog').classList.toggle('on',!!UI.logOpen);
   if(UI.logOpen)$('#gamelog').innerHTML=G.logs.slice(0,200).map(l=>`<li class="${l.pid!=null?'p'+l.pid:''} ${l.kind||''}">${esc(l.msg)}</li>`).join('');
   $('#tbSpeed').classList.toggle('on',SPEED<1);
+  $('#tbSpeed').hidden=mpLive(); // 멀티에서는 AI 속도 버튼이 필요 없음
   if(!UI.hideHands){SEEN.h0=new Set(G.p[0].hand.map(c=>c.uid));SEEN.h1=G.p[1].hand.length}SEEN.f=new Set([...G.p[0].field,...G.p[1].field].map(c=>c.uid));
   const mp=!!(UI.pending&&UI.pending.pid===0&&UI.pending.req.kind==='mulligan'&&SCREEN==='game');const M=$('#mull');
   if(mp&&M.dataset.on!=='1'){M.innerHTML=mullHTML();M.dataset.on='1'}
@@ -2851,20 +2872,20 @@ function showModal(html,wide){const b=$('#mbox');b.className='mbox'+(wide?' wide
 function hideModal(){$('#modal').hidden=true}
 function showLog(pid){
   const P=G.p[pid];
-  showModal(`<h2>${pid===0?'내':'AI'} 로그 · ${P.log.length}장</h2><p>로그(묘지)의 카드. 오른쪽 아래일수록 최근에 놓인 카드. 마우스를 올리면 효과 표시.</p>
+  showModal(`<h2>${pid===0?'내':esc(OPP())} 로그 · ${P.log.length}장</h2><p>로그(묘지)의 카드. 오른쪽 아래일수록 최근에 놓인 카드. 마우스를 올리면 효과 표시.</p>
    <div class="loglist">${P.log.length?P.log.map(c=>cardHTML(c).replace('tabindex="0" role="button"','')).join(''):'<p>비어 있음.</p>'}</div>
    <div class="mfoot"><button class="btn primary" data-act="close">닫기</button></div>`,P.log.length>8);
 }
 function showWin(){sfx(G.winner===0?'win':'lose');fxEnd(G.winner).catch(()=>{}).then(()=>{if(SCREEN==='game'&&G&&G.winner!=null)showWinModal()})}
 function showWinModal(){
-  const me=G.winner===0;
-  showModal(`<div class="rainbow-bar"></div><div class="win-big ${me?'me':'ai'}">${me?'승리!':'패배'}</div>
+  const me=G.winner===0,none=G.winner===-1;
+  showModal(`<div class="rainbow-bar"></div><div class="win-big ${me?'me':'ai'}">${none?'대전 종료':me?'승리!':'패배'}</div>
    <p>${esc(G.reason)} · ${G.turnNo}턴</p>
-   <p>니지 에리어 — 나 ${G.p[0].niji.length}/7 · AI ${G.p[1].niji.length}/7</p>
-   <div class="mfoot"><button class="btn" data-act="close">판 보기</button><button class="btn" data-act="golobby">로비로</button><button class="btn primary" data-act="rematch">다시 대전</button></div>`);
+   <p>니지 에리어 — 나 ${G.p[0].niji.length}/7 · ${esc(OPP())} ${G.p[1].niji.length}/7</p>
+   <div class="mfoot"><button class="btn" data-act="close">판 보기</button><button class="btn" data-act="golobby">로비로</button><button class="btn primary" data-act="rematch">${mpLive()?'멀티 대전 로비로':'다시 대전'}</button></div>`);
 }
 function showLeave(){
-  showModal(`<h2>대전 중단</h2><p>진행 중인 대전은 저장되지 않는다.</p>
+  showModal(`<h2>대전 중단</h2><p>${mpLive()?'지금 나가면 기권 처리되어 상대의 승리가 된다.':'진행 중인 대전은 저장되지 않는다.'}</p>
    <div class="mfoot"><button class="btn" data-act="close">계속하기</button><button class="btn primary" data-act="golobby">로비로 가기</button></div>`);
 }
 function showRules(){
@@ -2895,6 +2916,7 @@ const LOBBY={tab:SOLO?'boot':'home',mode:null,me:'SD01',ai:'SD02',first:'random'
 let BUILD=null;
 const ADMIN={busy:false,msg:'',err:false,usage:null,arm:null,pending:null,drop:null};
 function goLobby(){
+  if(MPG.on){if(mpLive()&&G.winner==null&&G.phase!=='setup')mpSend({t:'resign'});mpClose(!mpLive()||G.winner==null);MP.st=null}
   TOKEN.dead=true;SCREEN='lobby';fit();hideModal();fxReset();if(UI)UI.logOpen=false;renderInspector();if(CD_PENDING){CD_PENDING=false;applyCardData()}renderLobby();
 }
 /* ================= SETTINGS ================= */
@@ -3012,47 +3034,213 @@ function playHTML(){
 const MP={st:null,code:'',t0:0,timer:0,join:''};
 const MPCH='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 function mpCode(){const a=crypto.getRandomValues(new Uint8Array(6));return[...a].map(b=>MPCH[b%MPCH.length]).join('')}
-function mpStop(){clearInterval(MP.timer);MP.timer=0;MP.st=null}
+function mpStop(){clearInterval(MP.timer);MP.timer=0;MP.st=null;MP.err='';if(MPG.on&&!mpLive())mpClose(true)}
 function mpTick(){const el=document.getElementById('mpTime');if(!el){clearInterval(MP.timer);MP.timer=0;return}const s=Math.floor((Date.now()-MP.t0)/1000);el.textContent=`${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`}
-function mpStart(st){mpStop();MP.st=st;MP.t0=Date.now();if(st==='host')MP.code=mpCode();MP.timer=setInterval(mpTick,1000);
-  if(st==='join'){const c=MP.join;setTimeout(()=>{if(MP.st==='join'&&MP.join===c){MP.st='nf';clearInterval(MP.timer);MP.timer=0;renderLobby()}},1600)}}
+function mpStart(st){mpStop();MP.st=st;MP.t0=Date.now();MP.code='';MP.timer=setInterval(mpTick,1000);
+  if(st==='host')mpHostOpen();else if(st==='join')mpJoinRoom(MP.join)}
 function multiHTML(){
   const decks=allDecks();if((DECKSRC!=='account'||DECKRAW!=null)&&!decks.some(d=>d.key===LOBBY.me))LOBBY.me='SD01';
   const me=getDeck(LOBBY.me);const pm=validateDeck(me);const ok=!pm.length;
   let box='';
-  if(!MP.st)box=`<div class="mp-opts">
-     <button class="mpo" data-act="lb-mp" data-v="quick" ${ok?'':'disabled'}><b>빠른 매칭</b><small>비슷한 시간에 들어온 상대와 자동 연결</small></button>
+  const canMP=SOLO&&typeof RTCPeerConnection!=='undefined',signed=!!(CAP.uid&&CAP.db);
+  if(!canMP)box=`<div class="mp-wait"><b class="mpw-t">웹사이트에서만 가능</b><p>멀티 대전은 웹사이트(nijinana.kro.kr)에서 로그인한 뒤 이용할 수 있음</p></div>`;
+  else if(!signed)box=`<div class="mp-wait"><b class="mpw-t">로그인이 필요함</b><p>멀티 대전은 로그인한 계정끼리만 할 수 있음 (Google 또는 이메일 아이디)</p><button class="btn primary" data-act="lb-tologin">로그인 · 회원가입</button></div>`;
+  else if(!MP.st)box=`<div class="mp-opts">
+     <button class="mpo" disabled><b>빠른 매칭 <em class="soon">준비 중</em></b><small>비슷한 시간에 들어온 상대와 자동 연결</small></button>
      <button class="mpo" data-act="lb-mp" data-v="host" ${ok?'':'disabled'}><b>방 만들기</b><small>방 코드를 친구에게 알려 주고 기다림</small></button>
      <div class="mpo join"><b>코드로 참가</b><small>친구가 알려 준 6자리 코드</small>
       <div class="mpj"><input id="mpJoin" maxlength="12" placeholder="예) K7Q2ZP" value="${esc(MP.join)}" autocomplete="off" spellcheck="false" aria-label="방 코드"><button class="btn primary" data-act="lb-mp" data-v="join" ${ok&&MP.join.length===6?'':'disabled'}>참가</button></div></div>
     </div>`;
-  else if(MP.st==='nf')box=`<div class="mp-wait"><b class="mpw-t">방을 찾을 수 없음</b><p>코드 <code>${esc(MP.join)}</code> — 멀티 대전 서버가 아직 열리지 않음</p><button class="btn" data-act="lb-mp" data-v="cancel">돌아가기</button></div>`;
+  else if(MP.st==='nf')box=`<div class="mp-wait"><b class="mpw-t">방을 찾을 수 없음</b><p>코드 <code>${esc(MP.join)}</code> — 코드를 다시 확인해 줘</p><button class="btn" data-act="lb-mp" data-v="cancel">돌아가기</button></div>`;
+  else if(MP.st==='err')box=`<div class="mp-wait"><b class="mpw-t">연결하지 못함</b><p>${esc(MP.err||'')}</p><button class="btn" data-act="lb-mp" data-v="cancel">돌아가기</button></div>`;
   else box=`<div class="mp-wait"><div class="ld-spin" aria-hidden="true"></div>
-     <b class="mpw-t">${MP.st==='quick'?'상대를 찾는 중':MP.st==='host'?'상대를 기다리는 중':'방을 찾는 중'}</b><span class="mpw-time" id="mpTime">00:00</span>
-     ${MP.st==='host'?`<div class="mp-code"><small>방 코드</small><b>${MP.code}</b><button class="btn sm" data-act="lb-mp" data-v="copy">복사</button></div>`:''}
-     ${MP.st==='join'?`<p>코드 <code>${esc(MP.join)}</code></p>`:''}
-     <p class="hint">멀티 대전 서버는 준비 중이라 지금은 상대가 연결되지 않음</p>
+     <b class="mpw-t">${MP.st==='conn'?`${esc(MPG.oppName||'상대')}와 연결하는 중`:MP.st==='host'?(MP.code?'상대를 기다리는 중':'방 만드는 중'):'방을 찾는 중'}</b><span class="mpw-time" id="mpTime">00:00</span>
+     ${MP.st==='host'&&MP.code?`<div class="mp-code"><small>방 코드</small><b>${MP.code}</b><button class="btn sm" data-act="lb-mp" data-v="copy">복사</button></div><p class="hint">친구에게 코드를 알려 주고 이 화면을 켜 둔 채 기다려 줘</p>`:''}
+     ${MP.st==='join'||(MP.st==='conn'&&MPG.role==='guest')?`<p>코드 <code>${esc(MP.join)}</code></p>`:''}
      <button class="btn" data-act="lb-mp" data-v="cancel">취소</button></div>`;
   return`<main class="lb-body multi">
    <section class="panel"><h3>내 덱 <small>${decks.length}개</small></h3><div class="dlist">${decks.map(d=>deckTile(d,d.key===LOBBY.me,'lb-me')).join('')}</div>
     ${ok?'':`<p class="why2">${esc(pm[0])}</p>`}</section>
-   <section class="panel mp-panel"><h3>멀티 대전 <em class="soon">준비 중</em></h3>
+   <section class="panel mp-panel"><h3>멀티 대전 <small>1:1 · 친구와 방 코드로 대전</small></h3>
     <div class="mp-me">${chHTML(null,{id:me.ch,plain:true})}<span><small>사용할 덱</small><b>${esc(me.name)}</b></span></div>
     ${box}</section>
   </main>`;
 }
 
+/* ================= MULTIPLAYER (P2P 락스텝) =================
+   두 브라우저가 같은 엔진을 같은 시드로 똑같이 돌리고, 사람의 입력(카드 내기·세트·기동·공격·페이즈 넘기기·선택 응답)만 주고받는다.
+   - 연결: WebRTC 데이터 채널 (서로를 찾는 신호만 Firestore rooms/{code} 사용)
+   - 내 플레이어는 언제나 pid 0, 상대는 pid 1(remote). 카드 uid·덱 순서는 "방장 → 참가자" 순서로 만들어 양쪽이 같음
+   - 상대가 보낸 입력은 규칙에 맞는지 검사하고, 매 턴 끝에 양쪽 상태 해시를 비교해 어긋나면 대전을 멈춤 */
+const MPG={on:false,role:null,pc:null,dc:null,q:[],waiters:[],sync:{},code:'',unsub:null,oppName:'',oppUid:'',start:null,connT:0};
+const mpLive=()=>!!(G&&G.cfg&&G.cfg.mp);
+const OPP=()=>mpLive()?(G.p[1].name||'상대'):'AI';
+function mpSend(m){try{if(MPG.dc&&MPG.dc.readyState==='open')MPG.dc.send(JSON.stringify(m))}catch(e){}}
+function mpPump(){while(MPG.q.length&&MPG.waiters.length){MPG.waiters.shift().res(MPG.q.shift())}}
+function mpRecv(){const t=TOKEN;return new Promise((res,rej)=>{MPG.waiters.push({res,rej});mpPump()}).then(m=>{if(t.dead)throw new Abort();return m})}
+function mpRejectAll(){const w=MPG.waiters;MPG.waiters=[];for(const x of w)try{x.rej(new Abort())}catch(e){}}
+function mulberry32(a){return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function strHash(s){let h=5381;for(let i=0;i<s.length;i++)h=(h*33^s.charCodeAt(i))>>>0;return h.toString(36)}
+function cardsVer(){return strHash(Object.keys(CARDS).sort().map(k=>{const d=CARDS[k];return[k,d.type,d.lv,d.power,(d.colors||[]).join(''),(d.trigger||[]).join(''),d.text||''].join(':')}).join('|'))}
+function packDeck(dk){return{name:String(dk.name||'').slice(0,40),short:String(dk.short||dk.name||'').slice(0,40),ch:dk.ch,list:cleanList(dk.list)}}
+function okDeck(d){if(!d||typeof d!=='object'||!CARDS[d.ch]||CARDS[d.ch].type!=='channel')return null;
+  const x={name:String(d.name||'상대 덱').slice(0,40),short:String(d.short||d.name||'상대 덱').slice(0,40),ch:d.ch,list:cleanList(d.list)};return validateDeck(x).length?null:x}
+function mpHash(){const ph=MPG.role==='host'?[G.p[0],G.p[1]]:[G.p[1],G.p[0]];
+  return strHash(ph.map(P=>[P.deck.map(c=>c.uid).join(','),P.hand.map(c=>c.uid).sort((a,b)=>a-b).join(','),P.field.map(c=>c.uid+(c.tapped?'t':'')).join(','),
+    P.log.length,P.niji.join(''),P.cl.map(x=>(x.up?1:0)+(x.gone?2:0)).join(''),P.stage?P.stage.uid:'-',P.set?P.set.uid:'-'].join('|')).join('#'))}
+function mpTurnSync(){if(!mpLive())return;const t=G.turnNo;const h=mpHash();(MPG.sync[t]=MPG.sync[t]||{}).me=h;mpSend({t:'sync',turn:t,h});mpCheck(t)}
+function mpCheck(t){const s=MPG.sync[t];if(s&&s.me&&s.opp&&s.me!==s.opp)mpEnd('양쪽 게임 상태가 어긋나 대전을 멈춤 (동기화 오류)',null)}
+/* 상대 응답이 요청에 맞는지 검사 */
+function mpValidAns(req,v){
+  const inU=u=>Array.isArray(req.uids)&&req.uids.includes(u);
+  switch(req.kind){
+    case'yesno':case'mulligan':return typeof v==='boolean';
+    case'card':return v===null?!!req.optional:inU(v);
+    case'color':return v===null?!!req.optional:Array.isArray(req.idxs)&&req.idxs.includes(v);
+    case'cards':return Array.isArray(v)&&new Set(v).size===v.length&&v.every(inU)&&(v.length===0&&req.optional||v.length>=(req.min??0)&&v.length<=(req.max??v.length));
+    case'order':return Array.isArray(v)&&v.length===req.uids.length&&new Set(v).size===v.length&&v.every(inU);
+  }
+  return v===null||typeof v==='boolean'||typeof v==='number';
+}
+/* 상대 차례: 상대가 보낸 명령을 하나씩 실행 */
+async function mpRemoteTurn(pid){
+  while(true){
+    UI.remoteWait=true;render();const m=await mpRecv();UI.remoteWait=false;
+    if(m.t==='next'){render();return}
+    if(m.t!=='cmd'||!(await mpExec(pid,m))){mpEnd('상대의 입력이 규칙에 맞지 않아 대전을 멈춤',null);throw new Abort()}
+  }
+}
+async function mpExec(pid,m){
+  const P=G.p[pid];
+  if(m.c==='play'){const c=byUid(m.uid);if(!c||c.owner!==pid||playBlock(pid,c))return false;const d=D(c);const pay=m.pay;
+    if(!Array.isArray(pay)||pay.length!==(d.lv||0)||new Set(pay).size!==pay.length)return false;
+    for(const u of pay){const x=byUid(u);if(!x||x===c||!(P.hand.includes(x)||P.field.includes(x)))return false}
+    await doPlay(pid,c,pay);return true}
+  if(m.c==='set'){const c=byUid(m.uid);if(!c||G.cur!==pid||G.phase!=='set'||!P.hand.includes(c))return false;setCard(pid,c);return true}
+  if(m.c==='act'){if(!['ch','st'].includes(m.src)||!canActivate(pid,m.src))return false;await activate(pid,m.src);return true}
+  if(m.c==='atk'){const a=byUid(m.att);const tg=m.tg||{};if(!a||!canAttack(pid,a))return false;
+    const ok=attackTargets(pid,a).some(t=>t.kind===tg.kind&&(t.kind==='liver'?t.uid===tg.uid:t.idx===tg.idx));if(!ok)return false;
+    await doAttack(pid,a,tg.kind==='liver'?{kind:'liver',uid:tg.uid}:{kind:'color',idx:tg.idx});return true}
+  return false;
+}
+/* 대전이 비정상 종료될 때 (기권·끊김·동기화 오류) */
+function mpEnd(reason,localWinner){
+  if(!mpLive()||G.winner!=null)return;
+  G.winner=localWinner==null?-1:localWinner;G.reason=reason;log(reason,localWinner==null?0:localWinner,'win');
+  TOKEN.dead=true;mpRejectAll();UI.pending=null;UI.phaseRes=null;UI.att=null;UI.remoteWait=false;UI.busy=false;render();
+  if(localWinner===0)sfx('win');showWinModal();
+}
+/* ---- 연결 ---- */
+const ICE=()=>({iceServers:(window.NJ_CONFIG&&Array.isArray(NJ_CONFIG.iceServers)&&NJ_CONFIG.iceServers.length)?NJ_CONFIG.iceServers:[{urls:['stun:stun.l.google.com:19302','stun:stun1.l.google.com:19302']}]});
+function waitIce(pc,ms){return new Promise(res=>{if(pc.iceGatheringState==='complete')return res();const t=setTimeout(res,ms||4000);
+  pc.addEventListener('icegatheringstatechange',()=>{if(pc.iceGatheringState==='complete'){clearTimeout(t);res()}})})}
+function mpReset(graceful){
+  try{MPG.unsub&&MPG.unsub()}catch(e){}MPG.unsub=null;clearTimeout(MPG.connT);
+  const dc=MPG.dc,pc=MPG.pc;if(dc)dc.onclose=dc.onmessage=null;
+  const shut=()=>{try{dc&&dc.close()}catch(e){}try{pc&&pc.close()}catch(e){}};
+  if(graceful&&dc&&dc.readyState==='open')setTimeout(shut,600);else shut(); // 마지막 메시지(기권 등)가 도착할 시간을 줌
+  Object.assign(MPG,{on:false,role:null,pc:null,dc:null,q:[],waiters:[],sync:{},code:'',oppName:'',oppUid:'',start:null});
+}
+function mpClose(sendBye){if(sendBye)mpSend({t:'bye'});const code=MPG.code,role=MPG.role;mpReset(true);if(role==='host'&&code)mpCleanRoom(code)}
+function mpCleanRoom(code){if(!CAP.db)return;CAP.db.doc('rooms/'+code).collection('join').doc('guest').delete().catch(()=>{});CAP.db.doc('rooms/'+code).delete().catch(()=>{})}
+function mpFail(msg){const code=MPG.code,role=MPG.role;mpReset();if(role==='host'&&code)mpCleanRoom(code);MP.st='err';MP.err=msg;clearInterval(MP.timer);MP.timer=0;if(SCREEN==='lobby')renderLobby()}
+function setupDc(dc){
+  MPG.dc=dc;
+  dc.onopen=()=>{clearTimeout(MPG.connT);if(MPG.role==='host')mpHostStart()};
+  dc.onmessage=e=>{let m;try{m=JSON.parse(e.data)}catch(_){return}if(!m||typeof m!=='object')return;
+    if(m.t==='sync'){if(typeof m.turn==='number'&&typeof m.h==='string'){(MPG.sync[m.turn]=MPG.sync[m.turn]||{}).opp=m.h;mpCheck(m.turn)}return}
+    if(m.t==='resign'){mpEnd(`${MPG.oppName||'상대'}이(가) 대전을 나감 — 승리`,0);return}
+    if(m.t==='bye'){mpEnd(`${MPG.oppName||'상대'}이(가) 나감`,null);return}
+    if(m.t==='start'){if(MPG.role==='guest')mpGuestStart(m);return}
+    if(m.t==='ans'||m.t==='cmd'||m.t==='next'){MPG.q.push(m);mpPump()}};
+  dc.onclose=()=>{if(mpLive()&&G.winner==null)mpEnd('상대와 연결이 끊겨 대전이 종료됨',null);else if(SCREEN==='lobby'&&MP.st&&MP.st!=='err')mpFail('상대와 연결이 끊김')};
+}
+function watchPc(pc){pc.addEventListener('connectionstatechange',()=>{const s=pc.connectionState;
+  if(s==='failed'){if(mpLive()&&G.winner==null)mpEnd('상대와 연결이 끊겨 대전이 종료됨',null);else mpFail('연결 실패 — 서로 다른 통신망(특히 LTE·5G)끼리는 직접 연결이 막힐 수 있음. 둘 중 한 명이 Wi-Fi로 바꿔 다시 시도')}})}
+const myName=()=>String((CAP.me&&CAP.me.name)||'플레이어').slice(0,20);
+async function mpHostOpen(){
+  const me=getDeck(LOBBY.me);if(validateDeck(me).length)return mpFail('사용할 수 없는 덱');
+  mpReset();MPG.on=true;MPG.role='host';
+  const pc=new RTCPeerConnection(ICE());MPG.pc=pc;watchPc(pc);setupDc(pc.createDataChannel('nj',{ordered:true}));
+  try{await pc.setLocalDescription(await pc.createOffer());await waitIce(pc)}catch(e){return mpFail('연결 준비 실패: '+(e&&e.message||e))}
+  if(MPG.pc!==pc)return;
+  let code='',tries=0;
+  while(tries++<5){code=mpCode();try{const s=await CAP.db.doc('rooms/'+code).get();if(!s.exists)break}catch(e){return mpFail('방 만들기 실패 — 로그인 상태와 Firestore 규칙 확인')}}
+  MPG.code=code;MP.code=code;
+  try{await CAP.db.doc('rooms/'+code).set({host:CAP.uid,hostName:myName(),deck:packDeck(me),offer:{type:'offer',sdp:pc.localDescription.sdp},status:'open',at:Date.now(),v:cardsVer()})}
+  catch(e){return mpFail('방 만들기 실패: '+errText(e))}
+  if(MPG.pc!==pc){mpCleanRoom(code);return}
+  renderLobby();
+  MPG.unsub=CAP.db.doc('rooms/'+code).collection('join').doc('guest').onSnapshot(async s=>{
+    if(!s.exists||pc.remoteDescription||MPG.pc!==pc||MPG.gotAns===pc)return;const j=s.data()||{};
+    const dk=okDeck(j.deck);if(!dk||!j.answer||typeof j.answer.sdp!=='string'){return}
+    MPG.gotAns=pc; // 같은 응답 알림이 두 번 와도 한 번만 처리
+    MPG.oppName=String(j.name||'상대').slice(0,20);MPG.oppUid=String(j.uid||'');MPG.oppDeck=dk;
+    MP.st='conn';renderLobby();
+    try{await pc.setRemoteDescription({type:'answer',sdp:j.answer.sdp})}catch(e){return mpFail('상대와 연결 실패')}
+    MPG.connT=setTimeout(()=>{if(!MPG.dc||MPG.dc.readyState!=='open')mpFail('연결 시간 초과 — 서로 다른 통신망(특히 LTE·5G)끼리는 직접 연결이 막힐 수 있음. 둘 중 한 명이 Wi-Fi로 바꿔 다시 시도')},25000);
+  },()=>{});
+}
+async function mpJoinRoom(code){
+  const me=getDeck(LOBBY.me);if(validateDeck(me).length)return mpFail('사용할 수 없는 덱');
+  mpReset();MPG.on=true;MPG.role='guest';MPG.code=code;
+  let r;try{const s=await CAP.db.doc('rooms/'+code).get();if(!s.exists){mpReset();MP.st='nf';clearInterval(MP.timer);renderLobby();return}r=s.data()}
+  catch(e){return mpFail('방을 불러오지 못함 — 로그인 상태 확인')}
+  if(!r||r.status!=='open'||Date.now()-(+r.at||0)>30*60*1000)return mpFail('이미 시작했거나 닫힌 방');
+  if(r.host===CAP.uid)return mpFail('내가 만든 방에는 참가할 수 없음 — 다른 기기·계정으로 참가');
+  if(r.v!==cardsVer())return mpFail('카드 데이터가 서로 달라 대전할 수 없음 — 둘 다 새로고침 후 다시 시도');
+  const hd=okDeck(r.deck);if(!hd||!r.offer||typeof r.offer.sdp!=='string')return mpFail('방 정보가 올바르지 않음');
+  MPG.oppName=String(r.hostName||'상대').slice(0,20);MPG.oppUid=String(r.host||'');MPG.oppDeck=hd;
+  const pc=new RTCPeerConnection(ICE());MPG.pc=pc;watchPc(pc);pc.ondatachannel=e=>setupDc(e.channel);
+  try{await pc.setRemoteDescription({type:'offer',sdp:r.offer.sdp});await pc.setLocalDescription(await pc.createAnswer());await waitIce(pc)}
+  catch(e){return mpFail('연결 준비 실패: '+(e&&e.message||e))}
+  if(MPG.pc!==pc)return;
+  try{await CAP.db.doc('rooms/'+code).collection('join').doc('guest').set({uid:CAP.uid,name:myName(),deck:packDeck(me),answer:{type:'answer',sdp:pc.localDescription.sdp},at:Date.now()})}
+  catch(e){return mpFail('참가 실패 — 다른 사람이 먼저 참가했거나 닫힌 방')}
+  MP.st='conn';renderLobby();
+  MPG.connT=setTimeout(()=>{if(!MPG.start)mpFail('연결 시간 초과 — 서로 다른 통신망(특히 LTE·5G)끼리는 직접 연결이 막힐 수 있음. 둘 중 한 명이 Wi-Fi로 바꿔 다시 시도')},25000);
+}
+function mpHostStart(){
+  const me=packDeck(getDeck(LOBBY.me));const seed=crypto.getRandomValues(new Uint32Array(1))[0];const first=crypto.getRandomValues(new Uint8Array(1))[0]&1?'host':'guest';
+  const st={t:'start',seed,first,hostDeck:me,guestDeck:MPG.oppDeck,hostName:myName(),guestName:MPG.oppName,v:cardsVer()};
+  mpSend(st);mpCleanRoom(MPG.code);startMulti(st);
+}
+function mpGuestStart(m){
+  if(MPG.start)return;
+  const hd=okDeck(m.hostDeck),gd=okDeck(m.guestDeck);
+  if(!hd||!gd||typeof m.seed!=='number'||!['host','guest'].includes(m.first)){mpSend({t:'bye'});return mpFail('시작 정보가 올바르지 않음')}
+  if(m.v!==cardsVer()){mpSend({t:'bye'});return mpFail('카드 데이터가 서로 달라 대전할 수 없음 — 둘 다 새로고침 후 다시 시도')}
+  startMulti({...m,hostDeck:hd,guestDeck:gd});
+}
+window.addEventListener('pagehide',()=>{if(mpLive()&&G.winner==null&&G.phase!=='setup')mpSend({t:'resign'});else if(MPG.on)mpSend({t:'bye'})});
+async function startMulti(st){
+  if(MPG.start)return;MPG.start=st;clearTimeout(MPG.connT);clearInterval(MP.timer);MP.timer=0;
+  const role=MPG.role;const mine=role==='host'?st.hostDeck:st.guestDeck,theirs=role==='host'?st.guestDeck:st.hostDeck;
+  const first=st.first===role?'me':'ai';MPG.oppName=String((role==='host'?st.guestName:st.hostName)||MPG.oppName||'상대').slice(0,20);
+  hideModal();LOADING=true;
+  try{const coinP=coinToss({result:first,opp:MPG.oppName});const pre=preloadGame([mine,theirs],coinP);await coinP;await pre}catch(e){}finally{LOADING=false}
+  if(!MPG.on)return;
+  MP.st=null;SPEED=1;SCREEN='game';fit();renderLobby();
+  newGame({me:mine,opp:theirs,first,mp:{role,seed:st.seed,oppName:MPG.oppName}});
+  UI.logOpen=false;UI.hover=null;UI.hideHands=true;fxReset();render();runGame();
+}
+
 /* ================= COIN TOSS ================= */
-function coinToss(){return new Promise(res=>{
+function coinToss(opt){opt=opt||{};return new Promise(res=>{
   const ov=document.createElement('div');ov.id='coinov';ov.setAttribute('role','dialog');ov.setAttribute('aria-label','선후공 코인 토스');
   ov.innerHTML=`<div class="coin-box"><h2>선후공 코인 토스</h2><p class="coin-q">앞면 · 뒷면 중 하나를 고르면 코인을 던짐. 맞히면 선공</p>
     <div class="coin-stage"><div class="coin">${(()=>{const f=(k,c,b,i)=>{const u=resUrl(k);return u?`<div class="cf ${c} img" style="background-image:url('${u}')"></div>`:`<div class="cf ${c}"><b>${b}</b><span>${i}</span></div>`};return f('_uiCoinH','cf-h','앞','☀')+f('_uiCoinT','cf-t','뒤','☾')})()}</div><div class="coin-sh"></div></div>
     <div class="coin-pick"><button class="btn primary big" data-c="H">앞면</button><button class="btn big" data-c="T">뒷면</button></div>
     <p class="coin-res" aria-live="polite"></p></div>`;
-  $('#stage').appendChild(ov);ov.querySelector('[data-c="H"]').focus();
+  $('#stage').appendChild(ov);
+  if(opt.result){ // 멀티: 결과는 이미 정해짐 (방장이 무작위로 정함) — 자동으로 던지는 모습만
+    ov.querySelector('.coin-q').textContent=`${opt.opp||'상대'}와 대전 · 코인 토스로 선후공을 정함`;ov.querySelector('.coin-pick').style.display='none';
+    const pick=opt.result==='me'?'H':'T';const fake=document.createElement('button');fake.dataset.c=pick;fake.hidden=true;ov.querySelector('.coin-pick').appendChild(fake);
+    ov.dataset.forced=opt.result;setTimeout(()=>fake.onclick&&fake.onclick(),500);
+  }else ov.querySelector('[data-c="H"]').focus();
   ov.querySelectorAll('[data-c]').forEach(b=>b.onclick=async()=>{
     ov.querySelectorAll('[data-c]').forEach(x=>{x.disabled=true});const pick=b.dataset.c;b.classList.add('picked');
-    const r=crypto.getRandomValues(new Uint8Array(1))[0]&1?'H':'T';const win=pick===r;
+    const r=ov.dataset.forced?pick:(crypto.getRandomValues(new Uint8Array(1))[0]&1?'H':'T');const win=ov.dataset.forced?ov.dataset.forced==='me':pick===r;
     const coin=ov.querySelector('.coin'),sh=ov.querySelector('.coin-sh');const k=SET.fx==='off'||RM?0:fxk();
     sfx('flip');
     const end=`rotateY(${1800+(r==='T'?180:0)}deg)`;
@@ -3063,7 +3251,7 @@ function coinToss(){return new Promise(res=>{
     else coin.style.transform=end;
     sfx(win?'ccwin':'miss');
     const rt=ov.querySelector('.coin-res');rt.className='coin-res '+(win?'win':'lose');
-    rt.innerHTML=`<b>${r==='H'?'앞면':'뒷면'}!</b> ${win?'맞힘 — <em>나 선공</em>':'빗나감 — <em>AI 선공</em>'}`;
+    rt.innerHTML=ov.dataset.forced?`<b>${r==='H'?'앞면':'뒷면'}!</b> <em>${win?'나 선공':esc(opt.opp||'상대')+' 선공'}</em>`:`<b>${r==='H'?'앞면':'뒷면'}!</b> ${win?'맞힘 — <em>나 선공</em>':'빗나감 — <em>AI 선공</em>'}`;
     setTimeout(()=>{ov.remove();res(win?'me':'ai')},k?1300:900);
   });
 })}
@@ -3873,13 +4061,13 @@ async function fx(kind,o={}){
   if(!FXON())return;
   switch(kind){
     case'start':{const f=G.p[o.first];await fxBanner('대전 시작!',`선공 ${f.name} · 손패 5장   /   후공 ${G.p[1-o.first].name} · 손패 7장`,'dark',1500);break}
-    case'turn':if(!SET.banner){await fxWait(fxT(250));break}await fxBanner(o.pid===0?'나의 턴':'AI의 턴',`TURN ${G.turnNo}`,o.pid===0?'':'ai',950);break;
+    case'turn':if(!SET.banner){await fxWait(fxT(250));break}await fxBanner(o.pid===0?'나의 턴':(mpLive()?'상대의 턴':'AI의 턴'),`TURN ${G.turnNo}`,o.pid===0?'':'ai',950);break;
     case'pause':await fxWait(fxT(o.ms||400));break;
     case'intro':{
       if(RM){await fxWait(600);break}
       const me=G.p[0],ai=G.p[1];const firstName=G.p[o.first].name;
       const side=(P,who)=>`<div class="side"><span class="tag">${who}</span><div class="chbig"><div class="fl-f">${chHTML(null,{id:P.ch.id,plain:true,full:true})}</div><div class="fl-b">${chBackHTML()}</div></div><span class="dk">${esc(P.deckShort||'')}</span></div>`;
-      const el=fxEl(`<div class="row3">${side(me,'나')}<b class="vs">VS</b>${side(ai,'AI')}</div><div class="first">선공 <b>${esc(firstName)}</b> · 손패 5장　/　후공 <b>${esc(G.p[1-o.first].name)}</b> · 손패 7장</div>`,'fxintro');
+      const el=fxEl(`<div class="row3">${side(me,'나')}<b class="vs">VS</b>${side(ai,esc(OPP()))}</div><div class="first">선공 <b>${esc(firstName)}</b> · 손패 5장　/　후공 <b>${esc(G.p[1-o.first].name)}</b> · 손패 7장</div>`,'fxintro');
       const L=el.querySelector('.side'),R=el.querySelectorAll('.side')[1],V=el.querySelector('.vs'),F=el.querySelector('.first');
       const d=2600;
       anim(el,[{opacity:0},{opacity:1,offset:.08},{opacity:1,offset:.9},{opacity:0}],{duration:d}).then(()=>kill(el));
@@ -3895,7 +4083,7 @@ async function fx(kind,o={}){
     case'sp':await fxBanner('SP 콜!','블로커로 막을 수 없는 컬러 콜','sp',800);break;
     case'event':{
       if(RM){await fxWait(fxT(400));break}
-      const el=fxEl(`<span class="lbl">${o.c.owner===0?'나':'AI'} · 이벤트 발동</span>${cardHTML(o.c,{plain:true})}`,'fxevent');const d=fxT(1200);
+      const el=fxEl(`<span class="lbl">${o.c.owner===0?'나':esc(OPP())} · 이벤트 발동</span>${cardHTML(o.c,{plain:true})}`,'fxevent');const d=fxT(1200);
       anim(el,[{opacity:0},{opacity:1,offset:.14},{opacity:1,offset:.82},{opacity:0}],{duration:d}).then(()=>kill(el));
       const cd=el.querySelector('.card');anim(cd,[{transform:'scale(.45) rotateY(80deg)'},{transform:'scale(1.07)',offset:.3},{transform:'scale(1)',offset:.8},{transform:'scale(.9)'}],{duration:d,easing:'ease-out'});
       await fxWait(Math.round(d*.9));break}
@@ -3917,7 +4105,7 @@ async function fx(kind,o={}){
     case'clash':{
       if(RM){await fxWait(fxT(400));break}
       const {a,b,pa,pb}=o;const me=a.owner===0?a:b,ai=me===a?b:a,pm=me===a?pa:pb,po=me===a?pb:pa;
-      const el=fxEl(`<div class="side"><span class="tag">나</span>${cardHTML(me,{plain:true})}<span class="pw">${pm}</span></div><b class="vs">VS</b><div class="side"><span class="tag">AI</span>${cardHTML(ai,{plain:true})}<span class="pw">${po}</span></div>`,'fxclash');
+      const el=fxEl(`<div class="side"><span class="tag">나</span>${cardHTML(me,{plain:true})}<span class="pw">${pm}</span></div><b class="vs">VS</b><div class="side"><span class="tag">${esc(OPP())}</span>${cardHTML(ai,{plain:true})}<span class="pw">${po}</span></div>`,'fxclash');
       const d=fxT(1400);const L=el.children[0],V=el.children[1],R=el.children[2];
       anim(el,[{opacity:0},{opacity:1,offset:.1},{opacity:1,offset:.86},{opacity:0}],{duration:d}).then(()=>kill(el));
       anim(L,[{transform:'translateX(-380px)'},{transform:'translateX(22px)',offset:.32},{transform:'none',offset:.42},{transform:'none'}],{duration:d,easing:'ease-out',fill:'forwards'});
@@ -3958,7 +4146,7 @@ async function fx(kind,o={}){
         if(TOKEN.dead)throw new Abort();
         kill(ch);fxRing(t,'',140);fxSparks(t,16,120)}
       NJHIDE.delete(pid+color);mark('nj'+pid+color,'nj',1000);render();
-      fxFloatAt({x:800,y:pid===0?560:340},`컬러 콜 성공! ${pid===0?'내':'AI'} 니지 에리어 ${G.p[pid].niji.length}/7`,'good');
+      fxFloatAt({x:800,y:pid===0?560:340},`컬러 콜 성공! ${pid===0?'내':OPP()} 니지 에리어 ${G.p[pid].niji.length}/7`,'good');
       await fxWait(fxT(520));break}
     case'miss':{
       const r=stageRect(document.querySelector(`.z-cl.p${o.owner} [data-cl="${o.idx}"]`));if(r)fxFloatAt(center(r),'색 불일치','miss');
