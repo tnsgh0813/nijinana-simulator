@@ -9,8 +9,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Noto+Sans+JP:wght@500;700;900&display=swap">
-<script src="config.js?v=202610241209"></script>
-<script src="fb.js?v=202610241209"></script>
+<script src="config.js?v=202610241240"></script>
+<script src="fb.js?v=202610241240"></script>
 </head>
 <body>
 <style>
@@ -1056,6 +1056,9 @@ legend{font-size:12px;font-weight:700;color:var(--accent);padding:0 4px}
 .lb-startbtn kbd{font:inherit;font-size:12px;font-weight:700;background:rgba(255,255,255,.22);padding:2px 8px;border-radius:6px;margin-left:8px;vertical-align:middle}
 .mcard.last{outline:3px solid var(--gold);outline-offset:4px}
 .mcard.last .mc-go::after{content:" · 지난번 선택"}
+
+/* 이미지 길게 누르기(모바일) 메뉴·끌기 막기 */
+img{-webkit-touch-callout:none;-webkit-user-drag:none;user-select:none}
 </style>
 
 <div id="app">
@@ -2210,6 +2213,9 @@ document.addEventListener('click',e=>{
   if(el.dataset.cl!=null){handleColorClick(+el.dataset.owner,+el.dataset.cl);return}
   handleCardClick(+el.dataset.uid);
 });
+/* 우클릭 메뉴·이미지 끌어가기 막기 (입력 칸에서는 붙여넣기 등을 위해 허용) */
+document.addEventListener('contextmenu',e=>{const t=e.target;if(t&&t.closest&&t.closest('input,textarea,[contenteditable="true"]'))return;e.preventDefault()},true);
+document.addEventListener('dragstart',e=>{const t=e.target;if(t&&(t.tagName==='IMG'||(t.closest&&t.closest('.card,.chcard,.kv,.cf'))))e.preventDefault()},true);
 document.addEventListener('keydown',e=>{
   if(e.key==='Enter'&&e.target&&e.target.id==='mpJoin'){if(MP.join.length===6)lobbyAct('lb-mp',{v:'join'});return}
   if(e.key==='Enter'&&SCREEN==='lobby'&&LOBBY.tab==='play'&&LOBBY.mode==='ai'&&$('#modal').hidden&&!document.getElementById('coinov')&&!(e.target&&e.target.matches&&e.target.matches('button,input,textarea,[role=button]'))){const b=$('#lobby [data-act="lb-start"]');if(b&&!b.disabled){e.preventDefault();b.click()}return}
