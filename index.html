@@ -9,8 +9,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Noto+Sans+JP:wght@500;700;900&display=swap">
-<script src="config.js?v=202610241246"></script>
-<script src="fb.js?v=202610241246"></script>
+<script src="config.js?v=202610241309"></script>
+<script src="fb.js?v=202610241309"></script>
 </head>
 <body>
 <style>
@@ -1192,6 +1192,7 @@ const CARDS={
  'SD02-016':{name:'흡혈귀의 밤',jp:'吸血鬼の夜',type:'stage',cls:'moon',lv:2,tags:['家族','ゲーマー','囚人','メメント'],rar:'N',limited:true,
    text:'【한정: 같은 #】\n【기동 메인】【턴 1회】 자신의 덱 위에서 1장을 이 카드 아래에 둔다. 그 후, 이 카드 아래의 카드가 3장 이상일 경우, 이 카드와 그 카드들을 원하는 순서로 덱 아래에 두고, 자신의 로그의 Lv4 이하인 「쿠즈하」 라이버 1장을 등장시킨다.'},
  'SD03-001':{"name": "사사키 사쿠", "jp": "笹木咲", "type": "channel", "cls": "comet", "tags": ["ゲーマー", "囚人", "バンド"], "trigger": ["B"], "rar": "CH", "text": "【상대의 턴 중】【턴 1회】 자신의 라이버가 배틀로 인해 로그에 놓였을 때, 그 라이버를 이 카드 아래에 둔다. 그 후, 이 카드 아래의 카드가 3장 이상일 경우, 그것들을 원하는 순서로 덱 아래에 두고, 자신의 패가 5장이 되도록 카드를 뽑는다.\n【트리거: B】 (상대의 턴 중, 지정된 자신의 컬러 카드가 앞면이 됐을 때 발동) 자신의 패가 5장이 되도록 카드를 뽑는다."},
+ 'SD04-001':{"name": "카가미 하야토", "jp": "加賀美ハヤト", "type": "channel", "cls": "star", "tags": ["エンカウンター", "カードゲーマー", "盤", "メメント"], "trigger": ["O", "I"], "rar": "CH", "text": "【자신의 턴 종료 시】 상대에게 자신의 뒷면 컬러 카드 1장을 앞면으로 하게 해도 된다. 그러면 자신의 Lv1 이하 라이버 1장을 세로로 한다.\n【트리거: O I】 (상대의 턴 중, 지정된 자신의 컬러 카드가 앞면이 됐을 때 발동) 상대의 컬러 카드 1장을 앞면으로 한다."},
  'SD03-002':{"name": "사사키 사쿠", "jp": "笹木咲", "type": "liver", "cls": "comet", "lv": 0, "power": 3000, "colors": [], "tags": ["ゲーマー", "囚人", "バンド"], "rar": "N", "limited": true, "text": "【한정: 같은 #】"},
  'SD03-003':{"name": "사사키 사쿠", "jp": "笹木咲", "type": "liver", "cls": "comet", "lv": 1, "power": 3000, "colors": ["B"], "tags": ["ゲーマー", "囚人", "バンド"], "rar": "N", "blocker": true, "text": "【블로커】 (상대가 공격 또는 컬러 콜했을 때, 이 카드를 가로로 하는 것으로 공격 또는 컬러 콜을 중지하고 이 카드와 배틀한다)"},
  'SD03-004':{"name": "사사키 사쿠", "jp": "笹木咲", "type": "liver", "cls": "comet", "lv": 2, "power": 5000, "colors": ["R", "B"], "tags": ["ゲーマー", "囚人", "バンド"], "rar": "N", "text": "【등장 시】 이 카드 이외의 자신의 라이버 1장을 고른다. 이번 턴 중, 고른 카드의 파워 +3000. 고른 카드의 원래 파워가 7000 이상일 경우 대신 +5000."},
@@ -1331,6 +1332,8 @@ async function takeTurn(){
   if(!P.hand.length){log('패가 없어 세트 페이즈를 건너뜀',pid);render();await sleep(250)}
   else if(P.ai)await aiSet(pid);else await humanWait();
   await phase('end');
+  // 【자신의 턴 종료 시】 효과 (채널·스테이지·필드)
+  for(const src of [P.ch,P.stage,...P.field].filter(Boolean)){const e=EFF[src.id];if(e&&e.turnEnd&&(src===P.ch||src===P.stage||onField(src)))await e.turnEnd(pid,src)}
   for(const pl of G.p)for(const c of pl.field){c.buff=0;c.noCC=false}
   render();await sleep(250);
 }
@@ -1629,6 +1632,28 @@ EFF['SD02-016']={
   }
 };
 
+/* ---- SD04 카가미 하야토 ---- */
+EFF['SD04-001']={
+  async turnEnd(pid){const P=G.p[pid];
+    const downs=P.cl.map((x,i)=>i).filter(i=>!P.cl[i].gone&&!P.cl[i].up);if(!downs.length)return;
+    const tgt=P.field.filter(c=>c.tapped&&D(c).type==='liver'&&D(c).lv<=1);if(!tgt.length)return; // 세로로 할 라이버가 없으면 묻지 않음
+    const ok=await ask(pid,{kind:'yesno',text:`카가미 하야토 채널: 상대에게 내 뒷면 컬러 카드 1장을 앞면으로 하게 할까? 그러면 가로인 Lv1 이하 라이버 1장을 세로로 함`,
+      ai:()=>downs.length>=3&&tgt.some(c=>D(c).blocker||power(c)>=4000)});
+    if(!ok)return;
+    const i=await ask(1-pid,{kind:'color',owner:pid,idxs:downs,optional:false,text:'카가미 하야토 채널: 앞면으로 할 상대의 뒷면 컬러 카드 선택',ai:()=>downs[Math.random()*downs.length|0]});
+    P.cl[i].up=true;sfx('flip');mark('cl'+pid+':'+i,'flip',650);log(`카가미 하야토 채널: 상대가 컬러 카드를 공개 → ${CNAME[P.cl[i].color]}(${P.cl[i].color})`,pid);render();await fx('pause',{ms:650});
+    const live=tgt.filter(c=>onField(c)&&c.tapped);if(!live.length)return;
+    const u=live.length===1?live[0].uid:await ask(pid,{kind:'card',uids:live.map(c=>c.uid),optional:false,text:'카가미 하야토 채널: 세로로 할 Lv1 이하 라이버 선택',ai:()=>maxBy(live,c=>power(c)).uid});
+    const c=byUid(u);if(c&&onField(c)){await untapCard(c);log(`카가미 하야토 채널: ${nm(c)}을(를) 세로로 함`,pid);render();await sleep(250)}
+  },
+  async trig(pid){const O=G.p[1-pid];const idxs=O.cl.map((x,i)=>i).filter(i=>!O.cl[i].gone&&!O.cl[i].up);
+    if(!idxs.length){log('카가미 하야토 트리거: 상대의 뒷면 컬러 카드가 없음',pid);return}
+    const i=await ask(pid,{kind:'color',owner:1-pid,idxs,optional:false,text:'카가미 하야토 트리거: 앞면으로 할 상대 컬러 카드 선택',ai:()=>idxs[Math.random()*idxs.length|0]});
+    O.cl[i].up=true;sfx('flip');mark('cl'+(1-pid)+':'+i,'flip',650);log(`카가미 하야토 트리거: 상대 컬러 카드 공개 → ${CNAME[O.cl[i].color]}(${O.cl[i].color})`,pid);render();await fx('pause',{ms:650});
+    await checkTrigger(1-pid,O.cl[i].color);
+  }
+};
+
 /* ---- SD03 사사키 사쿠 ---- */
 EFF['SD03-001']={
   async oppLogged(pid,c){const P=G.p[pid];if(!P.log.includes(c))return;
@@ -1818,7 +1843,7 @@ function humanCanAct(){return G&&G.winner==null&&G.cur===0&&!G.p[0].ai&&!UI.pend
 
 
 /* ================= NAMES / ART / STORAGE ================= */
-const TAGKO={'囚人':'죄인','JK':'JK','ミッドナイト':'미드나이트','生徒会':'학생회','家族':'가족','ゲーマー':'게이머','メメント':'메멘토','勝負師':'승부사','バンド':'밴드','B級':'B급','シェアハウス':'셰어하우스'};
+const TAGKO={'囚人':'죄인','JK':'JK','ミッドナイト':'미드나이트','生徒会':'학생회','家族':'가족','ゲーマー':'게이머','メメント':'메멘토','勝負師':'승부사','バンド':'밴드','B級':'B급','シェアハウス':'셰어하우스','エンカウンター':'엔카운터','カードゲーマー':'카드게이머','盤':'반'};
 const tagKo=t=>TAGKO[t]||t;
 // 색상(클래스) 4종: 태양/솔(적), 달/루나(청), 혜성/코멧(녹), 별/스텔라(황)
 const CLSLIST=['sun','moon','comet','star'];
