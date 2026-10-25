@@ -18,9 +18,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Noto+Sans+JP:wght@500;700;900&display=swap">
-<script>window.NJ_BUILD="202610251807";window.NJ_NOTES=["새 카드: SD04-015 대폭발 (이벤트 · Lv2) — 상대의 Lv5 이하 라이버 1장을 손패로 되돌림", "카가미 하야토 카드 태그를 #학원(塾)으로 통일", "새 카드: SD04-003 카가미 하야토 · SD04-011 요루미 레나 · SD04-006/009 하카세 후유키"];</script>
-<script src="config.js?v=202610251807"></script>
-<script src="fb.js?v=202610251807"></script>
+<script>window.NJ_BUILD="202610251832";window.NJ_NOTES=["AI 난이도 추가: 쉬움 · 보통 · 어려움 · 최상 (AI 대전 설정·설정 화면에서 선택)", "어려움·최상 AI는 둘 수 있는 수를 직접 시험해 보고 상대의 다음 턴까지 계산해서 고름 — 새 카드가 추가돼도 그대로 동작", "AI가 처음 보는 이벤트·스테이지 카드도 써 보고 판단해서 사용 (예: 슬리브 교환, 대폭발)", "새 카드: SD04-015 대폭발"];</script>
+<script src="config.js?v=202610251832"></script>
+<script src="fb.js?v=202610251832"></script>
 </head>
 <body>
 <style>
@@ -1398,6 +1398,8 @@ button,a,[role=button]{-webkit-tap-highlight-color:transparent}
  .home-start{padding:14px 16px;gap:12px}.hs-ic{width:48px;height:48px}.hs-tx b{font-size:26px}
  .ht-tx b{font-size:13.5px}
 }
+
+.ailv-d{margin:-4px 0 4px;font-size:12px;color:var(--ink-2);line-height:1.45}
 </style>
 
 <div id="app">
@@ -1595,7 +1597,7 @@ function newGame(cfg){
   G.p[1-first].hand=G.p[1-first].deck.splice(0,7);
 }
 async function ask(pid,req){
-  if(G.p[pid].ai){await sleep(320);return req.ai()}
+  if(G.p[pid].ai){await sleep(320);if(!G.cfg.sim&&AILV(pid)==='easy'&&Math.random()<0.35){const r=aiRandomAns(req);if(r!==undefined)return r}return req.ai()}
   if(G.p[pid].remote){ // 상대의 선택을 기다림
     UI.remoteWait=true;render();const m=await mpRecv();UI.remoteWait=false;render();
     if(!m||m.t!=='ans'||!mpValidAns(req,m.v)){mpEnd('상대의 응답이 규칙에 맞지 않아 대전을 멈춤',null);throw new Abort()}
@@ -1611,6 +1613,7 @@ function humanWait(){const t=TOKEN;return new Promise(res=>{UI.phaseRes=()=>{if(
 function winGame(pid,reason){
   if(G.winner!=null)throw new GameOver();
   G.winner=pid;G.reason=reason;log(`${G.p[pid].name} 승리 — ${reason}`,pid,'win');
+  if(G.cfg.sim)throw new GameOver();
   UI.pending=null;UI.phaseRes=null;UI.att=null;render();
   if(!G.cfg.headless)showWin();
   throw new GameOver();
@@ -1634,7 +1637,7 @@ async function runGame(){
 }
 function mullReq(pid){const P=G.p[pid];
   return{kind:'mulligan',text:`손패를 다시 뽑을지 선택 (1회 한정 · 손패 ${P.hand.length}장)`,
-    ai:()=>!P.hand.some(c=>D(c).type==='liver'&&D(c).lv<=2&&D(c).lv>=1)}}
+    ai:()=>aiMulligan(P)}}
 function mullApply(pid,again){const P=G.p[pid];
   if(again){const n=P.hand.length;P.deck.push(...P.hand);P.hand=[];shuffle(P.deck);P.hand=P.deck.splice(0,n);fxRedeal(pid);log(`손패를 다시 뽑음 (${n}장)`,pid);render()}
   else log('손패 유지',pid);
@@ -1650,7 +1653,7 @@ async function mulliganAll(){
   UI.mull=null;render();
   for(const pid of order)mullApply(pid,got[pid]);
 }
-async function phase(name,skip){G.phase=name;UI.att=null;UI.tgt=null;render();phasePop(name,G.cur,skip);await sleep(220)}
+async function phase(name,skip){G.phase=name;if(!G.cfg.sim){UI.att=null;UI.tgt=null}render();phasePop(name,G.cur,skip);await sleep(220)}
 /* 페이즈가 바뀔 때 판 가운데에 잠깐 뜨는 알림 (누르기를 막지 않음) */
 const PHPOP={start:['스타트 페이즈','세로로 되돌리고 드로우'],main:['메인 페이즈','손패 플레이 · 기동 효과'],action:['액션 페이즈','라이버로 공격'],set:['세트 페이즈','손패 1장을 세트'],end:['엔드 페이즈','턴 종료']};
 function phasePop(name,pid,skip){
@@ -1663,7 +1666,7 @@ function phasePop(name,pid,skip){
 async function takeTurn(){
   const pid=G.cur,P=G.p[pid];
   G.turnNo++;P.turns++;P.once={};for(const c of P.field)c.once={};
-  UI.sel=null;if(TOUCH||UI.peek){UI.hover=null;UI.peek=false}
+  if(!G.cfg.sim){UI.sel=null;if(TOUCH||UI.peek){UI.hover=null;UI.peek=false}}
   log(`${G.turnNo}턴 · ${P.name}의 턴`,pid,'turn');render();await fx('turn',{pid});
   await phase('start',P.turns===1?'첫 턴':'');
   if(P.turns===1)log('첫 턴이라 스타트 페이즈를 건너뜀',pid);
@@ -1679,12 +1682,20 @@ async function takeTurn(){
   render();await sleep(300);
   await phase('main');
   if(P.ai)await aiMain(pid);else if(P.remote)await mpRemoteTurn(pid);else await humanWait();
+  await turnTail(pid,'action');
+}
+/* 액션 페이즈부터 턴 끝까지 (실제 대전과 AI 시뮬레이션이 같이 씀) */
+async function turnTail(pid,from){const P=G.p[pid];
+  if(from==='action'){
   await phase('action',P.turns===1&&pid===G.first?'선공 첫 턴':'');
   if(P.turns===1&&pid===G.first)log('선공 첫 턴이라 액션 페이즈를 건너뜀',pid);
   else if(P.ai)await aiAction(pid);else if(P.remote)await mpRemoteTurn(pid);else await humanWait();
+  }
+  if(from!=='end'){
   await phase('set',P.hand.length?'':'손패 없음');
   if(!P.hand.length){log('패가 없어 세트 페이즈를 건너뜀',pid);render();await sleep(250)}
   else if(P.ai)await aiSet(pid);else if(P.remote)await mpRemoteTurn(pid);else await humanWait();
+  }
   await phase('end');
   // 【자신의 턴 종료 시】 효과 (채널·스테이지·필드)
   for(const src of [P.ch,P.stage,...P.field].filter(Boolean)){const e=EFF[src.id];if(e&&e.turnEnd&&(src===P.ch||src===P.stage||onField(src)))await e.turnEnd(pid,src)}
@@ -2150,7 +2161,7 @@ function aiBlock(def,att,tg,blockers){
 function aiPay(P,c,n){
   return [...P.hand.filter(h=>h!==c)].sort((a,b)=>keepVal(a)-keepVal(b)).slice(0,n);
 }
-function aiBestPlay(pid){
+function aiBestPlay(pid,extra){
   const P=G.p[pid],O=G.p[1-pid];const cands=[];
   for(const c of [...P.hand,...(P.set?[P.set]:[])]){
     const d=D(c);if(d.lv>P.hand.length-(P.hand.includes(c)?1:0))continue;
@@ -2173,6 +2184,7 @@ function aiBestPlay(pid){
       const kill=ready.some(a=>O.field.some(t=>t.tapped&&power(t)>=power(a)&&power(t)-3000<power(a)));
       const ex=P.field.length<FIELD_MAX&&P.log.some(x=>nm(x)==='엑스 알비오'&&D(x).lv<=2);
       if(!kill&&!ex)continue;s=kill?38:27}
+    else if(extra&&extra[c.uid]!=null)s=extra[c.uid];
     else continue;
     const pay=aiPay(P,c,d.lv);
     if(pay.some(x=>keepVal(x)>(d.type==='stage'?Math.max(s,24):s)))continue;
@@ -2182,12 +2194,16 @@ function aiBestPlay(pid){
   return maxBy(cands,x=>x.s);
 }
 async function aiMain(pid){
+  const lv=AILV(pid);
+  if(lv==='hard'||lv==='expert')return aiMainSearch(pid,lv);
+  if(lv==='easy')return aiMainEasy(pid);
   const P=G.p[pid];
   for(let g=0;g<14;g++){
     await sleep(420);
     if(canActivate(pid,'ch')&&P.log.length<20&&P.deck.length>18){await activate(pid,'ch');continue}
     if(canActivate(pid,'st')&&(P.stage.id!=='SD02-016'||P.deck.length>10)){await activate(pid,'st');continue}
-    const plan=aiBestPlay(pid);if(!plan)break;
+    const extra=G.cfg.sim?null:await aiGenericScores(pid); // 처음 보는 이벤트·스테이지는 실제로 써 보고 판단
+    const plan=aiBestPlay(pid,extra);if(!plan)break;
     await doPlay(pid,plan.c,plan.pay.map(x=>x.uid));
   }
 }
@@ -2207,6 +2223,9 @@ function aiChooseTarget(pid,a){
   return{kind:'color',idx:down[Math.random()*down.length|0].i};
 }
 async function aiAction(pid){
+  const lv=AILV(pid);
+  if(lv==='hard'||lv==='expert')return aiActionSearch(pid,lv);
+  if(lv==='easy')return aiActionEasy(pid);
   const P=G.p[pid],O=G.p[1-pid];
   for(let g=0;g<12;g++){
     if(G.winner!=null)return;
@@ -2222,10 +2241,186 @@ async function aiAction(pid){
   }
 }
 async function aiSet(pid){
+  const lv=AILV(pid);if(lv==='hard'||lv==='expert')return aiSetSearch(pid,lv);
   const P=G.p[pid];await sleep(200);if(!P.hand.length)return;
+  if(lv==='easy'){if(!P.set||Math.random()<.3)setCard(pid,P.hand[Math.random()*P.hand.length|0]);return}
   const best=maxBy(P.hand,keepVal);
   if(P.set&&!(P.hand.length>=3&&keepVal(best)>keepVal(P.set)+6))return;
   setCard(pid,best);
+}
+
+/* ================= AI 난이도 =================
+   쉬움: 아무 카드나 내고 아무 데나 공격하며, 선택도 가끔 무작위.
+   보통: 카드별 판단 + 처음 보는 이벤트·스테이지는 써 본 결과로 판단.
+   어려움·최상: 할 수 있는 행동을 하나씩 "가상의 판"에서 실제로 해 보고(카드 효과도 엔진이 그대로 처리),
+   남은 턴과 상대의 다음 턴까지 진행해 본 뒤 판세 점수가 가장 좋은 행동을 고른다.
+   카드 번호를 외우지 않고 엔진으로 직접 돌려 보기 때문에 앞으로 추가되는 카드(부스터 등)에도 그대로 동작한다.
+   가상의 판에서는 상대 손패·덱 순서·뒷면 컬러 카드처럼 AI가 모르는 정보를 섞어서 쓰므로 몰래 보는 일은 없다. */
+const AILVS=[['easy','쉬움'],['normal','보통'],['hard','어려움'],['expert','최상']];
+const AILV_DESC={easy:'처음 하는 사람용 — 아무 카드나 내고 아무 데나 공격',normal:'카드마다 정해진 기준으로 판단',hard:'둘 수 있는 수를 직접 시험해 보고 상대의 다음 턴까지 계산해서 고름',expert:'어려움과 같은 계산을 여러 가지 경우로 반복해 가장 안전한 수를 고름 · 손패 기준도 엄격'};
+const AILV=pid=>(G&&G.cfg&&!G.cfg.sim&&((pid!=null&&G.cfg['aiLv'+pid])||G.cfg.aiLv))||'normal'; // 플레이어별 지정(aiLv0·aiLv1)도 가능 — 테스트용
+const AIPARAM={
+  hard:{samples:2,opp:true,deep:false,margin:1.2,budget:700,colorReps:1},
+  expert:{samples:6,opp:true,deep:true,margin:0.6,budget:1800,colorReps:2}}; // deep: 상대 턴 다음의 내 턴까지 봄
+let SIMD=0,SIMERR=0;
+function simRng(seed){return mulberry32((seed>>>0)||1)}
+function simShuffle(a,r){for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+/* 지금 판을 복사하되, pid가 모르는 정보는 섞는다 */
+function simClone(pid,seed){
+  const logs=G.logs;G.logs=[];let C;try{C=structuredClone(G)}finally{G.logs=logs}
+  C.cfg=Object.assign({},C.cfg,{headless:true,sim:true,mp:null});
+  for(const P of C.p){P.ai=true;P.remote=false}
+  const r=simRng(seed),O=C.p[1-pid],Me=C.p[pid];
+  const pool=[...O.hand,...O.deck,...(O.set?[O.set]:[])];simShuffle(pool,r);
+  O.hand=pool.splice(0,O.hand.length);if(O.set)O.set=pool.shift();O.deck=pool;
+  simShuffle(Me.deck,r);
+  for(const P of C.p){const down=P.cl.filter(x=>!x.up&&!x.gone);const cols=simShuffle(down.map(x=>x.color),r);down.forEach((x,i)=>x.color=cols[i])}
+  return C;
+}
+/* 가상의 판에서 fn을 실행하고 pid 입장의 점수를 돌려준다. 끝나면 진짜 판으로 되돌림 */
+async function simRun(pid,seed,fn){
+  const sv={G,RNG,SPEED,uidc,TOKEN};let sc=0;
+  const C=simClone(pid,seed);
+  G=C;RNG=simRng(seed^0x9e3779b9);SPEED=0;TOKEN={dead:false};SIMD++;
+  try{await fn(C)}catch(e){if(!(e instanceof GameOver||e instanceof Abort)){if(SIMERR++<3)console.warn('AI sim',e)}}
+  finally{try{sc=evalState(C,pid)}catch(e){sc=0}G=sv.G;RNG=sv.RNG;SPEED=sv.SPEED;uidc=sv.uidc;TOKEN=sv.TOKEN;SIMD--}
+  return sc;
+}
+/* 판세 점수 (카드 종류와 무관한 일반 기준) */
+function evalState(S,pid){
+  if(S.winner!=null)return S.winner===pid?1e5:S.winner===-1?0:-1e5;
+  const me=S.p[pid],op=S.p[1-pid];
+  const nj=k=>k*12+k*k*2.4; // 니지 에리어는 7이 되면 패배 — 쌓일수록 급하게 나빠짐
+  let s=nj(op.niji.length)-nj(me.niji.length);
+  const cols=P=>new Set(P.field.flatMap(c=>D(c).colors||[]));const mc=cols(me),oc=cols(op);
+  const open=P=>P.cl.filter(x=>!x.gone&&x.up);
+  s+=open(op).filter(x=>mc.has(x.color)).length*4.5-open(me).filter(x=>oc.has(x.color)).length*4.5; // 다음 컬러 콜이 확실한 자리
+  s+=open(op).length*1.2-open(me).length*1.2;
+  const lv=c=>{const d=D(c);if(d.type!=='liver')return 0;return power(c)/1000*1.1+(d.colors||[]).length*1.6+(d.blocker?2.5:0)+(c.tapped?0:1.4)+(d.lv||0)*0.5};
+  const sum=(a,f)=>a.reduce((n,x)=>n+f(x),0);
+  s+=sum(me.field,lv)-sum(op.field,lv);
+  s+=me.hand.length*1.6-op.hand.length*1.6+(me.set?1.4:0)-(op.set?1.4:0)+(me.stage?2.5:0)-(op.stage?2.5:0);
+  if(me.deck.length<6)s-=(6-me.deck.length)*5;if(op.deck.length<6)s+=(6-op.deck.length)*5;
+  return s;
+}
+/* 메인 페이즈에서 할 수 있는 행동 목록 (같은 카드는 한 번만) */
+function aiMainActs(pid){
+  const P=G.p[pid],acts=[],seen=new Set();
+  for(const src of ['ch','st'])if(canActivate(pid,src))acts.push({k:'act',src});
+  for(const c of [...P.hand,...(P.set?[P.set]:[])]){
+    if(playBlock(pid,c))continue;const d=D(c);if((d.lv||0)>P.hand.length-(P.hand.includes(c)?1:0))continue;
+    const key=c.id+(P.set===c?'s':'h');if(seen.has(key))continue;seen.add(key);
+    acts.push({k:'play',uid:c.uid,pay:aiPay(P,c,d.lv||0).map(x=>x.uid)})}
+  return acts;
+}
+async function aiDoMain(pid,a){if(a.k==='act')return activate(pid,a.src);const c=byUid(a.uid);if(c)return doPlay(pid,c,a.pay)}
+/* 행동(step)을 한 뒤 남은 턴(from: 'tail'=액션 페이즈부터, 'set'=세트 페이즈부터)과 상대의 다음 턴까지
+   보통 AI로 진행해 본 평균 점수. seeds마다 모르는 정보를 다르게 섞음 */
+async function aiRollout(pid,seeds,prm,step,from){
+  let t=0;for(const sd of seeds)t+=await simRun(pid,sd,async()=>{
+    if(step)await step();
+    if(G.winner==null){if(from==='tail')await turnTail(pid,'action');else if(from==='set')await turnTail(pid,'set');else if(from==='end')await turnTail(pid,'end')}
+    if(prm.opp&&G.winner==null){G.cur=1-pid;await takeTurn()}
+    if(prm.deep&&G.winner==null){G.cur=pid;await takeTurn()}});
+  return t/seeds.length;
+}
+const aiSeeds=n=>Array.from({length:n},()=>crypto.getRandomValues(new Uint32Array(1))[0]);
+async function aiMainSearch(pid,lv){
+  const prm=AIPARAM[lv],P=G.p[pid];
+  for(let g=0;g<12;g++){
+    await sleep(380);if(G.winner!=null)return;
+    const acts=aiMainActs(pid);if(!acts.length)return;
+    const seeds=aiSeeds(prm.samples),t0=performance.now();
+    // 기준: 더 내지 않고 바로 액션 페이즈로
+    const base=await aiRollout(pid,seeds,prm,null,'tail');
+    let best=null,bs=base+prm.margin;
+    for(const a of acts){
+      if(performance.now()-t0>prm.budget&&best)break;
+      const sc=await aiRollout(pid,seeds,prm,()=>aiDoMain(pid,a),'tail');
+      if(sc>bs){bs=sc;best=a}}
+    if(!best)return;
+    await aiDoMain(pid,best);
+  }
+}
+/* 공격 후보: 라이버마다 (상대 라이버 / 앞면 컬러 카드 / 뒷면 컬러 카드 대표 몇 장) */
+function aiAttackActs(pid,reps){
+  const P=G.p[pid],O=G.p[1-pid],acts=[];
+  for(const a of P.field){if(!canAttack(pid,a))continue;
+    const ts=attackTargets(pid,a);const downs=ts.filter(t=>t.kind==='color'&&!O.cl[t.idx].up);
+    const pick=new Set(simShuffle([...downs],Math.random).slice(0,reps));
+    for(const t of ts){if(t.kind==='color'&&!O.cl[t.idx].up&&!pick.has(t))continue;acts.push({att:a.uid,tg:t.kind==='liver'?{kind:'liver',uid:t.uid}:{kind:'color',idx:t.idx}})}}
+  return acts;
+}
+async function aiActionSearch(pid,lv){
+  const prm=AIPARAM[lv];
+  for(let g=0;g<12;g++){
+    if(G.winner!=null)return;
+    const acts=aiAttackActs(pid,prm.colorReps);if(!acts.length)return;
+    const seeds=aiSeeds(prm.samples),t0=performance.now();
+    const base=await aiRollout(pid,seeds,prm,null,'set');
+    let best=null,bs=base+prm.margin*0.5;
+    for(const a of acts){
+      if(performance.now()-t0>prm.budget*1.4&&best)break;
+      const sc=await aiRollout(pid,seeds,prm,()=>doAttack(pid,byUid(a.att),a.tg),'set');
+      if(sc>bs){bs=sc;best=a}}
+    if(!best)return;
+    await sleep(500);const at=byUid(best.att);if(!at||!canAttack(pid,at))return;await doAttack(pid,at,best.tg);
+  }
+}
+/* 세트 페이즈: 어떤 카드를 세트할지(또는 그대로 둘지)도 직접 시험해서 고름 */
+async function aiSetSearch(pid,lv){
+  const P=G.p[pid];await sleep(200);if(!P.hand.length)return;
+  const prm=AIPARAM[lv],seeds=aiSeeds(prm.samples);
+  let best=null,bs=await aiRollout(pid,seeds,prm,null,'end');
+  const seen=new Set();
+  for(const c of P.hand){if(seen.has(c.id))continue;seen.add(c.id);
+    const sc=await aiRollout(pid,seeds,prm,()=>{const x=byUid(c.uid);if(x)setCard(pid,x)},'end');if(sc>bs+0.3){bs=sc;best=c.uid}}
+  if(!P.set&&best==null)best=maxBy(P.hand,keepVal).uid; // 세트 칸이 비어 있으면 일단 채움
+  if(best!=null){const x=byUid(best);if(x&&P.hand.includes(x))setCard(pid,x)}
+}
+/* 보통: 카드별 판단이 없는 이벤트·스테이지는 한 번 써 본 결과(바로 다음 판세)로 점수를 매김 */
+const AI_KNOWN=new Set(['SD01-014','SD01-015','SD01-016','SD02-014','SD02-015','SD02-016','SD03-014','SD03-015']);
+async function aiGenericScores(pid){
+  const P=G.p[pid],out={};const cands=[...P.hand,...(P.set?[P.set]:[])].filter(c=>{const d=D(c);return(d.type==='event'||d.type==='stage')&&!AI_KNOWN.has(c.id)&&!playBlock(pid,c)});
+  if(!cands.length)return out;
+  const sd=aiSeeds(1)[0];const base=await simRun(pid,sd,async()=>{});
+  for(const c of cands){const d=D(c);if(d.type==='stage'&&P.stage)continue;
+    const pay=aiPay(P,c,d.lv||0).map(x=>x.uid);
+    const sc=await simRun(pid,sd,async()=>{await doPlay(pid,byUid(c.uid),pay)});
+    const gain=sc-base;if(gain>2)out[c.uid]=24+gain*1.5}
+  return out;
+}
+/* 쉬움 */
+async function aiMainEasy(pid){
+  const P=G.p[pid];
+  for(let g=0;g<6;g++){await sleep(420);if(Math.random()<0.25)return;
+    const acts=aiMainActs(pid).filter(a=>a.k==='play'&&D(byUid(a.uid)).type==='liver');if(!acts.length)return;
+    await aiDoMain(pid,acts[Math.random()*acts.length|0])}
+}
+async function aiActionEasy(pid){
+  for(let g=0;g<8;g++){if(G.winner!=null)return;if(Math.random()<0.2)return;
+    const acts=aiAttackActs(pid,7);if(!acts.length)return;const a=acts[Math.random()*acts.length|0];
+    await sleep(500);const at=byUid(a.att);if(!at||!canAttack(pid,at))return;await doAttack(pid,at,a.tg)}
+}
+function aiRandomAns(req){
+  const pick=a=>a[Math.random()*a.length|0];
+  switch(req.kind){
+    case'yesno':case'mulligan':return Math.random()<.5;
+    case'card':return req.optional&&Math.random()<.3?null:pick(req.uids);
+    case'color':return req.optional&&Math.random()<.3?null:pick(req.idxs);
+    case'cards':{const n=Math.max(req.min||0,Math.min(req.max??1,(req.min||0)+(Math.random()*2|0)));return simShuffle([...req.uids],Math.random).slice(0,n)}
+    case'order':return simShuffle([...req.uids],Math.random);
+  }
+}
+/* 멀리건: 난이도가 높을수록 손패 기준이 엄격함 */
+function aiMulligan(P){
+  const lv=AILV(P.pid),L=P.hand.filter(c=>D(c).type==='liver');
+  const low=L.filter(c=>D(c).lv>=1&&D(c).lv<=2).length,zero=L.filter(c=>D(c).lv===0).length,high=P.hand.filter(c=>(D(c).lv||0)>=3).length;
+  if(lv==='easy')return false;
+  if(lv==='normal')return !low;
+  const cols=new Set(L.flatMap(c=>D(c).colors||[])).size;
+  if(lv==='hard')return !low||high>=3;
+  return low<2&&!(low===1&&zero>=1)||high>=3||cols<2; // 최상: 낮은 레벨 2장 이상(또는 1장+Lv0), 고레벨 몰림 없음, 색 2가지 이상
 }
 function setCard(pid,c){
   if(pid===0&&mpLive())mpSend({t:'cmd',c:'set',uid:c.uid});
@@ -2479,7 +2674,7 @@ const SYNTH={
   win:c=>{[523,659,784,1047,784,1047].forEach((f,i)=>tone(c,{f,d:i===5?.6:.2,type:'triangle',g:.2,at:i*.12}))},
   lose:c=>{[392,349,311,262].forEach((f,i)=>tone(c,{f,d:i===3?.7:.28,type:'triangle',g:.18,at:i*.2}))}
 };
-function sfx(name){
+function sfx(name){if(G&&G.cfg&&G.cfg.headless)return;
   if(!SND.on||!SND.vol||(G&&G.cfg&&G.cfg.headless))return;
   const now=performance.now();if(SND.last[name]&&now-SND.last[name]<45)return;SND.last[name]=now; // 같은 소리 연타 방지
   const c=sndCtx();if(!c)return;
@@ -2627,7 +2822,7 @@ function handleColorClick(owner,idx){
   if(UI.att&&!p&&owner===1&&attackTargets(0,UI.att).some(t=>t.kind==='color')){UI.ccOpen=true;if(UI.tgt&&UI.tgt.kind!=='color')UI.tgt=null;render();return}
   UI.sel=`cl:${owner}:${idx}`;render();
 }
-function handleAct(a,el){
+function handleAct(a,el){if(SIMD>0)return;
   if(el&&el.tagName==='BUTTON'&&!/^(sndtoggle|snd-play)$/.test(a))sfx('click');
   const p=UI.pending;const ds=el.dataset;
   if(a.startsWith('lb-')||a.startsWith('b-')||a.startsWith('ad-')||a.startsWith('crop-')){lobbyAct(a,ds,el);return}
@@ -3047,7 +3242,7 @@ function inspHTML(s){
   return`<div class="ins-txt"><div class="ins-name">${esc(d.name)}</div><div class="ins-meta"><span>${esc(d.jp)} · ${c.id}</span>${meta}</div>${tags}
     <p class="ins-text">${d.text?kwText(d.text):'효과 없음'}${effStatus(c.id)==='미구현'?'<span class="noimpl">효과 자동 처리 미구현 — 직접 처리</span>':''}</p></div><button class="ins-img" data-act="zoom" data-id="${c.id}" aria-label="${esc(d.name)} 크게 보기">${img}<span class="zhint">크게 보기</span></button>`;
 }
-function renderInspector(){
+function renderInspector(){if(G&&G.cfg&&G.cfg.sim)return;
   const el=$('#inspector');if(!G||G.cfg.headless||SCREEN!=='game'){el.hidden=true;return}
   const t=UI.hover!=null?UI.hover:UI.sel;
   const html=t==null?'':inspHTML(t);
@@ -3164,8 +3359,8 @@ function goLobby(){
   TOKEN.dead=true;SCREEN='lobby';fit();hideModal();fxReset();if(UI)UI.logOpen=false;renderInspector();if(CD_PENDING){CD_PENDING=false;applyCardData()}renderLobby();
 }
 /* ================= SETTINGS ================= */
-const SET_DEF={fx:'normal',shake:true,banner:true,phase:true,ai:'1',hand:'m',font:'m',insp:'auto'};
-const SETOPT={fx:[['normal','보통'],['fast','빠르게'],['faster','매우 빠르게'],['off','끄기']],ai:[['1','보통'],['0.45','빠르게']],
+const SET_DEF={fx:'normal',shake:true,banner:true,phase:true,aiLv:'normal',ai:'1',hand:'m',font:'m',insp:'auto'};
+const SETOPT={fx:[['normal','보통'],['fast','빠르게'],['faster','매우 빠르게'],['off','끄기']],ai:[['1','보통'],['0.45','빠르게']],aiLv:AILVS,
   insp:[['auto','자동'],['full','크게'],['mini','간단히']],hand:[['s','작게'],['m','보통'],['l','크게'],['xl','아주 크게']],font:[['s','작게'],['m','보통'],['l','크게'],['xl','아주 크게']]};
 const SET=(()=>{const v=lsGet('nijinana.set',null);const o=Object.assign({},SET_DEF,v&&typeof v==='object'?v:{});
   for(const k of Object.keys(SETOPT))if(!SETOPT[k].some(x=>x[0]===o[k]))o[k]=SET_DEF[k];
@@ -3194,6 +3389,7 @@ function settingsHTML(){
     ${row('볼륨','',`<input type="range" min="0" max="100" value="${Math.round(SND.vol*100)}" id="sndVol" aria-label="볼륨"><button class="btn sm" data-act="lb-sndtest">▶ 들어보기</button>`)}
    </section>
    <section class="sbox2"><h4>AI 대전</h4>
+    ${row('AI 난이도','쉬움: 아무렇게나 둠 · 보통: 카드별 판단 · 어려움: 수를 직접 시험해 보고 상대 다음 턴까지 계산 · 최상: 같은 계산을 여러 번 해서 더 신중하게',seg('aiLv'))}
     ${row('AI 진행 속도','AI가 카드를 내고 공격하는 빠르기. 게임 중 왼쪽 위 ▶▶ 버튼으로도 바꿈',seg('ai'))}
    </section></div>
    <section class="sbox2 wide"><h4>화면</h4>
@@ -3245,8 +3441,8 @@ function lobbyHeadHTML(){
 }
 function quickHTML(){ // 지난번 덱 그대로 한 번에 AI 대전
   const me=getDeck(LOBBY.me),ai=getDeck(LOBBY.ai);if(!me||!ai||validateDeck(me).length||validateDeck(ai).length)return'';
-  const fl={random:'코인 토스',me:'내가 선공',ai:'AI 선공'}[LOBBY.first]||'코인 토스';
-  return`<button class="home-quick" data-act="lb-quick"><span class="hq-ic">${IC.play}</span><span class="hq-tx"><b>바로 대전</b><small>${esc(me.name)} <i>vs</i> AI ${esc(ai.name)} · ${fl}</small></span><span class="hq-go">→</span></button>`}
+  const fl={random:'코인 토스',me:'내가 선공',ai:'AI 선공'}[LOBBY.first]||'코인 토스';const lvl=(AILVS.find(x=>x[0]===SET.aiLv)||AILVS[1])[1];
+  return`<button class="home-quick" data-act="lb-quick"><span class="hq-ic">${IC.play}</span><span class="hq-tx"><b>바로 대전</b><small>${esc(me.name)} <i>vs</i> AI(${lvl}) ${esc(ai.name)} · ${fl}</small></span><span class="hq-go">→</span></button>`}
 function homeHTML(){
   const tiles=[['build','덱 만들기','50장 덱을 만들고 저장',IC.deck],['cards','카드 목록','모든 카드와 효과 보기',IC.cards],['settings','설정','연출 · 소리 · 카드 · 글씨 크기',IC.gear],
     ['rules','룰 · 가정','이 시뮬레이터의 규칙 정리',IC.book],['acct','계정',(CAP.me&&CAP.me.id)?'로그인 정보 · 로그아웃':'로그인 · 덱 저장 위치',IC.user]];
@@ -3798,7 +3994,7 @@ async function startGame(){
   if(SCREEN!==scr)return; // 로딩 중 화면을 떠났으면 시작 안 함
   SPEED=+SET.ai||1;
   hideModal();SCREEN='game';fit();renderLobby();
-  newGame({me:LOBBY.me,opp:LOBBY.ai,first});UI.logOpen=false;UI.hover=null;UI.hideHands=true;fxReset();render();runGame();
+  newGame({me:LOBBY.me,opp:LOBBY.ai,first,aiLv:SET.aiLv});log(`AI 난이도: ${(AILVS.find(x=>x[0]===SET.aiLv)||AILVS[1])[1]}`,1);UI.logOpen=false;UI.hover=null;UI.hideHands=true;fxReset();render();runGame();
 }
 /* 방금 누른 버튼이 다시 그린 뒤에도 화면의 같은 자리에 있게 (위쪽 내용 길이가 바뀌어도 화면이 튀지 않음) */
 const LBA={key:null,top:0,t:0};
@@ -3876,6 +4072,8 @@ function battleHTML(){
     <h3>AI 대전 설정</h3>
     <div class="vs"><div class="who">${chHTML(null,{id:me.ch,plain:true})}<span>나 · ${esc(me.name)}</span></div><b>VS</b><div class="who">${chHTML(null,{id:ai.ch,plain:true})}<span>AI · ${esc(ai.name)}</span></div></div>
     <span class="field-l">선공</span>${seg('lb-first',LOBBY.first,[['random','코인 토스'],['me','내가 선공'],['ai','AI가 선공']])}
+    <span class="field-l">AI 난이도</span>${seg('lb-ailv',SET.aiLv,AILVS)}
+    <p class="ailv-d">${esc(AILV_DESC[SET.aiLv]||'')}</p>
     <span class="field-l">AI 속도</span>${seg('lb-speed',SET.ai,SETOPT.ai)}
     <div style="flex:1"></div>
     ${ok?'':`<p class="why2">${esc((pm[0]?'내 덱: '+pm[0]:'AI 덱: '+pa[0]))}</p>`}
@@ -4258,6 +4456,7 @@ function lobbyAct(a,ds){
     case'lb-ai':LOBBY.ai=ds.key;saveLobbyPrefs();renderLobby();break;
     case'lb-first':LOBBY.first=ds.v;saveLobbyPrefs();renderLobby();break;
     case'lb-speed':if(SETOPT.ai.some(o=>o[0]===ds.v)){SET.ai=ds.v;saveSet()}renderLobby();break;
+    case'lb-ailv':if(AILVS.some(o=>o[0]===ds.v)){SET.aiLv=ds.v;saveSet()}renderLobby();break;
     case'lb-start':saveLobbyPrefs();startGame();break;
     case'lb-show':if(lbNoDetail()){showZoom(ds.cid);break}LOBBY.pin=ds.cid;LOBBY.hover=ds.cid;renderLobbyDetail();break;
     case'b-newblank':if(LOBBY.tab==='build')setTimeout(lbPush,0);BUILD={id:null,name:'새 덱',ch:null,list:{},dirty:true};SRCH=SRCH0();SRCH.type=['channel'];LOBBY.delArm=false;LOBBY.backArm=false;LOBBY.pin=null;renderLobby();break;
