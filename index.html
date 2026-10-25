@@ -18,9 +18,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Noto+Sans+JP:wght@500;700;900&display=swap">
-<script>window.NJ_BUILD="202610250447";window.NJ_NOTES=["모바일: 버튼을 누를 때 스크롤이 맨 위로 돌아가거나 화면이 튀던 문제 수정 — 누른 버튼이 그 자리에 그대로 있음", "로비 홈 화면 배치 정리 — 태블릿·폴드에서 버튼이 잘리거나 메뉴 글자가 깨지던 문제 수정", "니지 에리어의 컬러 카드가 칸 크기에 맞게 표시되도록 수정"];</script>
-<script src="config.js?v=202610250447"></script>
-<script src="fb.js?v=202610250447"></script>
+<script>window.NJ_BUILD="202610251409";window.NJ_NOTES=["새 카드: SD04-006 하카세 후유키 (Lv1 · 5000 · B)", "새 카드: SD04-009 하카세 후유키 (Lv3 · 6000 · GBI) — 컬러 콜 성공 시 로그의 Lv2 이하 #엔카운터 이벤트를 발동하고 덱 아래로", "모바일: 버튼을 누를 때 스크롤이 튀던 문제 수정"];</script>
+<script src="config.js?v=202610251409"></script>
+<script src="fb.js?v=202610251409"></script>
 </head>
 <body>
 <style>
@@ -1508,6 +1508,8 @@ const CARDS={
  'SD04-010':{"name": "요루미 레나", "jp": "夜見れな", "type": "liver", "cls": "star", "lv": 0, "power": 3000, "colors": [], "tags": ["エンカウンター", "クリエイター", "伝説", "ミッドナイト", "Brown"], "rar": "N", "limited": true, "text": "【한정: 같은 #】"},
  'SD04-014':{"name": "슬리브 교환", "jp": "スリーブ交換", "type": "event", "cls": "star", "lv": 0, "tags": ["エンカウンター", "カードゲーマー", "塾", "メメント"], "rar": "N", "text": "상대의 컬러 카드 1장을 앞면으로 한다. 그 후, 상대의 컬러 카드가 모두 앞면일 경우, 이 카드와 같은 #을 가진 자신의 로그의 Lv1 이하인 라이버 1장을 가로로 등장시켜도 된다."},
  'SD04-005':{"name": "카가미 하야토", "jp": "加賀美ハヤト", "type": "liver", "cls": "star", "lv": 3, "power": 8000, "colors": ["R", "O", "I"], "tags": ["エンカウンター", "カードゲーマー", "盤", "メメント"], "rar": "SDR", "text": "【컬러 콜 성공 시】【턴 1회】 상대의 컬러 카드가 모두 앞면일 경우, 이 카드와 같은 #을 가진 「카가미 하야토」 이외의 자신의 라이버 1장을 세로로 한다."},
+ 'SD04-006':{"name": "하카세 후유키", "jp": "葉加瀬冬雪", "type": "liver", "cls": "star", "lv": 1, "power": 5000, "colors": ["B"], "tags": ["エンカウンター"], "rar": "N", "text": ""},
+ 'SD04-009':{"name": "하카세 후유키", "jp": "葉加瀬冬雪", "type": "liver", "cls": "star", "lv": 3, "power": 6000, "colors": ["G", "B", "I"], "tags": ["エンカウンター"], "rar": "SDR", "text": "【컬러 콜 성공 시】【턴 1회】 자신의 로그의 Lv2 이하인 (#엔카운터) 를 가진 이벤트 1장을 발동해도 된다. 그 후, 발동한 이벤트를 덱 아래에 놓는다."},
  'SD03-002':{"name": "사사키 사쿠", "jp": "笹木咲", "type": "liver", "cls": "comet", "lv": 0, "power": 3000, "colors": [], "tags": ["ゲーマー", "囚人", "バンド"], "rar": "N", "limited": true, "text": "【한정: 같은 #】"},
  'SD03-003':{"name": "사사키 사쿠", "jp": "笹木咲", "type": "liver", "cls": "comet", "lv": 1, "power": 3000, "colors": ["B"], "tags": ["ゲーマー", "囚人", "バンド"], "rar": "N", "blocker": true, "text": "【블로커】 (상대가 공격 또는 컬러 콜했을 때, 이 카드를 가로로 하는 것으로 공격 또는 컬러 콜을 중지하고 이 카드와 배틀한다)"},
  'SD03-004':{"name": "사사키 사쿠", "jp": "笹木咲", "type": "liver", "cls": "comet", "lv": 2, "power": 5000, "colors": ["R", "B"], "tags": ["ゲーマー", "囚人", "バンド"], "rar": "N", "text": "【등장 시】 이 카드 이외의 자신의 라이버 1장을 고른다. 이번 턴 중, 고른 카드의 파워 +3000. 고른 카드의 원래 파워가 7000 이상일 경우 대신 +5000."},
@@ -2022,6 +2024,19 @@ EFF['SD04-014']={
     if(!opts.length||P.field.length>=FIELD_MAX){log('슬리브 교환: 등장시킬 같은 # 라이버가 로그에 없음',pid);return}
     const u=await ask(pid,{kind:'card',uids:opts.map(x=>x.uid),optional:true,text:'슬리브 교환: 가로로 등장시킬 로그의 Lv1 이하 같은 # 라이버 (건너뛰기 가능)',ai:()=>maxBy(opts,val).uid});
     if(u!=null){const x=take(P.log,u);if(x)await enter(pid,x,true)}
+  }
+};
+EFF['SD04-009']={ // 하카세 후유키: 컬러 콜 성공 시 로그의 Lv2 이하 #엔카운터 이벤트를 발동하고 덱 아래로
+  async ccWin(pid,c){const P=G.p[pid];
+    if(c.once.ccw)return;
+    const opts=P.log.filter(x=>D(x).type==='event'&&(D(x).lv||0)<=2&&D(x).tags.includes('エンカウンター'));
+    if(!opts.length){log('하카세 후유키: 발동할 로그의 Lv2 이하 #엔카운터 이벤트가 없음',pid);return}
+    const u=await ask(pid,{kind:'card',uids:opts.map(x=>x.uid),optional:true,text:'하카세 후유키 컬러 콜 성공 시: 발동할 로그의 Lv2 이하 #엔카운터 이벤트 선택 (건너뛰기 가능)',ai:()=>maxBy(opts,val).uid});
+    if(u==null){log('하카세 후유키: 이벤트를 발동하지 않음',pid);return}
+    const e=take(P.log,u);if(!e)return;c.once.ccw=true;
+    log(`하카세 후유키: 로그의 ${nm(e)} 발동`,pid);render();await fx('event',{c:e});
+    if(EFF[e.id]&&EFF[e.id].play)await EFF[e.id].play(pid,e);else if(D(e).text)log(`${nm(e)}: 효과 자동 처리 미구현 — 텍스트대로 직접 처리`,pid);
+    P.deck.push(e);log(`하카세 후유키: 발동한 ${nm(e)}을(를) 덱 아래에 놓음`,pid);render();await sleep(250);
   }
 };
 EFF['SD04-005']={
