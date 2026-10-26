@@ -18,9 +18,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Noto+Sans+JP:wght@500;700;900&display=swap">
-<script>window.NJ_BUILD="202610261346";window.NJ_NOTES=["새 카드: SD04-012 요루미 레나 (Lv2 · 5000 · YIV) — 등장 시 서로 상대의 컬러 카드 1장씩 앞면으로", "새 카드: SD04-013 요루미 레나 (Lv4 · 10000 · ROYV) — 상대 턴에 배틀로 로그에 가면 덱 위 3장을 보고 같은 # Lv2 이하 라이버를 가로로 등장", "AI 난이도 추가: 쉬움 · 보통 · 어려움 · 최상"];</script>
-<script src="config.js?v=202610261346"></script>
-<script src="fb.js?v=202610261346"></script>
+<script>window.NJ_BUILD="202610261449";window.NJ_NOTES=["카드 목록 새 구성: 스타터 덱 4종 · 부스터 팩으로 나눠 보고, 누르면 채널 카드부터 들어 있는 카드와 장수를 모두 표시", "카드 목록을 내리는 중에 가끔 맨 위로 올라가던 문제 수정", "카드 번호를 공식 표기대로 NJ-SD01-001 형식으로 표시", "휴대폰에서 카드 목록의 카드를 누르면 크게 보기"];</script>
+<script src="config.js?v=202610261449"></script>
+<script src="fb.js?v=202610261449"></script>
 </head>
 <body>
 <style>
@@ -460,6 +460,43 @@ legend{font-size:12px;font-weight:700;color:var(--accent);padding:0 4px}
 .lb-body.battle{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 500px}
 .lb-body.cards{grid-template-columns:minmax(0,1fr) 340px}
 .cpanel{gap:18px;overflow-y:auto}.sect.empty{opacity:.6}.csub{font-size:11px;font-weight:600;opacity:.65;margin-left:2px}
+/* 카드 목록: 상품별 */
+.pk-sect{display:flex;flex-direction:column;gap:12px}
+.pk-sect h4,.pk-view .sect h4{margin:0}
+.pkgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.pkgrid.booster{grid-template-columns:repeat(4,minmax(0,1fr))}
+.pk-wrap{position:relative;min-width:0;display:flex}
+.pk{appearance:none;border:2px solid transparent;font:inherit;color:var(--ink);background:rgba(255,255,255,.92);border-radius:16px;padding:0;cursor:pointer;display:flex;flex-direction:column;overflow:hidden;text-align:left;width:100%;box-shadow:0 2px 10px rgba(40,30,90,.08);transition:transform .14s,box-shadow .14s,border-color .14s}
+.pk:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(40,30,90,.16);border-color:rgba(214,51,122,.35)}
+.pk:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.pk.pk-soon{opacity:.75}
+.pk-art{display:block;aspect-ratio:4/3;background:linear-gradient(135deg,#f9e3ef,#e3e8fb);position:relative;overflow:hidden}
+.pk-art img{width:100%;height:100%;object-fit:cover;display:block}
+.pk-ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--f-jp);font-weight:900;font-size:20px;color:#fff;background:linear-gradient(150deg,var(--cls,var(--accent)),#1d2440);padding:12px;text-align:center}
+.pk-ph.sun{--cls:var(--sun)}.pk-ph.moon{--cls:var(--moon)}.pk-ph.comet{--cls:var(--comet)}.pk-ph.star{--cls:var(--star)}
+.pk-txt{display:flex;flex-direction:column;gap:2px;padding:10px 14px 12px;min-width:0}
+.pk-txt em{font-style:normal;font-family:var(--f-num);font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--accent)}
+.pk-txt b{font-size:16px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pk-txt small{font-size:11.5px;color:var(--ink-3);font-family:var(--f-jp)}
+.pk-n{margin-top:4px;font-size:12px;font-weight:600;color:var(--ink-2)}
+.pk-edit{position:absolute;top:8px;right:8px;appearance:none;border:0;font:inherit;font-size:11.5px;font-weight:700;padding:5px 10px;border-radius:999px;background:rgba(28,36,64,.82);color:#fff;cursor:pointer}
+.pk-edit:hover{background:var(--accent)}
+.pk-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.pk-mini{width:72px;aspect-ratio:4/3;border-radius:8px;overflow:hidden;position:relative;flex:none;background:#eee}
+.pk-mini img{width:100%;height:100%;object-fit:cover;display:block}.pk-mini .pk-ph{font-size:10px;padding:4px}
+.pk-ttl{display:flex;flex-direction:column;min-width:0;flex:1}
+.pk-ttl em{font-style:normal;font-family:var(--f-num);font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--accent)}
+.pk-ttl b{font-size:19px}
+.pk-chs{display:flex;flex-wrap:wrap;gap:14px}
+.pc-ch{align-items:flex-start}
+.pk-chbox{display:block;width:264px;height:189px;position:relative}
+.pk-chbox .chcard{position:absolute;left:0;top:0;transform:scale(1.5);transform-origin:0 0}
+.pc-ch .nm small{font-family:var(--f-num);font-weight:600;color:var(--ink-3);margin-left:4px}
+.pc{position:relative}
+.pc-no{font-family:var(--f-num);font-size:10.5px;font-weight:600;color:var(--ink-3);margin-top:-4px;white-space:nowrap}.pc-no b{color:var(--accent);font-family:var(--f-ui,inherit)}
+.pk-view .cgrid{grid-template-columns:repeat(auto-fill,minmax(138px,1fr));gap:16px 12px}
+.pk-view .cgrid .pc .card{--s:1.9}
+.pk-view .pc .nm{font-size:12.5px}
 .lb-body.build{grid-template-columns:320px minmax(0,1fr) 610px}
 .lb-body.blist{grid-template-columns:minmax(0,1fr)}
 .dgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px;overflow-y:auto;min-height:0;padding:4px 2px 8px;align-content:start;flex:1}
@@ -1150,6 +1187,11 @@ button,a,[role=button]{-webkit-tap-highlight-color:transparent}
  .mcard{min-height:280px;padding:28px}.mcard b{font-size:34px}.mc-ic{margin-bottom:24px}
  .lb-body.settings,.lb-body.admin{overflow:visible}
  .cgrid{grid-template-columns:repeat(auto-fill,minmax(100px,1fr))}
+ .pkgrid,.pkgrid.booster{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+ .pk-view .cgrid{grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:12px 8px}
+ .pk-view .cgrid .pc .card{--s:1.45}
+ .pk-chbox{width:220px;height:158px}.pk-chbox .chcard{transform:scale(1.25)}
+ .pk-txt{padding:8px 10px 10px}.pk-txt b{font-size:14.5px}
  .setgrid{grid-template-columns:1fr}
  .auth{grid-template-columns:1fr;height:auto}
  .auth-art{padding:24px 24px 18px}.auth-panel{padding:24px}
@@ -2503,7 +2545,12 @@ const UIRES={
   _uiModeAI:{n:'AI 대전 카드',d:'게임 시작 → 모드 선택의 AI 대전 칸 (9:10)',r:.9,w:900,g:'화면'},
   _uiModeMP:{n:'멀티 대전 카드',d:'게임 시작 → 모드 선택의 멀티 대전 칸 (9:10)',r:.9,w:900,g:'화면'},
   _uiCoinH:{n:'코인 앞면',d:'선후공 코인 토스 앞면 (1:1, 원형으로 잘림)',r:1,w:512,g:'코인'},
-  _uiCoinT:{n:'코인 뒷면',d:'선후공 코인 토스 뒷면 (1:1, 원형으로 잘림)',r:1,w:512,g:'코인'}
+  _uiCoinT:{n:'코인 뒷면',d:'선후공 코인 토스 뒷면 (1:1, 원형으로 잘림)',r:1,w:512,g:'코인'},
+  _uiPkSD01:{n:'스타터 SD01 썸네일',d:'카드 목록의 츠키노 미토 스타터 덱 칸 (4:3)',r:4/3,w:900,g:'상품'},
+  _uiPkSD02:{n:'스타터 SD02 썸네일',d:'카드 목록의 쿠즈하 스타터 덱 칸 (4:3)',r:4/3,w:900,g:'상품'},
+  _uiPkSD03:{n:'스타터 SD03 썸네일',d:'카드 목록의 사사키 사쿠 스타터 덱 칸 (4:3)',r:4/3,w:900,g:'상품'},
+  _uiPkSD04:{n:'스타터 SD04 썸네일',d:'카드 목록의 카가미 하야토 스타터 덱 칸 (4:3)',r:4/3,w:900,g:'상품'},
+  _uiPkBP01:{n:'부스터 BP01 썸네일',d:'카드 목록의 부스터 팩 제1탄 칸 (4:3)',r:4/3,w:900,g:'상품'}
 };
 const isUI=k=>typeof k==='string'&&k.startsWith('_ui');
 const SPECIAL={...Object.fromEntries(Object.entries(UIRES).map(([k,v])=>[k,v.n])),_back:'카드 뒷면',_chback:'채널 카드 뒷면',_cl:'컬러 카드 뒷면',_clR:'컬러 앞면 · R 빨강',_clO:'컬러 앞면 · O 주황',_clY:'컬러 앞면 · Y 노랑',_clG:'컬러 앞면 · G 초록',_clB:'컬러 앞면 · B 파랑',_clI:'컬러 앞면 · I 남색',_clV:'컬러 앞면 · V 보라'};
@@ -2535,11 +2582,13 @@ const CLS_IN={'태양':'sun','솔':'sun','sun':'sun','적':'sun','적색':'sun',
 const COLOR_IN={R:'R',O:'O',Y:'Y',G:'G',B:'B',I:'I',V:'V','빨강':'R','주황':'O','노랑':'Y','초록':'G','파랑':'B','남색':'I','보라':'V'};
 const TAG_IN=Object.fromEntries(Object.entries(TAGKO).map(([jp,ko])=>[ko,jp]));
 const yes=v=>/^(o|○|◯|y|yes|1|true|있음|예|v|✓|✔)$/i.test(String(v||'').trim());
-function normId(v){const m=String(v||'').trim().match(/^([A-Za-z]{2,4})\s*-?\s*(\d{1,2})\s*-\s*(\d{1,3})$/);return m?`${m[1].toUpperCase()}${m[2].padStart(2,'0')}-${m[3].padStart(3,'0')}`:null}
+// 화면에 보이는 카드 번호에는 공식 표기대로 NJ- 를 붙임 (내부 번호·저장 데이터는 SD01-001 그대로)
+const cardNo=id=>typeof id==='string'&&/^[A-Z]{2,4}\d{2}-\d{3}$/.test(id)?'NJ-'+id:id;
+function normId(v){const m=String(v||'').trim().match(/^(?:[Nn][Jj]\s*-\s*)?([A-Za-z]{2,4})\s*-?\s*(\d{1,2})\s*-\s*(\d{1,3})$/);return m?`${m[1].toUpperCase()}${m[2].padStart(2,'0')}-${m[3].padStart(3,'0')}`:null}
 function splitList(v){return String(v||'').split(/[\s,，、/·]+/).map(x=>x.trim().replace(/^#/,'')).filter(Boolean)}
 /* 한 행(열 이름→값) → {card} 또는 {err:[…]} */
 function rowToCard(r){
-  const err=[];const id=normId(r['번호']);if(!id)err.push('번호 형식 (예: SD03-001)');
+  const err=[];const id=normId(r['번호']);if(!id)err.push('번호 형식 (예: NJ-SD03-001)');
   const name=String(r['이름']||'').trim().slice(0,40);if(!name)err.push('이름 없음');
   const type=TYPE_IN[String(r['종류']||'').trim()];if(!type)err.push('종류 (채널/라이버/이벤트/스테이지)');
   const cls=CLS_IN[String(r['색상']||'').trim().toLowerCase()]||CLS_IN[String(r['색상']||'').trim()];if(!cls)err.push('색상 (태양/달/혜성/별)');
@@ -2565,7 +2614,7 @@ function cleanStored(o){
   return out;
 }
 function cardToRow(k){const d=CARDS[k];
-  return[k,d.name,d.jp||'',TYPEKO[d.type],CLSKO[d.cls]||d.cls,d.lv??'',d.type==='liver'?d.power:'',(d.colors||[]).join(' '),(d.trigger||[]).join(' '),
+  return[cardNo(k),d.name,d.jp||'',TYPEKO[d.type],CLSKO[d.cls]||d.cls,d.lv??'',d.type==='liver'?d.power:'',(d.colors||[]).join(' '),(d.trigger||[]).join(' '),
     (d.tags||[]).map(tagKo).join(', '),d.rar||'',d.blocker?'O':'',d.sp?'O':'',d.limited?'O':'',d.text||'']}
 const cdIds=()=>Object.keys(CARDS).sort((a,b)=>a.localeCompare(b));
 function tsvCell(v){v=String(v??'');return/[\t\n"]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}
@@ -2627,7 +2676,7 @@ async function cdApply(){
 }
 async function cdRevert(k){
   if(!CAP.db||!CUSTOM[k])return;const next={...CUSTOM};delete next[k];ADMIN.busy=true;renderLobby();
-  try{await writeCardData(next);CUSTOM=next;ADMIN.msg=`${k} ${BASECARDS[k]?'기본값으로 되돌림':'삭제 완료'}.`;ADMIN.err=false;applyCardData()}
+  try{await writeCardData(next);CUSTOM=next;ADMIN.msg=`${cardNo(k)} ${BASECARDS[k]?'기본값으로 되돌림':'삭제 완료'}.`;ADMIN.err=false;applyCardData()}
   catch(e){ADMIN.msg='저장 실패: '+errText(e);ADMIN.err=true}
   ADMIN.busy=false;renderLobby();
 }
@@ -2642,12 +2691,12 @@ function cardDataHTML(){
   const prev=ADMIN.cdPrev;
   const pv=prev?`<div class="cd-prev"><div class="row"><b>미리보기 ${prev.length}행</b><span class="pill ok">적용 가능 ${prev.filter(p=>p.card).length}</span>${prev.some(p=>!p.card)?`<span class="pill" style="color:var(--down)">오류 ${prev.filter(p=>!p.card).length}</span>`:''}<span style="flex:1"></span>
       <button class="btn sm" data-act="ad-cdcancel">취소</button><button class="btn primary sm" data-act="ad-cdapply" ${prev.some(p=>p.card)&&!ADMIN.busy?'':'disabled'}>적용 (${prev.filter(p=>p.card).length}장)</button></div>
-     <div class="cd-pl">${prev.map(p=>`<div class="cd-pr ${p.card?'':'bad'}"><span class="st ${p.st==='신규'?'new':p.st==='수정'?'mod':'err'}">${p.st}</span><b>${esc(p.id)}</b><span>${esc(p.name)}</span>${p.err?`<em>${esc(p.err.join(' · '))}</em>`:p.card?`<small>${esc(TYPEKO[p.card.type])} · ${esc(CLSKO[p.card.cls])}${p.card.lv!=null?' · Lv'+p.card.lv:''}${p.card.power!=null?' · '+p.card.power:''}${p.card.colors?' · '+p.card.colors.join(''):''}${p.card.trigger?' · 트리거 '+p.card.trigger.join(''):''}</small>`:''}</div>`).join('')}</div></div>`:'';
+     <div class="cd-pl">${prev.map(p=>`<div class="cd-pr ${p.card?'':'bad'}"><span class="st ${p.st==='신규'?'new':p.st==='수정'?'mod':'err'}">${p.st}</span><b>${esc(p.id==='?'?p.id:cardNo(p.id))}</b><span>${esc(p.name)}</span>${p.err?`<em>${esc(p.err.join(' · '))}</em>`:p.card?`<small>${esc(TYPEKO[p.card.type])} · ${esc(CLSKO[p.card.cls])}${p.card.lv!=null?' · Lv'+p.card.lv:''}${p.card.power!=null?' · '+p.card.power:''}${p.card.colors?' · '+p.card.colors.join(''):''}${p.card.trigger?' · 트리거 '+p.card.trigger.join(''):''}</small>`:''}</div>`).join('')}</div></div>`:'';
   return`<h3>카드 데이터 <small>총 ${ids.length}장 · 기본 ${ids.length-nNew} · 추가 ${nNew} · 수정 ${nMod} · 효과 미구현 ${nTodo}</small></h3>
    <div class="abar"><button class="btn sm" data-act="ad-cdcopy">현재 표 복사 (스프레드시트용)</button><button class="btn sm" data-act="ad-cdblank">빈 양식 복사</button>
     <p class="hint" style="flex:1;min-width:420px">스프레드시트에서 행을 복사해 아래에 붙여넣기 → 미리보기 → 적용. 첫 줄이 머리글이면 열 순서가 달라도 된다. 같은 번호는 수정, 새 번호는 추가.
      종류: 채널/라이버/이벤트/스테이지 · 색상: 태양/달/혜성/별 · 컬러·트리거: R O Y G B I V (띄어쓰기) · 태그: 쉼표 구분 · 블로커/SP/한정: O · 효과 키워드는 【등장 시】처럼 【】로 감싼다.</p></div>
-   <div class="cd-in"><textarea id="cdPaste" placeholder="${esc(CD_COLS.join('\t'))}&#10;SD03-001&#9;…">${esc(ADMIN.cdText||'')}</textarea><button class="btn primary" data-act="ad-cdprev">미리보기</button></div>
+   <div class="cd-in"><textarea id="cdPaste" placeholder="${esc(CD_COLS.join('\t'))}&#10;NJ-SD03-001&#9;…">${esc(ADMIN.cdText||'')}</textarea><button class="btn primary" data-act="ad-cdprev">미리보기</button></div>
    ${ADMIN.msg?`<p class="amsg ${ADMIN.err?'err':''}">${esc(ADMIN.msg)}</p>`:''}
    ${pv}
    <div class="cd-tbl"><table><thead><tr>${CD_COLS.map(c=>`<th>${c}</th>`).join('')}<th>효과 처리</th><th></th></tr></thead><tbody>
@@ -2912,7 +2961,7 @@ document.addEventListener('click',e=>{
     return;
   }
   if(el.dataset.act){handleAct(el.dataset.act,el);return}
-  if(el.dataset.cid){LOBBY.hover=el.dataset.cid;LOBBY.pin=el.dataset.cid;renderLobbyDetail();return}
+  if(el.dataset.cid){if(SCREEN==='lobby'&&lbNoDetail()&&!el.closest('#modal,#zoom')){showZoom(el.dataset.cid);return}LOBBY.hover=el.dataset.cid;LOBBY.pin=el.dataset.cid;renderLobbyDetail();return}
   if(el.closest('#modal')||el.closest('#inspector')||SCREEN!=='game')return;
   if(el.dataset.cl!=null){handleColorClick(+el.dataset.owner,+el.dataset.cl);return}
   handleCardClick(+el.dataset.uid);
@@ -3265,7 +3314,7 @@ function inspHTML(s){
   if(zone==='field')meta+=`<span>${c.tapped?'가로 (행동 완료)':'세로'}${c.noUntap?' · 잠금':''}${c.noCC?' · 이번 턴 컬러 콜 불가':''}</span>`;
   const tags=d.tags.length?`<div class="tags" style="margin-top:8px">${d.tags.map(t=>`<span class="tag">#${esc(tagKo(t))}</span>`).join('')}</div>`:'';
   const img=d.type==='channel'?chHTML(G.p[c.owner],{plain:true}):cardHTML(c,{plain:true});
-  return`<div class="ins-txt"><div class="ins-name">${esc(d.name)}</div><div class="ins-meta"><span>${esc(d.jp)} · ${c.id}</span>${meta}</div>${tags}
+  return`<div class="ins-txt"><div class="ins-name">${esc(d.name)}</div><div class="ins-meta"><span>${esc(d.jp)} · ${cardNo(c.id)}</span>${meta}</div>${tags}
     <p class="ins-text">${d.text?kwText(d.text):'효과 없음'}${effStatus(c.id)==='미구현'?'<span class="noimpl">효과 자동 처리 미구현 — 직접 처리</span>':''}</p></div><button class="ins-img" data-act="zoom" data-id="${c.id}" aria-label="${esc(d.name)} 크게 보기">${img}<span class="zhint">크게 보기</span></button>`;
 }
 function renderInspector(){if(G&&G.cfg&&G.cfg.sim)return;
@@ -3377,7 +3426,7 @@ function showRules(){
 }
 
 /* ================= LOBBY ================= */
-const LOBBY={tab:SOLO?'boot':'home',mode:null,me:'SD01',ai:'SD02',first:'random',speed:'1',hover:null,pin:null,delArm:false,msg:''};
+const LOBBY={tab:SOLO?'boot':'home',mode:null,me:'SD01',ai:'SD02',first:'random',speed:'1',hover:null,pin:null,pack:null,delArm:false,msg:''};
 let BUILD=null;
 const ADMIN={busy:false,msg:'',err:false,usage:null,arm:null,pending:null,drop:null};
 function goLobby(){
@@ -4041,7 +4090,7 @@ function renderLobby(){
   L.hidden=false;L.dataset.tab=LOBBY.tab;
   const ae=document.activeElement;const fid=ae&&ae.id&&L.contains(ae)?ae.id:null;
   let ss=null,se=null;try{if(fid&&ae.selectionStart!=null){ss=ae.selectionStart;se=ae.selectionEnd}}catch(e){}
-  const KS=['.resbox','.sres','.dkgrid','.dgrid','.filters','.dlist','.slots','.cgrid','.lb-body.settings','.auth-panel'];const sc={};KS.forEach(k=>{const e=L.querySelector(k);if(e)sc[k]=e.scrollTop});
+  const KS=['.resbox','.sres','.dkgrid','.dgrid','.filters','.dlist','.slots','.cgrid','.cpanel','.lb-body.settings','.auth-panel'];const sc={};KS.forEach(k=>{const e=L.querySelector(k);if(e)sc[k]=e.scrollTop});
   const top0=L.scrollTop;
   L.innerHTML=lobbyHTML();fillAcct(L);
   KS.forEach(k=>{const e=L.querySelector(k);if(e&&sc[k])e.scrollTop=sc[k]});
@@ -4232,12 +4281,51 @@ function buildPick(k){
   if(countList(BUILD.list)>=50){toast('50장 가득 참');renderLobby();return}
   BUILD.list[k]=v+1;BUILD.dirty=true;renderLobby();
 }
+/* 카드 목록: 상품(스타터 덱 · 부스터 팩)별로 보기. 썸네일은 관리자 → 화면 리소스 → "카드 목록 썸네일"에서 바꿈 */
+const PACKS=[
+  {k:'SD01',g:'starter',name:'츠키노 미토',jp:'月ノ美兎',ch:'SD01-001'},
+  {k:'SD02',g:'starter',name:'쿠즈하',jp:'葛葉',ch:'SD02-001'},
+  {k:'SD03',g:'starter',name:'사사키 사쿠',jp:'笹木咲',ch:'SD03-001'},
+  {k:'SD04',g:'starter',name:'카가미 하야토',jp:'加賀美ハヤト',ch:'SD04-001'},
+  {k:'BP01',g:'booster',name:'COLORS IGNITION',jp:'虹の幕開け',sub:'부스터 팩 제1탄'}];
+const PACKG=[['starter','스타터 덱','채널 카드 1장 + 50장 덱이 바로 들어 있는 상품'],['booster','부스터 팩','랜덤으로 카드가 들어 있는 확장 팩']];
+const packOf=k=>PACKS.find(p=>p.k===k)||null;
+const packIds=pk=>Object.keys(CARDS).filter(k=>k.startsWith(pk.k+'-')).sort((a,b)=>CARDS[a].type==='channel'?-1:CARDS[b].type==='channel'?1:a.localeCompare(b));
+const packStarter=pk=>pk.g==='starter'&&STARTERS[pk.k]&&STARTERS[pk.k].ch===pk.ch?STARTERS[pk.k]:null;
+function packArt(pk){
+  const a=artOf('_uiPk'+pk.k);if(a)return`<img src="${blobUrl(a)}" data-art="${a}" alt="">`;
+  if(pk.g==='booster')return`<img src="${esc(BN_DEF.bp01)}" alt="" class="pk-def">`;
+  const t=pk.ch&&thumbOf(pk.ch);const d=CARDS[pk.ch];
+  return t?`<img src="${blobUrl(t)}" data-art="${t}" alt="" class="pk-def">`:`<span class="pk-ph ${d?d.cls:''}">${esc(pk.name)}</span>`;
+}
+function packTile(pk){
+  const ids=packIds(pk);const st=packStarter(pk);const n=ids.length;
+  const info=n?(st?`${n}종 · 덱 ${countList(st.list)}장`:`${n}종 공개`):'카드 준비 중';
+  return`<div class="pk-wrap"><button class="pk ${n?'':'pk-soon'}" data-act="lb-pack" data-v="${pk.k}" aria-label="${esc(pk.name)} 카드 구성 보기">
+    <span class="pk-art">${packArt(pk)}</span>
+    <span class="pk-txt"><em>NJ-${pk.k}${pk.sub?' · '+esc(pk.sub):''}</em><b>${esc(pk.name)}</b><small>${esc(pk.jp)}</small><span class="pk-n">${info}</span></span></button>
+    ${CAP.admin?`<button class="pk-edit" data-act="ad-one" data-k="_uiPk${pk.k}" title="썸네일 이미지 바꾸기" ${ADMIN.busy?'disabled':''}>썸네일 바꾸기</button>`:''}</div>`;
+}
 function cardsHTML(){
-  const sect=cls=>{const ids=Object.keys(CARDS).filter(k=>CARDS[k].cls===cls&&CARDS[k].type!=='channel').sort();const chs=Object.keys(CARDS).filter(k=>CARDS[k].cls===cls&&CARDS[k].type==='channel').sort();
-    return`<div class="sect ${ids.length+chs.length?'':'empty'}"><h4><i style="background:var(--${cls})"></i>${CLSKO[cls]} · ${CLSSUB[cls]} <small class="csub">${CLSCOL[cls]}</small> <span class="pill">${ids.length+chs.length}장</span>${chs.map(c=>`<button class="btn sm" data-act="lb-show" data-cid="${c}">채널: ${esc(CARDS[c].name)}</button>`).join('')}</h4>
-     ${ids.length?`<div class="cgrid">${ids.map(k=>`<div class="pc">${cardHTML(viewCard(k),{plain:true,cid:true})}<span class="nm">${esc(CARDS[k].name)}</span></div>`).join('')}</div>`:'<p class="hint">아직 공개된 카드 없음</p>'}</div>`};
-  return`<main class="lb-body cards"><section class="panel cpanel">${CLSLIST.map(sect).join('')}</section>
-   <section class="panel detail" id="lbDetail">${detailHTML()}</section></main>`;
+  const pk=packOf(LOBBY.pack);
+  if(!pk)return`<main class="lb-body cards"><section class="panel cpanel">
+    ${PACKG.map(([g,t,sm])=>`<div class="pk-sect"><h4><i style="background:var(--${g==='starter'?'accent':'ai'})"></i>${t} <small class="csub">${sm}</small></h4>
+      <div class="pkgrid ${g}">${PACKS.filter(p=>p.g===g).map(packTile).join('')}</div></div>`).join('')}
+   </section><section class="panel detail" id="lbDetail">${detailHTML()}</section></main>`;
+  const ids=packIds(pk);const st=packStarter(pk);
+  const chs=ids.filter(k=>CARDS[k].type==='channel'),rest=ids.filter(k=>CARDS[k].type!=='channel');
+  const cnt=k=>st&&st.list[k]?` · <b>${st.list[k]}장</b>`:'';
+  const sum=st?`<span class="pill">채널 1장 + 덱 ${countList(st.list)}장</span>`:`<span class="pill">${ids.length}종</span>`;
+  const note=pk.g==='starter'&&!st&&ids.length?'<p class="hint">이 덱의 장수 구성은 아직 정리 전 — 공개된 카드만 표시</p>':'';
+  return`<main class="lb-body cards"><section class="panel cpanel pk-view">
+    <div class="pk-head"><button class="btn sm" data-act="lb-pack" data-v="">← 카드 목록</button><span class="pk-mini">${packArt(pk)}</span>
+     <div class="pk-ttl"><em>NJ-${pk.k} · ${pk.g==='starter'?'스타터 덱':esc(pk.sub||'부스터 팩')}</em><b>${esc(pk.name)}</b></div>${sum}</div>${note}
+    ${!ids.length?'<p class="hint">아직 공개된 카드 없음</p>':''}
+    ${chs.length?`<div class="sect"><h4><i style="background:var(--${CARDS[chs[0]].cls})"></i>채널 카드 <span class="pill">${chs.length}장</span></h4>
+      <div class="pk-chs">${chs.map(k=>`<div class="pc pc-ch"><span class="pk-chbox">${chHTML(null,{id:k,plain:true,cid:true})}</span><span class="nm">${esc(CARDS[k].name)} <small>${cardNo(k)}</small></span></div>`).join('')}</div></div>`:''}
+    ${rest.length?`<div class="sect"><h4><i style="background:var(--${CARDS[rest[0]].cls})"></i>${pk.g==='starter'?'덱 카드':'수록 카드'} <span class="pill">${rest.length}종</span></h4>
+      <div class="cgrid">${rest.map(k=>`<div class="pc">${cardHTML(viewCard(k),{plain:true,cid:true})}<span class="nm">${esc(CARDS[k].name)}</span><span class="pc-no">${cardNo(k)}${cnt(k)}</span></div>`).join('')}</div></div>`:''}
+   </section><section class="panel detail" id="lbDetail">${detailHTML()}</section></main>`;
 }
 function detailHTML(){
   const k=LOBBY.hover||LOBBY.pin;
@@ -4248,7 +4336,7 @@ function detailHTML(){
   if(d.lv!=null)meta+=`<span>Lv ${d.lv}</span>`;
   if(d.type==='liver')meta+=`<span>파워 ${d.power}</span><span>색 ${d.colors.length?d.colors.map(x=>`<i class="chip" style="--cc:var(--${x})">${x}</i>`).join(' '):'없음'}</span>`;
   if(d.trigger)meta+=`<span>트리거 ${d.trigger.map(x=>`<i class="chip" style="--cc:var(--${x})">${x}</i>`).join(' ')}</span>`;
-  return`<button class="dzoom" data-act="zoom" data-id="${k}" aria-label="${esc(d.name)} 크게 보기">${big}</button><div class="dname">${esc(d.name)}<small>${esc(d.jp)} · ${k}</small></div><div class="dmeta">${meta}</div>
+  return`<button class="dzoom" data-act="zoom" data-id="${k}" aria-label="${esc(d.name)} 크게 보기">${big}</button><div class="dname">${esc(d.name)}<small>${esc(d.jp)} · ${cardNo(k)}</small></div><div class="dmeta">${meta}</div>
     ${d.tags.length?`<div class="tags" style="justify-content:center">${d.tags.map(t=>`<span class="tag">#${esc(tagKo(t))}</span>`).join('')}</div>`:''}
     <p class="dtext">${d.text?kwText(d.text):'효과 없음'}${effStatus(k)==='미구현'?'<span class="noimpl">효과 자동 처리 미구현 — 직접 처리</span>':''}</p>`;
 }
@@ -4274,12 +4362,12 @@ function adminHTML(){
   return`<main class="lb-body admin"><section class="panel">${sub}
    <h3>카드 이미지 관리 <small>이미지 ${SLOTS.filter(k=>!k.startsWith('_')&&artOf(k)).length}/${SLOTS.filter(k=>!k.startsWith('_')).length} 등록됨 · 업로드 즉시 모든 사용자에게 적용 · 뒷면·컬러 카드·화면 이미지는 "화면 리소스" 탭</small></h3>
    <div class="abar"><button class="btn primary" data-act="ad-bulk" ${ADMIN.busy?'disabled':''}>여러 장 한꺼번에 올리기</button>${SOLO&&window.claude.seed?`<button class="btn" data-act="ad-seed" ${ADMIN.busy?'disabled':''}>기존 이미지 가져오기 (claude.ai 버전)</button>`:''}
-    <p class="hint" style="max-width:820px">파일 이름에 카드 번호(예: <b>SD01-004.png</b>, NJ-SD02-015.jpg, <b>BP01-012.png</b>)가 들어 있으면 맞는 카드에 자동 적용. 뒷면은 이름에 <b>back</b>, 채널 카드 뒷면은 <b>channel_back</b>, 컬러 카드 뒷면은 <b>color</b>, 컬러 카드 앞면은 <b>color_R</b>(R·O·Y·G·B·I·V) 포함. 컬러 카드는 일반 카드와 같은 세로 이미지로 올리면 된다. 1080×1080 공식 홍보 이미지는 가운데 카드 부분을 자동으로 자른다. 카드 하나만 바꾸려면 아래 카드의 "올리기"를 누르거나 파일을 카드 위로 드래그.</p>
+    <p class="hint" style="max-width:820px">파일 이름에 카드 번호(예: <b>NJ-SD01-004.png</b>, SD02-015.jpg, <b>NJ-BP01-012.png</b>)가 들어 있으면 맞는 카드에 자동 적용. 뒷면은 이름에 <b>back</b>, 채널 카드 뒷면은 <b>channel_back</b>, 컬러 카드 뒷면은 <b>color</b>, 컬러 카드 앞면은 <b>color_R</b>(R·O·Y·G·B·I·V) 포함. 컬러 카드는 일반 카드와 같은 세로 이미지로 올리면 된다. 1080×1080 공식 홍보 이미지는 가운데 카드 부분을 자동으로 자른다. 카드 하나만 바꾸려면 아래 카드의 "올리기"를 누르거나 파일을 카드 위로 드래그.</p>
     ${meter}</div>
    ${ADMIN.msg?`<p class="amsg ${ADMIN.err?'err':''}">${esc(ADMIN.msg)}</p>`:''}
    <div class="slots">${SLOTS.filter(k=>!k.startsWith('_')).map(k=>{const a=artOf(k);const label=SPECIAL[k]||CARDS[k].name;
      return`<div class="slot ${ADMIN.drop===k?'drop':''}" data-slot="${k}">${a?'<span class="has" title="이미지 있음"></span>':''}${slotPreview(k)}
-      <span class="snm">${esc(label)}</span><span class="sid">${SPECIAL[k]?'공통':k}</span>
+      <span class="snm">${esc(label)}</span><span class="sid">${SPECIAL[k]?'공통':cardNo(k)}</span>
       <div class="sb"><button data-act="ad-one" data-k="${k}" ${ADMIN.busy?'disabled':''}>${a?'바꾸기':'올리기'}</button>${a?`<button class="del ${ADMIN.arm===k?'arm':''}" data-act="ad-del" data-k="${k}" ${ADMIN.busy?'disabled':''}>${ADMIN.arm===k?'확인':'지우기'}</button>`:''}</div></div>`}).join('')}</div>
   </section></main>`;
 }
@@ -4424,6 +4512,7 @@ function resAdminHTML(){
    ${bannerAdminHTML()}
    ${sec('화면',grp('화면'),'로고 · 배너 · 배경')}
    ${sec('코인 토스',grp('코인'),'선후공 코인')}
+   ${sec('카드 목록 썸네일',grp('상품'),'스타터 덱 · 부스터 팩 칸 (기본: 채널 카드 그림 · 부스터 배너)')}
    ${sec('카드 공통',['_back','_chback','_cl','_clR','_clO','_clY','_clG','_clB','_clI','_clV'],'카드 뒷면 · 채널 뒷면 · 컬러 카드')}</div>`;
 }
 /* 화면 리소스 적용 */
@@ -4439,12 +4528,12 @@ const LBKEY='nijinana.lobby';
 function saveLobbyPrefs(){lsSet(LBKEY,{me:LOBBY.me,ai:LOBBY.ai,first:LOBBY.first,mode:LOBBY.mode})}
 (function(){const v=lsGet(LBKEY,null);if(v&&typeof v==='object'){for(const k of ['me','ai'])if(typeof v[k]==='string'&&v[k].length<80)LOBBY[k]=v[k];
   if(['random','me','ai'].includes(v.first))LOBBY.first=v.first;if(['ai','multi'].includes(v.mode))LOBBY.lastMode=v.mode}})();
-const lbState=()=>({nj:1,tab:LOBBY.tab,mode:LOBBY.mode||null,build:!!BUILD});
+const lbState=()=>({nj:1,tab:LOBBY.tab,mode:LOBBY.mode||null,build:!!BUILD,pack:LOBBY.tab==='cards'&&LOBBY.pack||null});
 function lbPush(){if(SCREEN!=='lobby'||LOBBY.tab==='login'||LOBBY.tab==='boot')return;const st=lbState();const cur=history.state;
-  if(cur&&cur.nj&&cur.tab===st.tab&&cur.mode===st.mode&&cur.build===st.build)return;try{history.pushState(st,'')}catch(e){}}
+  if(cur&&cur.nj&&cur.tab===st.tab&&cur.mode===st.mode&&cur.build===st.build&&(cur.pack||null)===st.pack)return;try{history.pushState(st,'')}catch(e){}}
 function lbBack(){if(SCREEN!=='lobby')return;
   if(history.state&&history.state.nj&&history.length>1){try{history.back();return}catch(e){}}
-  if(LOBBY.tab==='play'&&LOBBY.mode){LOBBY.mode=null}else if(LOBBY.tab==='build'&&BUILD){lobbyAct('b-back',{});return}else LOBBY.tab='home';mpStop();renderLobby()}
+  if(LOBBY.tab==='cards'&&LOBBY.pack){LOBBY.pack=null}else if(LOBBY.tab==='play'&&LOBBY.mode){LOBBY.mode=null}else if(LOBBY.tab==='build'&&BUILD){lobbyAct('b-back',{});return}else LOBBY.tab='home';mpStop();renderLobby()}
 window.addEventListener('popstate',e=>{const st=e.state;
   if(SCREEN==='game'){try{history.pushState(lbState(),'')}catch(_){}if(G&&G.winner==null&&G.phase!=='setup')showLeave();return}
   if(SCREEN!=='lobby'||LOBBY.tab==='login'||LOBBY.tab==='boot')return;
@@ -4453,7 +4542,7 @@ window.addEventListener('popstate',e=>{const st=e.state;
   if(BUILD&&!(st&&st.nj&&st.build)){ // 편집 중인 덱에서 나갈 때: 저장 안 됐으면 한 번 확인
     if(BUILD.dirty&&!LOBBY.backArm){LOBBY.backArm=true;try{history.pushState({nj:1,tab:'build',mode:LOBBY.mode||null,build:true},'')}catch(_){}toast('저장하지 않은 덱 — 한 번 더 뒤로 가면 저장 없이 나감');renderLobby();return}
     BUILD=null;LOBBY.backArm=false;LOBBY.delArm=false}
-  if(st&&st.nj){LOBBY.tab=(st.tab==='admin'&&!CAP.admin)?'home':st.tab;LOBBY.mode=st.mode||null}else{LOBBY.tab='home';LOBBY.mode=null}
+  if(st&&st.nj){LOBBY.tab=(st.tab==='admin'&&!CAP.admin)?'home':st.tab;LOBBY.mode=st.mode||null;LOBBY.pack=packOf(st.pack)?st.pack:null}else{LOBBY.tab='home';LOBBY.mode=null;LOBBY.pack=null}
   LOBBY.hover=null;renderLobby()});
 function lobbyAct(a,ds){
   switch(a){
@@ -4462,7 +4551,7 @@ function lobbyAct(a,ds){
     case'lb-editme':{const k=LOBBY.me;if(k.startsWith('u:')){const d=USERDECKS.find(x=>x.id===k.slice(2));if(d){LOBBY.tab='build';lbPush();lobbyAct('b-edit',{id:d.id})}}
       else if(STARTERS[k]){LOBBY.tab='build';lbPush();lobbyAct('b-copy',{key:k})}break}
     case'lb-newdeck':LOBBY.tab='build';lbPush();lobbyAct('b-newblank',{});break;
-    case'lb-go':{const v=ds.v;if(v==='admin'&&!CAP.admin)break;mpStop();if(v==='play'&&LOBBY.tab!=='play')LOBBY.mode=null;LOBBY.tab=v;LOBBY.hover=null;LOBBY.delArm=false;LOBBY.backArm=false;ADMIN.arm=null;if(v==='admin')refreshUsage();lbPush();renderLobby();break}
+    case'lb-go':{const v=ds.v;if(v==='admin'&&!CAP.admin)break;mpStop();if(v==='play'&&LOBBY.tab!=='play')LOBBY.mode=null;if(v==='cards')LOBBY.pack=null;LOBBY.tab=v;LOBBY.hover=null;LOBBY.delArm=false;LOBBY.backArm=false;ADMIN.arm=null;if(v==='admin')refreshUsage();lbPush();renderLobby();break}
     case'lb-mode':mpStop();LOBBY.mode=ds.v||null;LOBBY.hover=null;if(LOBBY.mode){LOBBY.lastMode=LOBBY.mode;saveLobbyPrefs()}lbPush();renderLobby();break;
     case'lb-mp':{const v=ds.v;if(v==='cancel')mpStop();else if(v==='copy'){copyText(MP.code).then(ok=>toast(ok?'방 코드 복사 완료':'복사가 막혀 있음 — 코드를 길게 눌러 복사해 줘'));break}
       else if(v==='share'){const t=`にじなな 시뮬레이터 멀티 대전 방 코드: ${MP.code}`;navigator.share({title:'멀티 대전 초대',text:t}).catch(()=>{});break}
@@ -4477,13 +4566,15 @@ function lobbyAct(a,ds){
     case'lb-pickid':AUTH.f.email=ds.v;AUTH.f.pw='';AUTH.view='login';AUTH.msg='';renderLobby();{const i=$('#af-pw');if(i)i.focus()}break;
     case'lb-tologin':hideModal();setGuest(false);AUTH.view='login';AUTH.msg='';if(SCREEN==='game')goLobby();LOBBY.tab='login';renderLobby();break;
     case'lb-verify':if(SOLO&&window.claude.auth&&window.claude.auth.verify)window.claude.auth.verify().then(()=>toast('인증 메일을 다시 보냄'),e=>toast(authErr(e)));break;
-    case'lb-tab':LOBBY.tab=ds.v;LOBBY.hover=null;LOBBY.delArm=false;LOBBY.backArm=false;ADMIN.arm=null;if(ds.v==='admin')refreshUsage();renderLobby();break;
+    case'lb-tab':if(ds.v==='cards')LOBBY.pack=null;LOBBY.tab=ds.v;LOBBY.hover=null;LOBBY.delArm=false;LOBBY.backArm=false;ADMIN.arm=null;if(ds.v==='admin')refreshUsage();renderLobby();break;
     case'lb-me':LOBBY.me=ds.key;saveLobbyPrefs();renderLobby();break;
     case'lb-ai':LOBBY.ai=ds.key;saveLobbyPrefs();renderLobby();break;
     case'lb-first':LOBBY.first=ds.v;saveLobbyPrefs();renderLobby();break;
     case'lb-speed':if(SETOPT.ai.some(o=>o[0]===ds.v)){SET.ai=ds.v;saveSet()}renderLobby();break;
     case'lb-ailv':if(AILVS.some(o=>o[0]===ds.v)){SET.aiLv=ds.v;saveSet()}renderLobby();break;
     case'lb-start':saveLobbyPrefs();startGame();break;
+    case'lb-pack':{const v=packOf(ds.v)?ds.v:null;if(v===LOBBY.pack)break;LOBBY.pack=v;LOBBY.hover=null;if(!v)LOBBY.pin=null;
+      renderLobby();const cp=document.querySelector('#lobby .cpanel');if(cp)cp.scrollTop=0;if(v){const L=$('#lobby');const h=L.querySelector('.lb-body');if(L&&h&&L.scrollTop>h.offsetTop)L.scrollTop=h.offsetTop}lbPush();break}
     case'lb-show':if(lbNoDetail()){showZoom(ds.cid);break}LOBBY.pin=ds.cid;LOBBY.hover=ds.cid;renderLobbyDetail();break;
     case'b-newblank':if(LOBBY.tab==='build')setTimeout(lbPush,0);BUILD={id:null,name:'새 덱',ch:null,list:{},dirty:true};SRCH=SRCH0();SRCH.type=['channel'];LOBBY.delArm=false;LOBBY.backArm=false;LOBBY.pin=null;renderLobby();break;
     case'b-back':if(BUILD&&BUILD.dirty&&!LOBBY.backArm){LOBBY.backArm=true;renderLobby()}else{BUILD=null;LOBBY.backArm=false;LOBBY.delArm=false;renderLobby()}break;
@@ -4906,7 +4997,7 @@ function showZoom(id){
   if(d.type==='liver')meta+=`<span>파워 ${d.power}</span><span>색 ${d.colors.length?d.colors.map(x=>`<i class="chip" style="--cc:var(--${x})">${x}</i>`).join(' '):'없음'}</span>`;
   if(d.trigger)meta+=`<span>트리거 ${d.trigger.map(x=>`<i class="chip" style="--cc:var(--${x})">${x}</i>`).join(' ')}</span>`;
   const Z=$('#zoom');
-  Z.innerHTML=`<div class="zin">${big}<div class="ztxt"><h3>${esc(d.name)}<small>${esc(d.jp)} · ${id}</small></h3><div class="zm">${meta}</div>
+  Z.innerHTML=`<div class="zin">${big}<div class="ztxt"><h3>${esc(d.name)}<small>${esc(d.jp)} · ${cardNo(id)}</small></h3><div class="zm">${meta}</div>
     ${d.tags.length?`<div class="tags">${d.tags.map(t=>`<span class="tag">#${esc(tagKo(t))}</span>`).join('')}</div>`:''}
     <p>${d.text?kwText(d.text):'효과 없음'}${effStatus(id)==='미구현'?'<span class="noimpl">효과 자동 처리 미구현 — 직접 처리</span>':''}</p><span class="zclose">아무 곳이나 누르거나 Esc로 닫기</span></div></div><button class="mx zx" data-act="zoomclose" title="닫기 (Esc)" aria-label="닫기">${XICON}</button>`;
   Z.hidden=false;
