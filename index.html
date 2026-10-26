@@ -18,9 +18,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Noto+Sans+JP:wght@500;700;900&display=swap">
-<script>window.NJ_BUILD="202610261449";window.NJ_NOTES=["카드 목록 새 구성: 스타터 덱 4종 · 부스터 팩으로 나눠 보고, 누르면 채널 카드부터 들어 있는 카드와 장수를 모두 표시", "카드 목록을 내리는 중에 가끔 맨 위로 올라가던 문제 수정", "카드 번호를 공식 표기대로 NJ-SD01-001 형식으로 표시", "휴대폰에서 카드 목록의 카드를 누르면 크게 보기"];</script>
-<script src="config.js?v=202610261449"></script>
-<script src="fb.js?v=202610261449"></script>
+<script>window.NJ_BUILD="202610261510";window.NJ_NOTES=["카드 목록 썸네일을 정사각형 상품 사진에 맞게 변경 (SD01 츠키노 미토 스타터 덱 이미지 적용)", "카드 목록 새 구성: 스타터 덱 4종 · 부스터 팩으로 나눠 보고, 누르면 채널 카드부터 들어 있는 카드와 장수를 모두 표시", "카드 목록을 내리는 중에 가끔 맨 위로 올라가던 문제 수정", "카드 번호를 공식 표기대로 NJ-SD01-001 형식으로 표시"];</script>
+<script src="config.js?v=202610261510"></script>
+<script src="fb.js?v=202610261510"></script>
 </head>
 <body>
 <style>
@@ -463,15 +463,14 @@ legend{font-size:12px;font-weight:700;color:var(--accent);padding:0 4px}
 /* 카드 목록: 상품별 */
 .pk-sect{display:flex;flex-direction:column;gap:12px}
 .pk-sect h4,.pk-view .sect h4{margin:0}
-.pkgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
-.pkgrid.booster{grid-template-columns:repeat(4,minmax(0,1fr))}
+.pkgrid,.pkgrid.booster{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px}
 .pk-wrap{position:relative;min-width:0;display:flex}
 .pk{appearance:none;border:2px solid transparent;font:inherit;color:var(--ink);background:rgba(255,255,255,.92);border-radius:16px;padding:0;cursor:pointer;display:flex;flex-direction:column;overflow:hidden;text-align:left;width:100%;box-shadow:0 2px 10px rgba(40,30,90,.08);transition:transform .14s,box-shadow .14s,border-color .14s}
 .pk:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(40,30,90,.16);border-color:rgba(214,51,122,.35)}
 .pk:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 .pk.pk-soon{opacity:.75}
-.pk-art{display:block;aspect-ratio:4/3;background:linear-gradient(135deg,#f9e3ef,#e3e8fb);position:relative;overflow:hidden}
-.pk-art img{width:100%;height:100%;object-fit:cover;display:block}
+.pk-art{display:block;aspect-ratio:1/1;background:linear-gradient(135deg,#f9e3ef,#e3e8fb);position:relative;overflow:hidden}
+.pk-art img{width:100%;height:100%;object-fit:cover;display:block}.pk-art img.pk-def{object-fit:contain;padding:12%}
 .pk-ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--f-jp);font-weight:900;font-size:20px;color:#fff;background:linear-gradient(150deg,var(--cls,var(--accent)),#1d2440);padding:12px;text-align:center}
 .pk-ph.sun{--cls:var(--sun)}.pk-ph.moon{--cls:var(--moon)}.pk-ph.comet{--cls:var(--comet)}.pk-ph.star{--cls:var(--star)}
 .pk-txt{display:flex;flex-direction:column;gap:2px;padding:10px 14px 12px;min-width:0}
@@ -482,7 +481,7 @@ legend{font-size:12px;font-weight:700;color:var(--accent);padding:0 4px}
 .pk-edit{position:absolute;top:8px;right:8px;appearance:none;border:0;font:inherit;font-size:11.5px;font-weight:700;padding:5px 10px;border-radius:999px;background:rgba(28,36,64,.82);color:#fff;cursor:pointer}
 .pk-edit:hover{background:var(--accent)}
 .pk-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-.pk-mini{width:72px;aspect-ratio:4/3;border-radius:8px;overflow:hidden;position:relative;flex:none;background:#eee}
+.pk-mini{width:64px;aspect-ratio:1/1;border-radius:8px;overflow:hidden;position:relative;flex:none;background:#eee}
 .pk-mini img{width:100%;height:100%;object-fit:cover;display:block}.pk-mini .pk-ph{font-size:10px;padding:4px}
 .pk-ttl{display:flex;flex-direction:column;min-width:0;flex:1}
 .pk-ttl em{font-style:normal;font-family:var(--f-num);font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--accent)}
@@ -2546,11 +2545,11 @@ const UIRES={
   _uiModeMP:{n:'멀티 대전 카드',d:'게임 시작 → 모드 선택의 멀티 대전 칸 (9:10)',r:.9,w:900,g:'화면'},
   _uiCoinH:{n:'코인 앞면',d:'선후공 코인 토스 앞면 (1:1, 원형으로 잘림)',r:1,w:512,g:'코인'},
   _uiCoinT:{n:'코인 뒷면',d:'선후공 코인 토스 뒷면 (1:1, 원형으로 잘림)',r:1,w:512,g:'코인'},
-  _uiPkSD01:{n:'스타터 SD01 썸네일',d:'카드 목록의 츠키노 미토 스타터 덱 칸 (4:3)',r:4/3,w:900,g:'상품'},
-  _uiPkSD02:{n:'스타터 SD02 썸네일',d:'카드 목록의 쿠즈하 스타터 덱 칸 (4:3)',r:4/3,w:900,g:'상품'},
-  _uiPkSD03:{n:'스타터 SD03 썸네일',d:'카드 목록의 사사키 사쿠 스타터 덱 칸 (4:3)',r:4/3,w:900,g:'상품'},
-  _uiPkSD04:{n:'스타터 SD04 썸네일',d:'카드 목록의 카가미 하야토 스타터 덱 칸 (4:3)',r:4/3,w:900,g:'상품'},
-  _uiPkBP01:{n:'부스터 BP01 썸네일',d:'카드 목록의 부스터 팩 제1탄 칸 (4:3)',r:4/3,w:900,g:'상품'}
+  _uiPkSD01:{n:'스타터 SD01 썸네일',d:'카드 목록의 츠키노 미토 스타터 덱 칸 (1:1 정사각형, 상품 사진 그대로)',r:1,w:800,g:'상품'},
+  _uiPkSD02:{n:'스타터 SD02 썸네일',d:'카드 목록의 쿠즈하 스타터 덱 칸 (1:1 정사각형, 상품 사진 그대로)',r:1,w:800,g:'상품'},
+  _uiPkSD03:{n:'스타터 SD03 썸네일',d:'카드 목록의 사사키 사쿠 스타터 덱 칸 (1:1 정사각형, 상품 사진 그대로)',r:1,w:800,g:'상품'},
+  _uiPkSD04:{n:'스타터 SD04 썸네일',d:'카드 목록의 카가미 하야토 스타터 덱 칸 (1:1 정사각형, 상품 사진 그대로)',r:1,w:800,g:'상품'},
+  _uiPkBP01:{n:'부스터 BP01 썸네일',d:'카드 목록의 부스터 팩 제1탄 칸 (1:1 정사각형, 상품 사진 그대로)',r:1,w:800,g:'상품'}
 };
 const isUI=k=>typeof k==='string'&&k.startsWith('_ui');
 const SPECIAL={...Object.fromEntries(Object.entries(UIRES).map(([k,v])=>[k,v.n])),_back:'카드 뒷면',_chback:'채널 카드 뒷면',_cl:'컬러 카드 뒷면',_clR:'컬러 앞면 · R 빨강',_clO:'컬러 앞면 · O 주황',_clY:'컬러 앞면 · Y 노랑',_clG:'컬러 앞면 · G 초록',_clB:'컬러 앞면 · B 파랑',_clI:'컬러 앞면 · I 남색',_clV:'컬러 앞면 · V 보라'};
