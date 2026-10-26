@@ -18,9 +18,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Noto+Sans+JP:wght@500;700;900&display=swap">
-<script>window.NJ_BUILD="202610261825";window.NJ_NOTES=["관리자 카드 이미지 화면: 상품별(NJ-SD01 …)로 나눠 보여주고, 휴대폰·태블릿에서 버튼을 크게 해 누르기 쉽게", "스타터 덱 구성 통일: 모든 스타터가 N 카드 4장씩 + SDR 카드 2장씩 = 50장", "SD04 카가미 하야토 스타터 덱 추가"];</script>
-<script src="config.js?v=202610261825"></script>
-<script src="fb.js?v=202610261825"></script>
+<script>window.NJ_BUILD="202610261831";window.NJ_NOTES=["휴대폰·태블릿에서 관리자 이미지 업로드가 안 되던 문제 수정 (자르기 창이 화면 밖으로 넘치던 것, iPhone·iPad에서 이미지가 저장 한도를 넘던 것)", "관리자 카드 이미지 화면: 상품별로 나눠 보여주고, 휴대폰·태블릿에서 버튼을 크게", "스타터 덱 구성 통일: N 카드 4장씩 + SDR 카드 2장씩 = 50장 · SD04 스타터 추가"];</script>
+<script src="config.js?v=202610261831"></script>
+<script src="fb.js?v=202610261831"></script>
 </head>
 <body>
 <style>
@@ -1174,6 +1174,7 @@ button,a,[role=button]{-webkit-tap-highlight-color:transparent}
 @keyframes rotph{0%,20%{transform:rotate(0)}50%,80%{transform:rotate(-90deg)}100%{transform:rotate(0)}}
 @media (prefers-reduced-motion:reduce){.rot-ph{animation:none;transform:rotate(-90deg)}}
 /* 작은 화면 로비: 화면 실제 크기 + 세로 스크롤 */
+#stage.resp .cropgrid{flex-direction:column;align-items:center;gap:16px}#stage.resp .cropside{width:100%}#stage.resp .cropside canvas{width:auto!important;height:120px!important}#stage.resp .cropside .mfoot .btn{min-height:42px;padding:0 22px}
 #stage.resp #lobby{overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 @container lb (max-width:1199px){
  .lb-head{height:auto;flex-wrap:wrap;padding:12px 16px 8px;gap:8px 10px}
@@ -1485,9 +1486,9 @@ button,a,[role=button]{-webkit-tap-highlight-color:transparent}
   <div id="zoom" hidden data-act="zoomclose"></div>
   <div id="modal" hidden><div class="mbox" id="mbox"></div></div>
  </div>
- <input type="file" id="fileOne" accept="image/png,image/jpeg,image/webp,image/gif" hidden>
+ <input type="file" id="fileOne" accept="image/*" hidden>
  <input type="file" id="fileSnd" accept="audio/*" hidden>
- <input type="file" id="fileBulk" accept="image/png,image/jpeg,image/webp,image/gif" multiple hidden>
+ <input type="file" id="fileBulk" accept="image/*" multiple hidden>
  <div id="rotate" hidden role="dialog" aria-label="가로 화면 안내"><div class="rot-ph" aria-hidden="true"><i></i></div><b>가로로 돌려서 플레이</b><p>대전 판은 가로 화면에 맞춰져 있어서 세로로는 작게 보임</p>
   <div class="rot-btns"><button class="btn primary" data-act="rotfs">전체 화면 + 가로로 보기</button><button class="btn" data-act="rotdismiss">세로로 계속하기</button></div></div>
 </div>
@@ -4692,14 +4693,29 @@ function slotFromName(name){
   if(/back|뒷면/i.test(n))return'_back';
   return null;
 }
-function errText(e){const c=e&&e.code;return({too_large:'파일 용량 초과 (20MB 이하)',unsupported_type:'지원하지 않는 형식 (PNG·JPG·WebP·GIF)',quota_or_state:'저장 공간 부족',
+function errText(e){const c=e&&e.code;return({too_large:'이미지 용량이 너무 큼 — 더 작은 이미지로 다시 시도',unsupported_type:'지원하지 않는 형식 (PNG·JPG·WebP·GIF)',quota_or_state:'저장 공간 부족',
   not_granted:'관리자 권한 없음',rate_limited:'업로드가 너무 잦음. 잠시 후 재시도',store_unavailable:'저장소 연결 불가',invalid_argument:'저장 권한 없음'})[c]||('업로드 실패'+(c?' ('+c+')':''))}
-function loadImage(file){return new Promise((res,rej)=>{if(!file||file.size>20*1048576||!/^image\/(png|jpeg|webp|gif)$/.test(file.type)){rej(new Error('형식·용량 불가'));return}const url=URL.createObjectURL(file);const img=new Image();img.onload=()=>{if(img.naturalWidth*img.naturalHeight>40e6){URL.revokeObjectURL(url);rej(new Error('해상도 초과'));return}res({img,url})};img.onerror=()=>{URL.revokeObjectURL(url);rej(new Error('이미지를 읽을 수 없음'))};img.src=url})}
-function cropToBlob(img,R,ratio,maxW){
-  const outW=Math.max(1,Math.round(Math.min(R.w,maxW||(ratio<1?744:1040))));const outH=Math.max(1,Math.round(outW/ratio));
-  const cv=document.createElement('canvas');cv.width=outW;cv.height=outH;cv.getContext('2d').drawImage(img,R.x,R.y,R.w,R.h,0,0,outW,outH);
-  return new Promise(res=>{try{cv.toBlob(b=>{if(b&&b.type==='image/webp')res(b);else cv.toBlob(b2=>res(b2),'image/png')},'image/webp',0.9)}catch(e){res(null)}});
+function loadImage(file){return new Promise((res,rej)=>{if(!file||file.size>30*1048576||(file.type&&!/^image\//.test(file.type))){rej(new Error('형식·용량 불가'));return}const url=URL.createObjectURL(file);const img=new Image();img.onload=()=>{if(img.naturalWidth*img.naturalHeight>40e6){URL.revokeObjectURL(url);rej(new Error('해상도 초과'));return}res({img,url})};img.onerror=()=>{URL.revokeObjectURL(url);rej(new Error('이미지를 읽을 수 없음'))};img.src=url})}
+/* 저장용 이미지 만들기. iPhone·iPad(Safari)는 WebP로 저장을 못 해서 PNG가 나오는데, PNG는 용량이 커서 사이트 저장 한도(약 700KB)를 넘었음.
+   → WebP가 안 되면 JPEG로(투명이 필요한 로고·코인만 PNG), 그래도 크면 화질·크기를 조금씩 낮춰 한도 안으로 맞춤 */
+const IMG_LIMIT=()=>SOLO?640*1024:4*1048576;
+async function encodeCanvas(cv,alpha){
+  const tb=(c,t,q)=>new Promise(r=>{try{c.toBlob(b=>r(b),t,q)}catch(e){r(null)}});const LIM=IMG_LIMIT();
+  for(const sc of [1,.85,.7,.55,.4]){
+    let c=cv;if(sc<1){c=document.createElement('canvas');c.width=Math.max(1,Math.round(cv.width*sc));c.height=Math.max(1,Math.round(cv.height*sc));const g=c.getContext('2d');g.imageSmoothingQuality='high';g.drawImage(cv,0,0,c.width,c.height)}
+    const w=await tb(c,'image/webp',.9);
+    if(w&&w.type==='image/webp'){if(w.size<=LIM)return w;for(const q of [.8,.7,.6]){const x=await tb(c,'image/webp',q);if(x&&x.size<=LIM)return x}continue}
+    if(alpha){const pn=await tb(c,'image/png');if(pn&&pn.size<=LIM)return pn;continue}
+    for(const q of [.9,.82,.74,.65]){const j=await tb(c,'image/jpeg',q);if(j&&j.size<=LIM)return j}
+  }
+  return null;
 }
+function cropToBlob(img,R,ratio,maxW,alpha){
+  const outW=Math.max(1,Math.round(Math.min(R.w,maxW||(ratio<1?744:1040))));const outH=Math.max(1,Math.round(outW/ratio));
+  const cv=document.createElement('canvas');cv.width=outW;cv.height=outH;const g=cv.getContext('2d');g.imageSmoothingQuality='high';g.drawImage(img,R.x,R.y,R.w,R.h,0,0,outW,outH);
+  return encodeCanvas(cv,!!alpha);
+}
+const needAlpha=k=>k==='_uiLogo'||k==='_uiCoinH'||k==='_uiCoinT';
 let artChain=Promise.resolve();
 async function makeThumb(src,ratio){
   // src: Blob → 작은 webp. 세로 카드 320px, 가로(채널) 448px 폭
@@ -4768,7 +4784,7 @@ async function bulkUpload(files){
   ADMIN.busy=true;ADMIN.err=false;ADMIN.msg=`이미지 ${files.length}장 준비 중…`;renderLobby();
   for(const f of files){
     const k=slotFromName(f.name);if(!k){skipped.push(f.name);continue}
-    try{const {img,url}=await loadImage(f);const r=slotRatio(k);entries[k]=await cropToBlob(img,autoRect(img.naturalWidth,img.naturalHeight,r),r);URL.revokeObjectURL(url)}
+    try{const {img,url}=await loadImage(f);const r=slotRatio(k);entries[k]=await cropToBlob(img,autoRect(img.naturalWidth,img.naturalHeight,r),r,0,needAlpha(k));URL.revokeObjectURL(url)}
     catch(e){skipped.push(f.name)}
   }
   ADMIN.busy=false;
@@ -4787,9 +4803,9 @@ async function openCrop(slot,file){
   let L;try{L=await loadImage(file)}catch(e){ADMIN.msg='이미지를 읽을 수 없음';ADMIN.err=true;renderLobby();return}
   const w=L.img.naturalWidth,h=L.img.naturalHeight,ratio=slotRatio(slot);
   if(!ratio){ // 자유 비율(로고 등): 자르지 않고 크기만 맞춰 저장 (투명 유지)
-    const mw=UIRES[slot]?UIRES[slot].w:1200;const blob=await cropToBlob(L.img,{x:0,y:0,w,h},w/h,mw);URL.revokeObjectURL(L.url);
+    const mw=UIRES[slot]?UIRES[slot].w:1200;const blob=await cropToBlob(L.img,{x:0,y:0,w,h},w/h,mw,true);URL.revokeObjectURL(L.url);
     if(!blob){ADMIN.msg='이미지 생성 실패';ADMIN.err=true;renderLobby();return}await uploadArt({[slot]:blob});return}
-  const k=Math.min(600/w,600/h);
+  const box=Math.max(200,Math.min(600,LAYOUT.mode==='resp'?LAYOUT.w-72:600));const k=Math.min(box/w,box/h);
   CROP={slot,img:L.img,url:L.url,w,h,ratio,k,rect:autoRect(w,h,ratio)};
   const pw=ratio<1?200:ratio===1?220:280,ph=Math.round(pw/ratio);
   showModal(`<h2>이미지 자르기 · ${esc(isBn(slot)?'배너 '+(BN.data.list.findIndex(b=>'bn:'+b.id===slot)+1):SPECIAL[slot]||CARDS[slot].name)}</h2>
@@ -4823,7 +4839,7 @@ document.addEventListener('pointermove',e=>{
 document.addEventListener('pointerup',()=>{DRAG=null});
 function closeCrop(){if(CROP)URL.revokeObjectURL(CROP.url);CROP=null;hideModal()}
 async function cropApply(){
-  if(!CROP)return;const c=CROP;const blob=await cropToBlob(c.img,c.rect,c.ratio,isBn(c.slot)?1600:isUI(c.slot)?UIRES[c.slot].w:0);closeCrop();
+  if(!CROP)return;const c=CROP;const blob=await cropToBlob(c.img,c.rect,c.ratio,isBn(c.slot)?1600:isUI(c.slot)?UIRES[c.slot].w:0,needAlpha(c.slot));closeCrop();
   if(isBn(c.slot)){if(blob)await uploadBanner(c.slot.slice(3),blob);else{ADMIN.msg='이미지 생성 실패';ADMIN.err=true;renderLobby()}return}
   if(!blob){ADMIN.msg='이미지 생성 실패';ADMIN.err=true;renderLobby();return}
   await uploadArt({[c.slot]:blob});
