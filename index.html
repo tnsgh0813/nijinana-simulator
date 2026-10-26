@@ -18,9 +18,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Noto+Sans+JP:wght@500;700;900&display=swap">
-<script>window.NJ_BUILD="202610261831";window.NJ_NOTES=["휴대폰·태블릿에서 관리자 이미지 업로드가 안 되던 문제 수정 (자르기 창이 화면 밖으로 넘치던 것, iPhone·iPad에서 이미지가 저장 한도를 넘던 것)", "관리자 카드 이미지 화면: 상품별로 나눠 보여주고, 휴대폰·태블릿에서 버튼을 크게", "스타터 덱 구성 통일: N 카드 4장씩 + SDR 카드 2장씩 = 50장 · SD04 스타터 추가"];</script>
-<script src="config.js?v=202610261831"></script>
-<script src="fb.js?v=202610261831"></script>
+<script>window.NJ_BUILD="202610261836";window.NJ_NOTES=["휴대폰·태블릿에서 관리자 이미지 업로드가 안 되던 문제 수정 — 자르기 창이 화면 크기에 맞춰지고 스크롤 가능, iPhone·iPad 저장 용량 문제 해결", "관리자 카드 이미지 화면: 상품별로 나눠 보여주고, 휴대폰·태블릿에서 버튼을 크게", "스타터 덱 구성 통일: N 카드 4장씩 + SDR 카드 2장씩 = 50장 · SD04 스타터 추가"];</script>
+<script src="config.js?v=202610261836"></script>
+<script src="fb.js?v=202610261836"></script>
 </head>
 <body>
 <style>
@@ -710,7 +710,7 @@ legend{font-size:12px;font-weight:700;color:var(--accent);padding:0 4px}
 }
 /* crop */
 .cropgrid{display:flex;gap:26px;align-items:flex-start}
-.cropbox{position:relative;flex:none;background:#1c2033;overflow:hidden;border-radius:10px;touch-action:none}
+.cropbox{position:relative;flex:none;background:#1c2033;overflow:hidden;border-radius:10px;touch-action:pan-y}
 .cropbox img{width:100%;height:100%;display:block;user-select:none;pointer-events:none}
 .croprect{position:absolute;box-shadow:0 0 0 9999px rgba(10,10,30,.55);outline:2px solid #fff;cursor:move;touch-action:none}
 .crophandle{position:absolute;right:-11px;bottom:-11px;width:22px;height:22px;border-radius:50%;background:var(--accent);border:3px solid #fff;cursor:nwse-resize;touch-action:none}
@@ -872,6 +872,10 @@ legend{font-size:12px;font-weight:700;color:var(--accent);padding:0 4px}
 /* 카드가 빽빽한 편집 화면은 너무 커지지 않게 상한 */
 #lobby[data-tab="build"],#lobby[data-tab="admin"],#lobby[data-tab="cards"]{zoom:min(var(--fs,1),1.06)}
 .mbox:has(canvas){zoom:1;max-height:none;overflow:visible}
+.mbox:has(.cropgrid){max-height:calc(var(--sh,900px) - 24px);max-width:calc(var(--sw,1600px) - 24px);overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.cropgrid.stack{flex-direction:column;align-items:center;gap:14px}.cropgrid.stack .cropside{width:100%}.cropgrid.stack .cropside canvas{width:auto!important;height:110px!important}
+#stage.resp .cropside .mfoot .btn{min-height:42px;padding:0 22px}
+.cropgrid:not(.stack) .cropside{width:260px}
 .hcard{top:calc(8px - 132px * (var(--hs,1) * var(--hsm,1) - 1))}
 .hcard .card{--s:calc(1.5 * var(--hs,1) * var(--hsm,1))}
 
@@ -1174,7 +1178,6 @@ button,a,[role=button]{-webkit-tap-highlight-color:transparent}
 @keyframes rotph{0%,20%{transform:rotate(0)}50%,80%{transform:rotate(-90deg)}100%{transform:rotate(0)}}
 @media (prefers-reduced-motion:reduce){.rot-ph{animation:none;transform:rotate(-90deg)}}
 /* 작은 화면 로비: 화면 실제 크기 + 세로 스크롤 */
-#stage.resp .cropgrid{flex-direction:column;align-items:center;gap:16px}#stage.resp .cropside{width:100%}#stage.resp .cropside canvas{width:auto!important;height:120px!important}#stage.resp .cropside .mfoot .btn{min-height:42px;padding:0 22px}
 #stage.resp #lobby{overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 @container lb (max-width:1199px){
  .lb-head{height:auto;flex-wrap:wrap;padding:12px 16px 8px;gap:8px 10px}
@@ -4805,12 +4808,12 @@ async function openCrop(slot,file){
   if(!ratio){ // 자유 비율(로고 등): 자르지 않고 크기만 맞춰 저장 (투명 유지)
     const mw=UIRES[slot]?UIRES[slot].w:1200;const blob=await cropToBlob(L.img,{x:0,y:0,w,h},w/h,mw,true);URL.revokeObjectURL(L.url);
     if(!blob){ADMIN.msg='이미지 생성 실패';ADMIN.err=true;renderLobby();return}await uploadArt({[slot]:blob});return}
-  const box=Math.max(200,Math.min(600,LAYOUT.mode==='resp'?LAYOUT.w-72:600));const k=Math.min(box/w,box/h);
+  const {k,stack}=cropFit(w,h);
   CROP={slot,img:L.img,url:L.url,w,h,ratio,k,rect:autoRect(w,h,ratio)};
   const pw=ratio<1?200:ratio===1?220:280,ph=Math.round(pw/ratio);
   showModal(`<h2>이미지 자르기 · ${esc(isBn(slot)?'배너 '+(BN.data.list.findIndex(b=>'bn:'+b.id===slot)+1):SPECIAL[slot]||CARDS[slot].name)}</h2>
    <p>밝은 틀 안이 카드 이미지가 된다. 틀을 드래그해 이동, 오른쪽 아래 점을 드래그해 크기 조절.</p>
-   <div class="cropgrid"><div class="cropbox" id="cropbox" style="width:${Math.round(w*k)}px;height:${Math.round(h*k)}px"><img src="${L.url}" alt="" draggable="false">
+   <div class="cropgrid ${stack?'stack':''}"><div class="cropbox" id="cropbox" style="width:${Math.round(w*k)}px;height:${Math.round(h*k)}px"><img src="${L.url}" alt="" draggable="false">
      <div class="croprect" id="croprect"><span class="crophandle" id="crophandle"></span></div></div>
     <div class="cropside"><canvas id="cropprev" width="${pw}" height="${ph}" style="width:${pw}px;height:${ph}px"></canvas>
      <div class="row">${ratio<1&&!isUI(slot)&&!isBn(slot)?'<button class="btn sm" data-act="crop-center">가운데 카드 (홍보 이미지)</button>':''}<button class="btn sm" data-act="crop-full">최대로</button></div>
@@ -4818,6 +4821,15 @@ async function openCrop(slot,file){
      <div class="mfoot"><button class="btn" data-act="crop-cancel">취소</button><button class="btn primary" data-act="crop-apply">적용</button></div></div></div>`,'1000px');
   updateCrop();
 }
+/* 자르기 틀 크기: 화면 크기(폭·높이)에 맞춤. 넓으면 옆에 미리보기, 좁으면 아래로 */
+function cropFit(w,h){
+  const W=LAYOUT.mode==='resp'?LAYOUT.w:1600,H=LAYOUT.mode==='resp'?LAYOUT.h:900;const stack=W<720;
+  const bw=stack?W-72:Math.min(620,W-72-60-260),bh=stack?Math.max(200,H*.52):Math.max(220,Math.min(620,H-190));
+  return{k:Math.min(bw/w,bh/h),stack};
+}
+function relayoutCrop(){if(!CROP)return;const b=$('#cropbox');if(!b)return;const f=cropFit(CROP.w,CROP.h);CROP.k=f.k;
+  b.style.width=Math.round(CROP.w*f.k)+'px';b.style.height=Math.round(CROP.h*f.k)+'px';const g=b.closest('.cropgrid');if(g)g.classList.toggle('stack',f.stack);updateCrop()}
+window.addEventListener('resize',()=>setTimeout(relayoutCrop,80));
 function updateCrop(){
   if(!CROP)return;const R=CROP.rect,k=CROP.k;const el=$('#croprect');if(!el)return;
   el.style.left=(R.x*k)+'px';el.style.top=(R.y*k)+'px';el.style.width=(R.w*k)+'px';el.style.height=(R.h*k)+'px';
