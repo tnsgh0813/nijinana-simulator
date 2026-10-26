@@ -18,9 +18,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Noto+Sans+JP:wght@500;700;900&display=swap">
-<script>window.NJ_BUILD="202610261806";window.NJ_NOTES=["새 카드: SD04-004 카가미 하야토 (Lv3 · 8000 · ROYI)", "새 카드: SD04-008 하카세 후유키 (Lv2 · 5000 · OGB) — 배틀 승리 시 SP 콜", "카드 목록 썸네일을 정사각형 상품 사진에 맞게 변경"];</script>
-<script src="config.js?v=202610261806"></script>
-<script src="fb.js?v=202610261806"></script>
+<script>window.NJ_BUILD="202610261815";window.NJ_NOTES=["새 카드: SD04-016 앙코르 스테이지 (스테이지 Lv3) — #엔카운터 라이버가 컬러 콜에 성공하고 상대 컬러 카드가 모두 앞면이면, 이 카드를 로그에 놓고 로그의 Lv3 이하 #엔카운터 라이버를 등장", "새 카드: SD04-004 카가미 하야토 (Lv3 · 8000 · ROYI)", "새 카드: SD04-008 하카세 후유키 (Lv2 · 5000 · OGB) — 배틀 승리 시 SP 콜"];</script>
+<script src="config.js?v=202610261815"></script>
+<script src="fb.js?v=202610261815"></script>
 </head>
 <body>
 <style>
@@ -1558,6 +1558,7 @@ const CARDS={
  'SD04-011':{"name": "요루미 레나", "jp": "夜見れな", "type": "liver", "cls": "star", "lv": 1, "power": 4000, "colors": ["V"], "tags": ["エンカウンター", "クリエイター", "伝説", "ミッドナイト", "Brown"], "rar": "N", "text": "【세로가 되었을 때】 상대의 컬러 카드 1장을 앞면으로 한다."},
  'SD04-006':{"name": "하카세 후유키", "jp": "葉加瀬冬雪", "type": "liver", "cls": "star", "lv": 1, "power": 5000, "colors": ["B"], "tags": ["エンカウンター"], "rar": "N", "text": ""},
  'SD04-008':{"name": "하카세 후유키", "jp": "葉加瀬冬雪", "type": "liver", "cls": "star", "lv": 2, "power": 5000, "colors": ["O", "G", "B"], "tags": ["エンカウンター"], "rar": "N", "sp": true, "text": "【배틀 승리 시】 이 카드로 SP 콜한다. (SP 콜은 【블로커】 등으로 중지되지 않는다)"},
+ 'SD04-016':{"name": "앙코르 스테이지", "jp": "アンコールステージ", "type": "stage", "cls": "star", "lv": 3, "tags": ["エンカウンター"], "rar": "SDR", "text": "자신의 (#엔카운터) 를 가진 라이버가 컬러 콜에 성공했을 때, 상대의 컬러 카드가 모두 앞면일 경우, 이 카드를 로그에 놓아도 된다. 그렇게 했을 경우, 자신의 로그의 Lv3 이하인 (#엔카운터) 를 가진 라이버 1장을 등장시킨다."},
  'SD04-004':{"name": "카가미 하야토", "jp": "加賀美ハヤト", "type": "liver", "cls": "star", "lv": 3, "power": 8000, "colors": ["R", "O", "Y", "I"], "tags": ["エンカウンター", "カードゲーマー", "塾", "メメント"], "rar": "N", "text": ""},
  'SD04-009':{"name": "하카세 후유키", "jp": "葉加瀬冬雪", "type": "liver", "cls": "star", "lv": 3, "power": 6000, "colors": ["G", "B", "I"], "tags": ["エンカウンター"], "rar": "SDR", "text": "【컬러 콜 성공 시】【턴 1회】 자신의 로그의 Lv2 이하인 (#엔카운터) 를 가진 이벤트 1장을 발동해도 된다. 그 후, 발동한 이벤트를 덱 아래에 놓는다."},
  'SD03-002':{"name": "사사키 사쿠", "jp": "笹木咲", "type": "liver", "cls": "comet", "lv": 0, "power": 3000, "colors": [], "tags": ["ゲーマー", "囚人", "バンド"], "rar": "N", "limited": true, "text": "【한정: 같은 #】"},
@@ -1907,6 +1908,7 @@ async function colorCall(att,idx,sp){
     log(`성공! ${cc.color} 컬러 카드가 ${O.name}의 니지 에리어로 (${O.niji.length}/7)`,pid);render();await fx('ccWin',{pid:1-pid,color:cc.color,from});
     if(O.niji.length>=7)winGame(pid,'상대 니지 에리어 7색 완성');
     if(onField(att)&&EFF[att.id]&&EFF[att.id].ccWin)await EFF[att.id].ccWin(pid,att); // 【컬러 콜 성공 시】
+    {const st=G.p[pid].stage;if(G.winner==null&&st&&EFF[st.id]&&EFF[st.id].allyCcWin)await EFF[st.id].allyCcWin(pid,st,att)} // 스테이지: 자신의 라이버가 컬러 콜에 성공했을 때
   }else{log(`실패: ${nm(att)}에게 ${CNAME[cc.color]}이(가) 없어 앞면으로 남음`,pid);mark('cl'+(1-pid)+':'+idx,'shake',480);render();await fx('miss',{owner:1-pid,idx})}
   render();
 }
@@ -2089,6 +2091,19 @@ EFF['SD04-014']={
     if(u!=null){const x=take(P.log,u);if(x)await enter(pid,x,true)}
   }
 };
+EFF['SD04-016']={ // 앙코르 스테이지: #엔카운터 라이버의 컬러 콜 성공 + 상대 컬러 카드 모두 앞면 → 이 카드를 로그에, 로그의 Lv3 이하 #엔카운터 라이버 등장
+  async allyCcWin(pid,st,att){const P=G.p[pid],O=G.p[1-pid];
+    if(P.stage!==st||!D(att).tags.includes('エンカウンター'))return;
+    if(!O.cl.filter(x=>!x.gone).every(x=>x.up))return;
+    const pick=()=>P.log.filter(x=>D(x).type==='liver'&&(D(x).lv||0)<=3&&D(x).tags.includes('エンカウンター'));
+    const ok=await ask(pid,{kind:'yesno',text:`앙코르 스테이지: 이 카드를 로그에 놓고 로그의 Lv3 이하 #엔카운터 라이버 1장을 등장시킬까? (등장 가능 ${pick().length}장)`,ai:()=>pick().length>0});
+    if(!ok||P.stage!==st)return;
+    P.stage=null;P.log.push(st,...P.under);P.under=[];log('앙코르 스테이지 → 로그',pid);render();await sleep(250);
+    const opts=pick();if(!opts.length){log('앙코르 스테이지: 등장시킬 Lv3 이하 #엔카운터 라이버가 로그에 없음',pid);return}
+    const u=opts.length===1?opts[0].uid:await ask(pid,{kind:'card',uids:opts.map(x=>x.uid),optional:false,text:'앙코르 스테이지: 등장시킬 로그의 Lv3 이하 #엔카운터 라이버 선택',ai:()=>maxBy(opts,val).uid});
+    const x=take(P.log,u);if(x)await enter(pid,x);
+  }
+};
 /* 컬러 카드 1장을 앞면으로 (chooser가 고름, owner의 컬러 라인) — 앞면이 되면 트리거 판정 */
 async function flipColor(chooser,owner,label){const O=G.p[owner];const idxs=O.cl.map((x,i)=>i).filter(i=>!O.cl[i].gone&&!O.cl[i].up);
   if(!idxs.length){log(`${label}: ${chooser===owner?'':'상대의 '}뒷면 컬러 카드가 없음`,chooser);return}
@@ -2238,7 +2253,10 @@ function aiBestPlay(pid,extra){
     else if(d.type==='stage'){if(P.stage)continue;
       if(c.id==='SD01-016'){const jk=P.field.filter(x=>hasTag(x,'JK')).length;s=jk>=2?36:24}
       else if(c.id==='SD02-016'){if(P.deck.length<=12)continue;s=P.deck.length>20?36:28}
-      else s=21}
+      else if(c.id==='SD04-016'){ // 앙코르 스테이지: 상대 컬러 카드가 거의 앞면이고 다시 꺼낼 #엔카운터 라이버가 있을 때 가치가 큼
+        const down=O.cl.filter(x=>!x.gone&&!x.up).length;const back=P.log.some(x=>D(x).type==='liver'&&D(x).lv<=3&&hasTag(x,'エンカウンター'));
+        s=down<=1&&back?55:down<=2&&back?36:22}
+      else s=(extra&&extra[c.uid]!=null)?extra[c.uid]:21}
     else if(c.id==='SD01-015'){const t=O.field.filter(x=>x.tapped&&D(x).lv<=6);if(!t.length)continue;s=40+val(maxBy(t,val))}
     else if(c.id==='SD02-014'){const t=O.field.filter(x=>D(x).lv<=5&&power(x)<=10000);if(!t.length)continue;s=36+val(maxBy(t,val))}
     else if(c.id==='SD03-014'){const t=O.field.filter(x=>D(x).lv<=5);if(!t.length)continue;s=36+val(maxBy(t,val))}
@@ -2447,7 +2465,7 @@ async function aiSetSearch(pid,lv){
   if(best!=null){const x=byUid(best);if(x&&P.hand.includes(x))setCard(pid,x)}
 }
 /* 보통: 카드별 판단이 없는 이벤트·스테이지는 한 번 써 본 결과(바로 다음 판세)로 점수를 매김 */
-const AI_KNOWN=new Set(['SD01-014','SD01-015','SD01-016','SD02-014','SD02-015','SD02-016','SD03-014','SD03-015']);
+const AI_KNOWN=new Set(['SD01-014','SD01-015','SD01-016','SD02-014','SD02-015','SD02-016','SD03-014','SD03-015','SD04-016']);
 async function aiGenericScores(pid){
   const P=G.p[pid],out={};const cands=[...P.hand,...(P.set?[P.set]:[])].filter(c=>{const d=D(c);return(d.type==='event'||d.type==='stage')&&!AI_KNOWN.has(c.id)&&!playBlock(pid,c)});
   if(!cands.length)return out;
@@ -2455,7 +2473,11 @@ async function aiGenericScores(pid){
   for(const c of cands){const d=D(c);if(d.type==='stage'&&P.stage)continue;
     const pay=aiPay(P,c,d.lv||0).map(x=>x.uid);
     const sc=await simRun(pid,sd,async()=>{await doPlay(pid,byUid(c.uid),pay)});
-    const gain=sc-base;if(gain>2)out[c.uid]=24+gain*1.5}
+    const gain=sc-base;if(gain>2)out[c.uid]=24+gain*1.5;
+    // 나중에 발동하는 효과만 있는 스테이지(조건부 자동 효과)는 놓는 순간의 이득이 안 보이므로, 같은 #의 라이버가 충분하면 놓을 가치가 있다고 봄
+    if(d.type==='stage'&&!(c.uid in out)){const e=EFF[c.id];const passive=e&&Object.keys(e).some(k=>k!=='act'&&k!=='canAct');
+      if(passive){const tg=d.tags||[];const n=[...P.field,...P.hand].filter(x=>x!==c&&D(x).type==='liver'&&(!tg.length||D(x).tags.some(t=>tg.includes(t)))).length;
+        if(n>=3&&P.hand.length-(d.lv||0)>=2)out[c.uid]=20+Math.min(n,6)}}}
   return out;
 }
 /* 쉬움 */
