@@ -18,9 +18,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Noto+Sans+JP:wght@500;700;900&display=swap">
-<script>window.NJ_BUILD="202610261815";window.NJ_NOTES=["새 카드: SD04-016 앙코르 스테이지 (스테이지 Lv3) — #엔카운터 라이버가 컬러 콜에 성공하고 상대 컬러 카드가 모두 앞면이면, 이 카드를 로그에 놓고 로그의 Lv3 이하 #엔카운터 라이버를 등장", "새 카드: SD04-004 카가미 하야토 (Lv3 · 8000 · ROYI)", "새 카드: SD04-008 하카세 후유키 (Lv2 · 5000 · OGB) — 배틀 승리 시 SP 콜"];</script>
-<script src="config.js?v=202610261815"></script>
-<script src="fb.js?v=202610261815"></script>
+<script>window.NJ_BUILD="202610261821";window.NJ_NOTES=["스타터 덱 구성 통일: 모든 스타터가 N 카드 4장씩 + SDR 카드 2장씩 = 50장", "SD04 카가미 하야토 스타터 덱 추가 — AI 대전·멀티에서 바로 선택 가능", "새 카드: SD04-016 앙코르 스테이지 · SD04-004 카가미 하야토 · SD04-008 하카세 후유키"];</script>
+<script src="config.js?v=202610261821"></script>
+<script src="fb.js?v=202610261821"></script>
 </head>
 <body>
 <style>
@@ -1578,10 +1578,11 @@ const CARDS={
  'SD03-016':{"name": "리로드 포인트", "jp": "リロードポイント", "type": "stage", "cls": "comet", "lv": 0, "tags": ["家族", "ゲーマー"], "rar": "N", "text": "【기동 메인】【턴 1회】 자신의 패 1장을 이 카드 아래에 두는 것으로, 카드 1장을 뽑는다. 그 후, 이 카드 아래의 카드가 3장 이상일 경우, 이 카드와 그것들을 원하는 순서로 덱 아래에 두고, 카드 1장을 뽑는다."},
 };
 /* 50장 구성 매수는 미공개라 임의 설정 */
-const STARTERS={
+const STARTERS={ // 스타터 덱: 채널 1장 + N 10종×4장 + SDR 5종×2장 = 50장 (모든 스타터 같은 규칙)
  SD01:{key:'SD01',name:'SD01 츠키노 미토',short:'츠키노 미토',ch:'SD01-001',starter:true,list:{'SD01-002':4,'SD01-003':4,'SD01-004':2,'SD01-005':4,'SD01-006':4,'SD01-007':4,'SD01-008':4,'SD01-009':2,'SD01-010':4,'SD01-011':4,'SD01-012':4,'SD01-013':2,'SD01-014':4,'SD01-015':2,'SD01-016':2}},
- SD03:{key:'SD03',name:'SD03 사사키 사쿠',short:'사사키 사쿠',ch:'SD03-001',starter:true,list:{'SD03-002':4,'SD03-003':4,'SD03-004':4,'SD03-005':2,'SD03-006':4,'SD03-007':4,'SD03-008':4,'SD03-009':2,'SD03-010':4,'SD03-011':4,'SD03-012':4,'SD03-013':2,'SD03-014':3,'SD03-015':2,'SD03-016':3}},
- SD02:{key:'SD02',name:'SD02 쿠즈하',short:'쿠즈하',ch:'SD02-001',starter:true,list:{'SD02-002':4,'SD02-003':3,'SD02-004':4,'SD02-005':3,'SD02-006':4,'SD02-007':4,'SD02-008':3,'SD02-009':3,'SD02-010':4,'SD02-011':4,'SD02-012':4,'SD02-013':2,'SD02-014':2,'SD02-015':2,'SD02-016':4}},
+ SD02:{key:'SD02',name:'SD02 쿠즈하',short:'쿠즈하',ch:'SD02-001',starter:true,list:{'SD02-002':4,'SD02-003':4,'SD02-004':4,'SD02-005':2,'SD02-006':4,'SD02-007':4,'SD02-008':4,'SD02-009':2,'SD02-010':4,'SD02-011':4,'SD02-012':4,'SD02-013':2,'SD02-014':2,'SD02-015':2,'SD02-016':4}},
+ SD03:{key:'SD03',name:'SD03 사사키 사쿠',short:'사사키 사쿠',ch:'SD03-001',starter:true,list:{'SD03-002':4,'SD03-003':4,'SD03-004':4,'SD03-005':2,'SD03-006':4,'SD03-007':4,'SD03-008':4,'SD03-009':2,'SD03-010':4,'SD03-011':4,'SD03-012':4,'SD03-013':2,'SD03-014':2,'SD03-015':2,'SD03-016':4}},
+ SD04:{key:'SD04',name:'SD04 카가미 하야토',short:'카가미 하야토',ch:'SD04-001',starter:true,list:{'SD04-002':4,'SD04-003':4,'SD04-004':4,'SD04-005':2,'SD04-006':4,'SD04-007':4,'SD04-008':4,'SD04-009':2,'SD04-010':4,'SD04-011':4,'SD04-012':4,'SD04-013':2,'SD04-014':4,'SD04-015':2,'SD04-016':2}},
 };
 const PHASES=[['start','스타트 페이즈'],['main','메인 페이즈'],['action','액션 페이즈'],['set','세트 페이즈'],['end','엔드 페이즈']];
 const PNAME=Object.fromEntries(PHASES);
