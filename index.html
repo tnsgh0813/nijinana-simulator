@@ -18,9 +18,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Noto+Sans+JP:wght@500;700;900&display=swap">
-<script>window.NJ_BUILD="202610261836";window.NJ_NOTES=["휴대폰·태블릿에서 관리자 이미지 업로드가 안 되던 문제 수정 — 자르기 창이 화면 크기에 맞춰지고 스크롤 가능, iPhone·iPad 저장 용량 문제 해결", "관리자 카드 이미지 화면: 상품별로 나눠 보여주고, 휴대폰·태블릿에서 버튼을 크게", "스타터 덱 구성 통일: N 카드 4장씩 + SDR 카드 2장씩 = 50장 · SD04 스타터 추가"];</script>
-<script src="config.js?v=202610261836"></script>
-<script src="fb.js?v=202610261836"></script>
+<script>window.NJ_BUILD="202610271333";window.NJ_NOTES=["부스터 팩 BP01 첫 카드: NJ-BP01-001 켄모치 토야 (채널 · 태양) — 기동 효과(#탄환 라이버를 가로로 해서 「켄모치 토야」 파워 업)와 트리거 V(상대 가로 라이버 잠금) 자동 처리", "새 태그: #탄환", "휴대폰·태블릿 관리자 이미지 업로드 문제 수정"];</script>
+<script src="config.js?v=202610271333"></script>
+<script src="fb.js?v=202610271333"></script>
 </head>
 <body>
 <style>
@@ -1558,6 +1558,7 @@ const CARDS={
  'SD02-016':{name:'흡혈귀의 밤',jp:'吸血鬼の夜',type:'stage',cls:'moon',lv:2,tags:['家族','ゲーマー','囚人','メメント'],rar:'N',limited:true,
    text:'【한정: 같은 #】\n【기동 메인】【턴 1회】 자신의 덱 위에서 1장을 이 카드 아래에 둔다. 그 후, 이 카드 아래의 카드가 3장 이상일 경우, 이 카드와 그 카드들을 원하는 순서로 덱 아래에 두고, 자신의 로그의 Lv4 이하인 「쿠즈하」 라이버 1장을 등장시킨다.'},
  'SD03-001':{"name": "사사키 사쿠", "jp": "笹木咲", "type": "channel", "cls": "comet", "tags": ["ゲーマー", "囚人", "バンド"], "trigger": ["B"], "rar": "CH", "text": "【상대의 턴 중】【턴 1회】 자신의 라이버가 배틀로 인해 로그에 놓였을 때, 그 라이버를 이 카드 아래에 둔다. 그 후, 이 카드 아래의 카드가 3장 이상일 경우, 그것들을 원하는 순서로 덱 아래에 두고, 자신의 패가 5장이 되도록 카드를 뽑는다.\n【트리거: B】 (상대의 턴 중, 지정된 자신의 컬러 카드가 앞면이 됐을 때 발동) 자신의 패가 5장이 되도록 카드를 뽑는다."},
+ 'BP01-001':{"name": "켄모치 토야", "jp": "剣持刀也", "type": "channel", "cls": "sun", "tags": ["囚人", "弾丸", "メメント"], "trigger": ["V"], "rar": "CH", "text": "【기동 메인】【턴 1회】 「켄모치 토야」 이외의 자신의 (#탄환) 을 가진 라이버 1장을 가로로 하는 것으로, 이번 턴 중, 자신의 「켄모치 토야」 라이버 1장의 파워를 가로로 한 카드의 파워만큼 +한다. 그 후, 상대에게 자신의 컬러 카드 1장을 앞면으로 하게 한다.\n【트리거: V】 (상대의 턴 중, 지정된 자신의 컬러 카드가 앞면이 됐을 때 발동) 상대의 가로 라이버 1장은 다음 상대의 스타트 페이즈에 세로가 되지 않는다."},
  'SD04-001':{"name": "카가미 하야토", "jp": "加賀美ハヤト", "type": "channel", "cls": "star", "tags": ["エンカウンター", "カードゲーマー", "塾", "メメント"], "trigger": ["O", "I"], "rar": "CH", "text": "【자신의 턴 종료 시】 상대에게 자신의 뒷면 컬러 카드 1장을 앞면으로 하게 해도 된다. 그러면 자신의 Lv1 이하 라이버 1장을 세로로 한다.\n【트리거: O I】 (상대의 턴 중, 지정된 자신의 컬러 카드가 앞면이 됐을 때 발동) 상대의 컬러 카드 1장을 앞면으로 한다."},
  'SD04-002':{"name": "카가미 하야토", "jp": "加賀美ハヤト", "type": "liver", "cls": "star", "lv": 1, "power": 3000, "colors": ["O"], "tags": ["エンカウンター", "カードゲーマー", "塾", "メメント"], "rar": "N", "blocker": true, "text": "【블로커】 (상대가 공격 또는 컬러 콜했을 때, 이 카드를 가로로 하는 것으로 공격 또는 컬러 콜을 중지하고 이 카드와 배틀한다)"},
  'SD04-007':{"name": "하카세 후유키", "jp": "葉加瀬冬雪", "type": "liver", "cls": "star", "lv": 2, "power": 5000, "colors": ["G", "B"], "tags": ["エンカウンター"], "rar": "N", "text": "【등장 시】 이 카드 이외의 자신의 라이버 1장을 고른다. 이번 턴 중, 고른 카드의 파워 +3000. 고른 카드의 원래 파워가 7000 이상일 경우 대신 +5000."},
@@ -2068,6 +2069,30 @@ EFF['SD02-016']={
 };
 
 /* ---- SD04 카가미 하야토 ---- */
+/* ---- BP01 ---- */
+EFF['BP01-001']={ // 켄모치 토야 채널
+  fodder(pid){return G.p[pid].field.filter(x=>!x.tapped&&nm(x)!=='켄모치 토야'&&hasTag(x,'弾丸'))},
+  kens(pid){return G.p[pid].field.filter(x=>nm(x)==='켄모치 토야')},
+  canAct(pid){return this.fodder(pid).length>0},
+  // AI: 세로인 켄모치가 파워를 올리면 상대의 가로 라이버를 이길 수 있을 때만 사용
+  aiPlan(pid){const O=G.p[1-pid];let best=null;
+    for(const k of this.kens(pid).filter(x=>!x.tapped))for(const f of this.fodder(pid)){const pk=power(k),pf=power(f);
+      const tg=O.field.filter(t=>t.tapped&&power(t)>=pk&&power(t)<pk+pf);if(!tg.length)continue;
+      const v=val(maxBy(tg,val))-val(f)*.5;if(!best||v>best.v)best={k,f,v}}
+    return best&&best.v>0?best:null},
+  aiOk(pid){return!!this.aiPlan(pid)},
+  async act(pid){const P=G.p[pid];const fs=this.fodder(pid);if(!fs.length)return;const plan=this.aiPlan(pid);
+    const fu=await ask(pid,{kind:'card',uids:fs.map(x=>x.uid),optional:false,text:'켄모치 토야 채널: 가로로 할 「켄모치 토야」 이외의 #탄환 라이버 선택',ai:()=>(plan?plan.f:minBy(fs,x=>power(x))).uid});
+    const f=byUid(fu);if(!f||!onField(f))return;f.tapped=true;const amt=power(f);log(`켄모치 토야 채널: ${nm(f)}을(를) 가로로 함 (파워 ${amt})`,pid);render();await sleep(250);
+    const ks=this.kens(pid);
+    if(ks.length){const ku=ks.length===1?ks[0].uid:await ask(pid,{kind:'card',uids:ks.map(x=>x.uid),optional:false,text:`켄모치 토야 채널: 파워 +${amt} 할 「켄모치 토야」 선택`,ai:()=>(plan&&ks.includes(plan.k)?plan.k:maxBy(ks,x=>x.tapped?0:power(x)+1)).uid});
+      const k=byUid(ku);if(k&&onField(k)){addBuff(k,amt);log(`${nm(k)} 파워 +${amt} (${power(k)})`,pid)}}
+    else log('켄모치 토야 채널: 파워를 올릴 「켄모치 토야」가 없음',pid);
+    render();await sleep(200);
+    await flipColor(1-pid,pid,'켄모치 토야 채널');
+  },
+  async trig(pid){await lockEnter(pid,()=>true,'켄모치 토야 트리거: 다음 스타트 페이즈에 세로가 되지 않을 상대의 가로 라이버 선택')}
+};
 EFF['SD04-001']={
   async turnEnd(pid){const P=G.p[pid];
     const downs=P.cl.map((x,i)=>i).filter(i=>!P.cl[i].gone&&!P.cl[i].up);if(!downs.length)return;
@@ -2300,7 +2325,7 @@ async function aiMain(pid){
   const P=G.p[pid];
   for(let g=0;g<14;g++){
     await sleep(420);
-    if(canActivate(pid,'ch')&&P.log.length<20&&P.deck.length>18){await activate(pid,'ch');continue}
+    if(canActivate(pid,'ch')){const ce=EFF[P.ch.id];if(ce.aiOk?ce.aiOk(pid):(P.log.length<20&&P.deck.length>18)){await activate(pid,'ch');continue}}
     if(canActivate(pid,'st')&&(P.stage.id!=='SD02-016'||P.deck.length>10)){await activate(pid,'st');continue}
     const extra=G.cfg.sim?null:await aiGenericScores(pid); // 처음 보는 이벤트·스테이지는 실제로 써 보고 판단
     const plan=aiBestPlay(pid,extra);if(!plan)break;
@@ -2560,7 +2585,7 @@ function humanCanAct(){return G&&G.winner==null&&G.cur===0&&!G.p[0].ai&&!UI.pend
 
 
 /* ================= NAMES / ART / STORAGE ================= */
-const TAGKO={'囚人':'죄인','JK':'JK','ミッドナイト':'미드나이트','生徒会':'학생회','家族':'가족','ゲーマー':'게이머','メメント':'메멘토','勝負師':'승부사','バンド':'밴드','B級':'B급','シェアハウス':'셰어하우스','エンカウンター':'엔카운터','カードゲーマー':'카드게이머','盤':'반','塾':'학원','クリエイター':'크리에이터','伝説':'전설','Brown':'Brown'};
+const TAGKO={'囚人':'죄인','JK':'JK','ミッドナイト':'미드나이트','生徒会':'학생회','家族':'가족','ゲーマー':'게이머','メメント':'메멘토','勝負師':'승부사','バンド':'밴드','B級':'B급','シェアハウス':'셰어하우스','エンカウンター':'엔카운터','カードゲーマー':'카드게이머','盤':'반','塾':'학원','クリエイター':'크리에이터','伝説':'전설','Brown':'Brown','弾丸':'탄환'};
 const tagKo=t=>TAGKO[t]||t;
 // 색상(클래스) 4종: 태양/솔(적), 달/루나(청), 혜성/코멧(녹), 별/스텔라(황)
 const CLSLIST=['sun','moon','comet','star'];
