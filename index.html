@@ -18,9 +18,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Noto+Sans+JP:wght@500;700;900&display=swap">
-<script>window.NJ_BUILD="202610271333";window.NJ_NOTES=["부스터 팩 BP01 첫 카드: NJ-BP01-001 켄모치 토야 (채널 · 태양) — 기동 효과(#탄환 라이버를 가로로 해서 「켄모치 토야」 파워 업)와 트리거 V(상대 가로 라이버 잠금) 자동 처리", "새 태그: #탄환", "휴대폰·태블릿 관리자 이미지 업로드 문제 수정"];</script>
-<script src="config.js?v=202610271333"></script>
-<script src="fb.js?v=202610271333"></script>
+<script>window.NJ_BUILD="202610282108";window.NJ_NOTES=["공식 룰 Q&A 반영: 필드의 라이버는 5장까지 — 5장일 때 새로 등장시키면 자신의 라이버 1장을 골라 로그에 놓음", "공식 룰 Q&A 반영: 어느 쪽이든 덱이 0장이 되면 니지 에리어 컬러 카드 수를 비교해 적은 쪽 승리 (같으면 덱이 0장이 된 쪽 패배)", "룰 정리 화면 새로 정리 — 공식 Q&A로 확인된 룰에 표시", "새 카드: BP01-001 켄모치 토야 (채널)"];</script>
+<script src="config.js?v=202610282108"></script>
+<script src="fb.js?v=202610282108"></script>
 </head>
 <body>
 <style>
@@ -371,6 +371,7 @@ button{font:inherit}
 #modal{position:absolute;inset:0;z-index:80;background:rgba(40,28,70,.36);display:flex;align-items:center;justify-content:center}
 .mbox{background:var(--paper);border-radius:20px;padding:26px 30px;width:740px;box-shadow:0 24px 60px rgba(30,20,60,.3)}
 .mbox.wide{width:1340px}
+.rq{display:inline-block;font-size:10.5px;font-weight:800;color:#fff;background:var(--ai);border-radius:999px;padding:1px 7px;margin-left:2px;vertical-align:1px;white-space:nowrap}
 .mbox h2{margin:0 0 6px;font-family:var(--f-jp);font-weight:900;font-size:26px;text-wrap:balance}
 .mbox h3{margin:14px 0 4px;font-size:15px;color:var(--accent)}
 .mbox p{margin:0 0 8px;color:var(--ink-2)}
@@ -1501,7 +1502,8 @@ button,a,[role=button]{-webkit-tap-highlight-color:transparent}
 /* ================= CARD DATA (공식 카드 이미지 기준) ================= */
 const COLORS=['R','O','Y','G','B','I','V'];
 const CNAME={R:'빨강',O:'주황',Y:'노랑',G:'초록',B:'파랑',I:'남색',V:'보라'};
-const FIELD_MAX=Infinity; // 필드 라이버 수 제한 없음
+const FIELD_MAX=Infinity; // 등장 자체는 항상 가능 (가득 차 있으면 아래 FIELD_CAP 처리)
+const FIELD_CAP=5; // 공식: 필드의 라이버는 5장까지. 6장째가 등장할 때 자신의 라이버 1장을 로그에 놓음
 const CARDS={
  'SD01-001':{name:'츠키노 미토',jp:'月ノ美兎',type:'channel',cls:'sun',tags:['囚人','JK'],trigger:['R','G'],rar:'CH',
    text:'【자신의 턴 중】【턴 1회】 자신의 라이버가 배틀에 승리했을 때, 상대의 컬러 카드 1장을 앞면으로 한다.\n【트리거: R G】 (상대의 턴 중, 지정된 자신의 컬러 카드가 앞면이 됐을 때 발동) 이번 턴 중, 상대의 라이버 1장은 컬러 콜할 수 없다.'},
@@ -1736,8 +1738,9 @@ async function takeTurn(){
     for(const c of up)if(EFF[c.id]&&EFF[c.id].upright&&onField(c))await EFF[c.id].upright(pid,c);
     const need=P.hand.length<5?5-P.hand.length:1;let n=0;
     for(let i=0;i<need;i++){
-      if(!P.deck.length){if(n)log(`${n}장 드로우 (손패 ${P.hand.length}장)`,pid);winGame(1-pid,`${P.name}의 덱에 드로우할 카드가 없음`)}
-      P.hand.push(P.deck.shift());n++}
+      if(!P.deck.length)break;
+      P.hand.push(P.deck.shift());n++;
+      if(!P.deck.length){log(`${n}장 드로우 (손패 ${P.hand.length}장)`,pid);render();deckOutCheck(pid)}}
     log(`${n}장 드로우 (손패 ${P.hand.length}장)`,pid);sfx('draw');
   }
   render();await sleep(300);
@@ -1789,7 +1792,12 @@ async function doPlay(pid,c,payUids){
   render();
 }
 async function enter(pid,c,tapped=false){
-  const P=G.p[pid];reset(c);c.tapped=tapped;c.entered=G.turnNo;P.field.push(c);
+  const P=G.p[pid];
+  if(P.field.length>=FIELD_CAP){ // 공식 Q&A: 필드에 이미 5장이면 그중 1장을 로그에 놓고 등장
+    const opts=P.field.slice();
+    const u=await ask(pid,{kind:'card',uids:opts.map(x=>x.uid),optional:false,text:`필드가 가득 참 (${FIELD_CAP}장): ${nm(c)}을(를) 등장시키기 위해 로그에 놓을 내 라이버 1장 선택`,ai:()=>aiDropPick(pid).uid});
+    const t=byUid(u)||opts[0];if(t&&onField(t)){log(`필드 ${FIELD_CAP}장 — ${nm(t)}을(를) 로그에 놓고 ${nm(c)} 등장`,pid);await destroy(t,false)}}
+  reset(c);c.tapped=tapped;c.entered=G.turnNo;P.field.push(c);
   log(`${nm(c)} 등장${tapped?' (가로)':''}`,pid);sfx('enter');render();await sleep(350);
   if(EFF[c.id]&&EFF[c.id].enter)await EFF[c.id].enter(pid,c);
 }
@@ -1805,11 +1813,17 @@ async function destroy(c,byBattle){
   const ce=EFF[P.ch.id];const k='chlg'+G.turnNo;
   if(byBattle&&G.cur!==c.owner&&ce&&ce.oppLogged&&!P.once[k]&&P.log.includes(c)){P.once[k]=true;await ce.oppLogged(c.owner,c)}
 }
-// 덱이 비어도 즉시 지지는 않음. 드로우해야 할 때 덱에 카드가 없으면 패배(takeTurn). 그 밖의 효과는 가능한 만큼만 처리.
+/* 공식 Q&A: 어느 플레이어든 덱이 0장이 된 순간 서로의 니지 에리어 컬러 카드 수를 비교해서 적은 쪽이 승리.
+   같으면 덱이 0장이 된 플레이어가 패배. (덱 위를 잠깐 보는 효과처럼 카드가 덱에 남아 있는 경우는 해당 없음) */
+function deckOutCheck(pid){
+  if(G.winner!=null||G.phase==='setup')return;const P=G.p[pid],O=G.p[1-pid];if(P.deck.length)return;
+  const a=P.niji.length,b=O.niji.length;const w=a<b?pid:1-pid;
+  log(`${P.name}의 덱이 0장 — 니지 에리어 ${P.name} ${a}장 · ${O.name} ${b}장`,pid);
+  winGame(w,`${P.name}의 덱이 0장 · 니지 에리어 ${a} 대 ${b}${a===b?' (같아서 덱이 0장이 된 쪽 패배)':' (적은 쪽 승리)'}`);
+}
 function refill(pid){return G.p[pid].deck.length>0}
-// 패배는 스타트 페이즈 드로우에서만. 효과로 뽑을 때는 덱에 남은 만큼만 뽑음
 function drawN(pid,n,why){const P=G.p[pid];let k=0;for(let i=0;i<n;i++){if(!P.deck.length)break;P.hand.push(P.deck.shift());k++}
-  if(k){log(`${why||'효과'}: ${k}장 뽑음 (패 ${P.hand.length}장)`,pid);sfx('draw')}if(k<n)log(`${why||'효과'}: 덱이 비어 ${n-k}장은 뽑지 못함`,pid);render();return k}
+  if(k){log(`${why||'효과'}: ${k}장 뽑음 (패 ${P.hand.length}장)`,pid);sfx('draw')}if(k<n)log(`${why||'효과'}: 덱이 비어 ${n-k}장은 뽑지 못함`,pid);render();deckOutCheck(pid);return k}
 function drawTo(pid,n,why){const P=G.p[pid];const need=Math.max(0,n-P.hand.length);if(!need){log(`${why}: 패가 이미 ${P.hand.length}장`,pid);return 0}return drawN(pid,need,why)}
 async function untapCard(c){if(!c.tapped)return;c.tapped=false;if(EFF[c.id]&&EFF[c.id].upright&&onField(c))await EFF[c.id].upright(c.owner,c)}
 async function orderToBottom(pid,cards,label){ // 원하는 순서로 덱 아래에: 1번부터 차례로 놓음 → 마지막 번호가 덱 맨 아래
@@ -1838,7 +1852,7 @@ async function fxUnder(pid,src,c,dest){
     {transform:`translate(${tx}px,${ty+pk}px) scale(.96)`,opacity:0}],{duration:fxT(760),easing:'ease-in-out',fill:'forwards'});
   kill(g);mark(dest==='ch'?'tuckch'+pid:'tuckst'+pid,'tuck',420);
 }
-function mill(pid,n){const P=G.p[pid];let k=0;for(let i=0;i<n;i++){if(!refill(pid))break;P.log.push(P.deck.shift());k++}if(k)fxMill(pid,k);return k}
+function mill(pid,n){const P=G.p[pid];let k=0;for(let i=0;i<n;i++){if(!refill(pid))break;P.log.push(P.deck.shift());k++}if(k)fxMill(pid,k);if(k)deckOutCheck(pid);return k}
 function canActivate(pid,src){
   const P=G.p[pid];if(G.cur!==pid||G.winner!=null)return false;
   const card=src==='ch'?P.ch:P.stage;if(!card)return false;
@@ -2054,7 +2068,7 @@ EFF['SD02-015']={async play(pid){
 EFF['SD02-016']={
   canAct(pid){return G.p[pid].deck.length>0},
   async act(pid){
-    const P=G.p[pid];if(!refill(pid))return;await fxUnder(pid,'deck',P.deck[0],'st');P.under.push(P.deck.shift());log(`흡혈귀의 밤: 덱 위 1장을 아래에 둠 (${P.under.length}장)`,pid);render();if(P.under.length>=3)await sleep(350);
+    const P=G.p[pid];if(!refill(pid))return;await fxUnder(pid,'deck',P.deck[0],'st');P.under.push(P.deck.shift());log(`흡혈귀의 밤: 덱 위 1장을 아래에 둠 (${P.under.length}장)`,pid);render();deckOutCheck(pid);if(P.under.length>=3)await sleep(350);
     if(P.under.length>=3){
       // 원하는 순서로 덱 아래에: 먼저 고른 카드부터 차례로 놓음(나중에 고른 카드일수록 더 아래)
       const st=P.stage;await orderToBottom(pid,[st,...P.under],'흡혈귀의 밤');P.under=[];P.stage=null;
@@ -2164,7 +2178,7 @@ EFF['SD04-013']={async logged(pid,c){ // 요루미 레나 Lv4: 상대 턴에 배
   const rest=look.filter(x=>x!==chosen);G.look.cards=rest;
   if(chosen){log(`요루미 레나: ${nm(chosen)}을(를) 가로로 등장`,pid);await enter(pid,chosen,true)}
   if(rest.length)await orderToBottom(pid,rest,'요루미 레나');
-  G.look=null;render();
+  G.look=null;render();deckOutCheck(pid);
 }};
 EFF['SD04-015']={async play(pid){ // 대폭발: 상대의 Lv5 이하 라이버 1장을 손패로
   const O=G.p[1-pid];const opts=O.field.filter(t=>D(t).type==='liver'&&D(t).lv<=5);if(!opts.length){log('대폭발: 대상이 없어 효과 없음',pid);return}
@@ -2280,6 +2294,7 @@ function aiBlock(def,att,tg,blockers){
   }
   return null;
 }
+const aiDropPick=pid=>minBy(G.p[pid].field,x=>val(x)+(x.tapped?0:4)+(D(x).blocker&&!x.tapped?3:0)); // 필드가 가득 찼을 때 로그에 놓을 라이버
 function aiPay(P,c,n){
   return [...P.hand.filter(h=>h!==c)].sort((a,b)=>keepVal(a)-keepVal(b)).slice(0,n);
 }
@@ -2288,7 +2303,8 @@ function aiBestPlay(pid,extra){
   for(const c of [...P.hand,...(P.set?[P.set]:[])]){
     const d=D(c);if(d.lv>P.hand.length-(P.hand.includes(c)?1:0))continue;
     let s=-1;
-    if(d.type==='liver'){if(P.field.length>=FIELD_MAX)continue;s=d.lv===0?16:20+d.lv*8+d.colors.length*4+d.power/1500+(d.blocker?4:0)}
+    if(d.type==='liver'){if(P.field.length>=FIELD_MAX)continue;s=d.lv===0?16:20+d.lv*8+d.colors.length*4+d.power/1500+(d.blocker?4:0);
+      if(P.field.length>=FIELD_CAP){const w=aiDropPick(pid);if(val(w)>=val(c))continue;s-=val(w)*.8}}
     else if(d.type==='stage'){if(P.stage)continue;
       if(c.id==='SD01-016'){const jk=P.field.filter(x=>hasTag(x,'JK')).length;s=jk>=2?36:24}
       else if(c.id==='SD02-016'){if(P.deck.length<=12)continue;s=P.deck.length>20?36:28}
@@ -2425,7 +2441,8 @@ function evalState(S,pid){
   const sum=(a,f)=>a.reduce((n,x)=>n+f(x),0);
   s+=sum(me.field,lv)-sum(op.field,lv);
   s+=me.hand.length*1.6-op.hand.length*1.6+(me.set?1.4:0)-(op.set?1.4:0)+(me.stage?2.5:0)-(op.stage?2.5:0);
-  if(me.deck.length<6)s-=(6-me.deck.length)*5;if(op.deck.length<6)s+=(6-op.deck.length)*5;
+  // 덱 0장 = 니지 에리어 비교(적은 쪽 승리, 같으면 덱이 빈 쪽 패배) → 덱이 적을 때 니지가 같거나 많으면 위험, 적으면 오히려 유리
+  const dr=(P,Q)=>P.deck.length<6?(6-P.deck.length)*5*(P.niji.length>=Q.niji.length?1:-.6):0;s-=dr(me,op);s+=dr(op,me);
   return s;
 }
 /* 메인 페이즈에서 할 수 있는 행동 목록 (같은 카드는 한 번만) */
@@ -3465,24 +3482,28 @@ function showLeave(){
    <div class="mfoot"><button class="btn" data-act="close">계속하기</button><button class="btn primary" data-act="golobby">로비로 가기</button></div>`);
 }
 function showRules(){
-  const inGame=SCREEN==='game';
-  showModal(`<h2>룰 요약과 시뮬레이터 가정</h2>
+  showModal(`<h2>룰 정리</h2>
   <div class="cols3">
-   <div><h3>승리 조건</h3><p>컬러 콜에 성공하면 그 컬러 카드는 주인의 니지 에리어로 간다. 상대 니지 에리어에 7색이 모두 채워지면(상대 컬러 카드 7장을 모두 성공시키면) 승리.</p>
-    <h3>준비 · 덱</h3><ul><li>채널 카드 1장 + 같은 클래스 메인 덱 50장 + 7색 컬러 카드(뒷면, 무작위 순서).</li><li>같은 카드는 4장까지. 한정 카드는 채널과 같은 #가 있어야 넣을 수 있다.</li><li>선공 5장, 후공 7장. 1회 다시 뽑을 수 있다.</li></ul>
-    <h3>턴의 흐름</h3><ol><li><b>스타트</b> — 가로 라이버를 세로로. 손패가 5장이 될 때까지 드로우(5장 이상이면 1장).</li><li><b>메인</b> — 카드 플레이, 기동 효과. 레벨만큼의 카드를 손패·필드에서 로그로 보내는 게 코스트.</li><li><b>액션</b> — 세로 라이버로 공격 또는 컬러 콜. 행동한 라이버는 가로가 된다.</li><li><b>세트</b> — 손패 1장까지 세트 에어리어에 뒷면으로.</li><li><b>엔드</b> — "이번 턴 동안" 효과가 끝난다.</li></ol></div>
-   <div><h3>배틀 · 컬러 콜</h3><ul><li>공격 대상은 상대의 가로 라이버 또는 컬러 카드.</li><li>배틀은 파워가 큰 쪽이 승리, 진 쪽은 로그로. 같으면 둘 다 로그로.</li><li>컬러 콜: 상대 컬러 카드 1장을 앞면으로 하고, 공격 라이버가 그 색을 가지고 있으면 그 카드는 상대의 니지 에리어로. 아니면 앞면인 채로 남는다.</li><li>블로커: 세로 상태에서 가로로 눕혀 상대의 공격·컬러 콜을 중지하고 대신 배틀. SP 콜은 막을 수 없다.</li><li>채널 트리거: 상대 턴 중 지정 색의 내 컬러 카드가 앞면이 되면 발동.</li></ul>
-    <h3>조작</h3><ul><li>카드에 마우스를 올리면 효과 표시. 터치 화면은 한 번 누르면 표시되고, <b>길게 누르면</b> 선택하지 않고 효과만 봄. 설명 창은 누른 카드를 가리지 않는 쪽에 뜨고, 창 위를 눌러도 아래 카드가 눌림.</li><li>손패 카드를 누르면 위에 "플레이" 버튼. 한 번 더 눌러도 플레이. 필드로 드래그해도 플레이.</li><li>코스트가 있는 카드는 아래에서 올라오는 판에서 로그로 보낼 카드를 고른다.</li><li>액션 페이즈: 세로 라이버 → 대상 순서로 누르거나, 라이버를 대상까지 드래그.</li><li>로그 더미를 누르면 로그의 카드 확인.</li></ul></div>
-   <div><h3>이 시뮬레이터의 룰 (공식 룰 공개 전 임시)</h3><ul>
-    <li>필드에 놓을 수 있는 라이버 수는 제한 없음.</li>
+   <div><h3>승리 조건</h3><ul>
+     <li>컬러 콜에 성공하면 그 컬러 카드는 주인의 니지 에리어로 간다. <b>상대 니지 에리어에 7색이 모두 모이면 승리.</b></li>
+     <li><b>어느 쪽이든 덱이 0장이 되면</b> 그 즉시 서로의 니지 에리어 컬러 카드 수를 비교해서 <b>적은 쪽이 승리</b>. 같으면 <b>덱이 0장이 된 쪽이 패배</b>. <span class="rq">공식 Q&A</span></li></ul>
+    <h3>준비 · 덱</h3><ul><li>채널 카드 1장 + 같은 클래스 메인 덱 50장 + 7색 컬러 카드(뒷면, 무작위 순서).</li><li>같은 카드는 4장까지. 한정 카드는 채널과 같은 #가 있어야 넣을 수 있다.</li><li>선공 5장, 후공 7장. 1회 다시 뽑을 수 있다(양쪽 동시에 결정).</li></ul>
+    <h3>턴의 흐름</h3><ol><li><b>스타트</b> — 가로 라이버를 세로로. 손패가 5장이 될 때까지 드로우(5장 이상이면 1장).</li><li><b>메인</b> — 카드 플레이, 기동 효과.</li><li><b>액션</b> — 세로 라이버로 공격 또는 컬러 콜. 행동한 라이버는 가로가 된다.</li><li><b>세트</b> — 손패 1장까지 세트 에어리어에 뒷면으로.</li><li><b>엔드</b> — "이번 턴 동안" 효과가 끝난다.</li></ol></div>
+   <div><h3>필드 · 코스트</h3><ul>
+     <li>필드의 라이버는 <b>5장까지</b>. 5장일 때 새로 등장시키면 <b>자신의 라이버 1장을 골라 로그에 놓고</b> 등장한다. <span class="rq">공식 Q&A</span></li>
+     <li>코스트는 카드 레벨만큼의 카드를 로그에 놓는 것. 놓을 수 있는 건 <b>손패와 필드의 카드뿐</b> — 세트 에어리어·스테이지 에어리어의 카드는 코스트로 쓸 수 없다. <span class="rq">공식 Q&A</span></li>
+     <li>라이버는 <b>등장한 턴부터 공격·컬러 콜 가능</b>. <span class="rq">공식 Q&A</span></li>
+     <li>파워가 <b>0 이하가 되어도 필드에 남는다</b>(로그로 가지 않음). <span class="rq">공식 Q&A</span></li></ul>
+    <h3>배틀 · 컬러 콜</h3><ul><li>공격 대상은 상대의 가로 라이버 또는 컬러 카드.</li><li>배틀은 파워가 큰 쪽이 승리, 진 쪽은 로그로. 같으면 둘 다 로그로.</li><li>컬러 콜: 상대 컬러 카드 1장을 앞면으로 하고, 공격 라이버가 그 색을 가지고 있으면 그 카드는 상대의 니지 에리어로. 아니면 앞면인 채로 남는다.</li><li>블로커: 세로 상태에서 가로로 눕혀 상대의 공격·컬러 콜을 중지하고 대신 배틀. SP 콜은 막을 수 없다.</li><li>채널 트리거: 상대 턴 중 지정 색의 내 컬러 카드가 앞면이 되면 발동.</li></ul></div>
+   <div><h3>공식 확인 전 · 이 시뮬레이터의 처리</h3><ul>
     <li>첫 턴은 선공·후공 모두 스타트 페이즈를 건너뛰고, 선공의 첫 턴은 액션 페이즈도 건너뛴다.</li>
-    <li>라이버는 세로로 등장하고, 등장한 턴에도 공격할 수 있다.</li>
+    <li>라이버는 세로로 등장한다(효과로 가로 등장하는 경우 제외).</li>
     <li>이벤트·스테이지·기동 효과는 메인 페이즈에만 사용. 스테이지는 1장이고, 새로 내면 기존 것은 로그로.</li>
-    <li>세트 페이즈에 손패 1장을 세트 에어리어에 놓을 수 있다. 이미 카드가 있으면 그 카드는 로그로. 세트 에어리어의 카드는 메인 페이즈에 플레이할 수 있다.</li>
-    <li>스타트 페이즈에 드로우해야 할 때 덱에 카드가 없으면 패배. 덱이 0장이 되는 것만으로는 지지 않고, 효과로 카드를 뽑거나 덱을 로그로 보내는 효과는 남은 만큼만 처리.</li>
+    <li>세트 에어리어에 이미 카드가 있으면 새로 놓을 때 기존 카드는 로그로. 세트 에어리어의 카드는 메인 페이즈에 플레이할 수 있다.</li>
+    <li>효과로 카드를 뽑거나 덱을 로그로 보내는 도중 덱이 0장이 되면, 그 순간 위의 덱 0장 판정을 한다. 덱 위를 잠깐 보는 효과(보고 덱으로 되돌림)는 덱에서 빠진 것으로 치지 않는다.</li>
     <li>컬러 카드 뒷면의 색은 주인도 모른다. 컬러 콜 대상은 공격하는 쪽이 고른다(앞면 카드도 가능).</li>
-    <li>파워가 0이 되는 것만으로는 로그로 가지 않는다. 카드 효과에 적힌 경우에만 로그로.</li>
-    <li>스타터덱 50장의 카드별 매수는 임의 구성.</li></ul></div>
+    <li>스타터 덱 매수는 공식 구성 공개 전 임시: N 카드 4장씩, SDR 카드 2장씩(50장).</li></ul>
+    <h3>조작</h3><ul><li>카드에 마우스를 올리면 효과 표시. 터치 화면은 한 번 누르면 표시되고, <b>길게 누르면</b> 선택하지 않고 효과만 봄.</li><li>손패 카드를 누르면 위에 "플레이" 버튼. 필드로 드래그해도 플레이.</li><li>코스트가 있는 카드는 아래에서 올라오는 판에서 로그로 보낼 카드를 고른다.</li><li>액션 페이즈: 세로 라이버 → 대상 순서로 누르거나, 라이버를 대상까지 드래그.</li><li>로그 더미를 누르면 로그의 카드 확인.</li></ul></div>
   </div>
   <div class="mfoot"><button class="btn primary" data-act="close">닫기</button></div>`,true);
 }
