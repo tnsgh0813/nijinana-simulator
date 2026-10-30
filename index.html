@@ -18,9 +18,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Noto+Sans+JP:wght@500;700;900&display=swap">
-<script>window.NJ_BUILD="202610282108";window.NJ_NOTES=["공식 룰 Q&A 반영: 필드의 라이버는 5장까지 — 5장일 때 새로 등장시키면 자신의 라이버 1장을 골라 로그에 놓음", "공식 룰 Q&A 반영: 어느 쪽이든 덱이 0장이 되면 니지 에리어 컬러 카드 수를 비교해 적은 쪽 승리 (같으면 덱이 0장이 된 쪽 패배)", "룰 정리 화면 새로 정리 — 공식 Q&A로 확인된 룰에 표시", "새 카드: BP01-001 켄모치 토야 (채널)"];</script>
-<script src="config.js?v=202610282108"></script>
-<script src="fb.js?v=202610282108"></script>
+<script>window.NJ_BUILD="202610301534";window.NJ_NOTES=["부스터 BP01 #탄환 카드 8장 추가: 켄모치 토야 (Lv0·1·2), 이에나가 무기, 후시미 가쿠, 유히 리리 (2종), 스테이지 「4발의 탄환」", "켄모치 토야 채널의 기동 효과를 이제 실제로 쓸 수 있음 (#탄환 라이버 등장)", "새 태그: #오컬트 · #투라이윤", "공식 룰 Q&A 반영: 필드 5장 제한 · 덱 0장 니지 에리어 비교 판정"];</script>
+<script src="config.js?v=202610301534"></script>
+<script src="fb.js?v=202610301534"></script>
 </head>
 <body>
 <style>
@@ -1501,6 +1501,7 @@ button,a,[role=button]{-webkit-tap-highlight-color:transparent}
 'use strict';
 /* ================= CARD DATA (공식 카드 이미지 기준) ================= */
 const COLORS=['R','O','Y','G','B','I','V'];
+const colorsOf=c=>c&&c.allCol?COLORS:D(c).colors; // 효과로 "이번 턴 모든 색"을 얻은 라이버
 const CNAME={R:'빨강',O:'주황',Y:'노랑',G:'초록',B:'파랑',I:'남색',V:'보라'};
 const FIELD_MAX=Infinity; // 등장 자체는 항상 가능 (가득 차 있으면 아래 FIELD_CAP 처리)
 const FIELD_CAP=5; // 공식: 필드의 라이버는 5장까지. 6장째가 등장할 때 자신의 라이버 1장을 로그에 놓음
@@ -1561,6 +1562,14 @@ const CARDS={
    text:'【한정: 같은 #】\n【기동 메인】【턴 1회】 자신의 덱 위에서 1장을 이 카드 아래에 둔다. 그 후, 이 카드 아래의 카드가 3장 이상일 경우, 이 카드와 그 카드들을 원하는 순서로 덱 아래에 두고, 자신의 로그의 Lv4 이하인 「쿠즈하」 라이버 1장을 등장시킨다.'},
  'SD03-001':{"name": "사사키 사쿠", "jp": "笹木咲", "type": "channel", "cls": "comet", "tags": ["ゲーマー", "囚人", "バンド"], "trigger": ["B"], "rar": "CH", "text": "【상대의 턴 중】【턴 1회】 자신의 라이버가 배틀로 인해 로그에 놓였을 때, 그 라이버를 이 카드 아래에 둔다. 그 후, 이 카드 아래의 카드가 3장 이상일 경우, 그것들을 원하는 순서로 덱 아래에 두고, 자신의 패가 5장이 되도록 카드를 뽑는다.\n【트리거: B】 (상대의 턴 중, 지정된 자신의 컬러 카드가 앞면이 됐을 때 발동) 자신의 패가 5장이 되도록 카드를 뽑는다."},
  'BP01-001':{"name": "켄모치 토야", "jp": "剣持刀也", "type": "channel", "cls": "sun", "tags": ["囚人", "弾丸", "メメント"], "trigger": ["V"], "rar": "CH", "text": "【기동 메인】【턴 1회】 「켄모치 토야」 이외의 자신의 (#탄환) 을 가진 라이버 1장을 가로로 하는 것으로, 이번 턴 중, 자신의 「켄모치 토야」 라이버 1장의 파워를 가로로 한 카드의 파워만큼 +한다. 그 후, 상대에게 자신의 컬러 카드 1장을 앞면으로 하게 한다.\n【트리거: V】 (상대의 턴 중, 지정된 자신의 컬러 카드가 앞면이 됐을 때 발동) 상대의 가로 라이버 1장은 다음 상대의 스타트 페이즈에 세로가 되지 않는다."},
+ 'BP01-004':{"name": "이에나가 무기", "jp": "家長むぎ", "type": "liver", "cls": "sun", "lv": 2, "power": 6000, "colors": ["O", "Y", "G"], "tags": ["弾丸"], "rar": "N", "text": ""},
+ 'BP01-005':{"name": "켄모치 토야", "jp": "剣持刀也", "type": "liver", "cls": "sun", "lv": 0, "power": 3000, "colors": [], "tags": ["囚人", "弾丸", "メメント"], "rar": "N", "limited": true, "text": "【한정: 같은 #】"},
+ 'BP01-008':{"name": "켄모치 토야", "jp": "剣持刀也", "type": "liver", "cls": "sun", "lv": 1, "power": 4000, "colors": ["V"], "tags": ["囚人", "弾丸", "メメント"], "rar": "SR", "text": "【배틀 승리 시】 「켄모치 토야」 이외의 자신의 (#탄환) 을 가진 라이버 1장을 세로로 한다."},
+ 'BP01-009':{"name": "켄모치 토야", "jp": "剣持刀也", "type": "liver", "cls": "sun", "lv": 2, "power": 5000, "colors": ["G", "I", "V"], "tags": ["囚人", "弾丸", "メメント"], "rar": "N", "text": "【등장 시】 자신의 로그에 라이버의 「이에나가 무기」와 「후시미 가쿠」와 「유히 리리」가 있을 경우, 이번 턴 중, 이 카드는 모든 색을 얻는다."},
+ 'BP01-022':{"name": "후시미 가쿠", "jp": "伏見ガク", "type": "liver", "cls": "sun", "lv": 2, "power": 6000, "colors": ["R", "O", "V"], "tags": ["オカルト", "勝負師", "弾丸", "トゥライユーン"], "rar": "N", "text": ""},
+ 'BP01-023':{"name": "유히 리리", "jp": "夕陽リリ", "type": "liver", "cls": "sun", "lv": 2, "power": 5000, "colors": ["R", "G", "B"], "tags": ["弾丸"], "rar": "R", "text": "【턴 1회】 이 카드 이외의 자신의 (#탄환) 을 가진 라이버가 배틀에 승리했을 때, 상대의 컬러 카드 1장을 앞면으로 한다."},
+ 'BP01-024':{"name": "유히 리리", "jp": "夕陽リリ", "type": "liver", "cls": "sun", "lv": 2, "power": 6000, "colors": ["R", "B", "I"], "tags": ["弾丸"], "rar": "N", "text": ""},
+ 'BP01-030':{"name": "4발의 탄환", "jp": "4発の弾丸", "type": "stage", "cls": "sun", "lv": 1, "tags": ["弾丸"], "rar": "N", "text": "【턴 1회】 자신의 (#탄환) 을 가진 라이버가 배틀에 승리했을 때, 그 카드로 상대의 뒷면 컬러 카드에 SP 콜한다. (SP 콜은 【블로커】 등으로 중지되지 않는다)"},
  'SD04-001':{"name": "카가미 하야토", "jp": "加賀美ハヤト", "type": "channel", "cls": "star", "tags": ["エンカウンター", "カードゲーマー", "塾", "メメント"], "trigger": ["O", "I"], "rar": "CH", "text": "【자신의 턴 종료 시】 상대에게 자신의 뒷면 컬러 카드 1장을 앞면으로 하게 해도 된다. 그러면 자신의 Lv1 이하 라이버 1장을 세로로 한다.\n【트리거: O I】 (상대의 턴 중, 지정된 자신의 컬러 카드가 앞면이 됐을 때 발동) 상대의 컬러 카드 1장을 앞면으로 한다."},
  'SD04-002':{"name": "카가미 하야토", "jp": "加賀美ハヤト", "type": "liver", "cls": "star", "lv": 1, "power": 3000, "colors": ["O"], "tags": ["エンカウンター", "カードゲーマー", "塾", "メメント"], "rar": "N", "blocker": true, "text": "【블로커】 (상대가 공격 또는 컬러 콜했을 때, 이 카드를 가로로 하는 것으로 공격 또는 컬러 콜을 중지하고 이 카드와 배틀한다)"},
  'SD04-007':{"name": "하카세 후유키", "jp": "葉加瀬冬雪", "type": "liver", "cls": "star", "lv": 2, "power": 5000, "colors": ["G", "B"], "tags": ["エンカウンター"], "rar": "N", "text": "【등장 시】 이 카드 이외의 자신의 라이버 1장을 고른다. 이번 턴 중, 고른 카드의 파워 +3000. 고른 카드의 원래 파워가 7000 이상일 경우 대신 +5000."},
@@ -1622,7 +1631,7 @@ let SPEED=1;
 let G=null, UI={}, uidc=0, SEL={uids:new Set(),cl:new Set()};
 function sleep(ms){const t=TOKEN;if(SPEED===0)return t.dead?Promise.reject(new Abort()):Promise.resolve();return new Promise((res,rej)=>setTimeout(()=>t.dead?rej(new Abort()):res(),ms*SPEED))}
 function mkCard(id,owner){return{uid:++uidc,id,owner,tapped:false,noUntap:false,buff:0,entered:-1,noCC:false,once:{}}}
-function reset(c){c.tapped=false;c.noUntap=false;c.buff=0;c.noCC=false;c.once={}}
+function reset(c){c.tapped=false;c.noUntap=false;c.buff=0;c.noCC=false;c.once={};c.allCol=false}
 function take(arr,u){const i=arr.findIndex(x=>x.uid===u);return i<0?null:arr.splice(i,1)[0]}
 function onField(c){return G.p[c.owner].field.includes(c)}
 function byUid(u){
@@ -1763,7 +1772,7 @@ async function turnTail(pid,from){const P=G.p[pid];
   await phase('end');
   // 【자신의 턴 종료 시】 효과 (채널·스테이지·필드)
   for(const src of [P.ch,P.stage,...P.field].filter(Boolean)){const e=EFF[src.id];if(e&&e.turnEnd&&(src===P.ch||src===P.stage||onField(src)))await e.turnEnd(pid,src)}
-  for(const pl of G.p)for(const c of pl.field){c.buff=0;c.noCC=false}
+  for(const pl of G.p)for(const c of pl.field){c.buff=0;c.noCC=false;c.allCol=false}
   mpTurnSync();
   render();await sleep(250);
 }
@@ -1917,6 +1926,9 @@ async function battleWon(c){
   if(G.cur===c.owner&&ce&&ce.ownWin&&!P.once.chWin){P.once.chWin=true;await ce.ownWin(c.owner,c)}
   if(EFF[c.id]&&EFF[c.id].win){if(onField(c))await EFF[c.id].win(c.owner,c)}
   else if(D(c).sp&&onField(c))await spCall(c.owner,c); // 새 SP 카드: 배틀 승리 시 SP 콜 자동
+  // 다른 카드의 "자신의 (조건) 라이버가 배틀에 승리했을 때": 필드의 다른 라이버 → 스테이지 순서
+  for(const x of P.field.slice()){if(G.winner!=null)return;if(x!==c&&onField(x)&&EFF[x.id]&&EFF[x.id].allyWin)await EFF[x.id].allyWin(c.owner,x,c)}
+  const st=P.stage;if(G.winner==null&&st&&EFF[st.id]&&EFF[st.id].allyWin)await EFF[st.id].allyWin(c.owner,st,c);
 }
 async function checkTrigger(owner,color){
   const P=G.p[owner];const d=D(P.ch);
@@ -1931,7 +1943,7 @@ async function colorCall(att,idx,sp){
   log(`${sp?'SP 콜':'컬러 콜'}: ${CNAME[cc.color]}(${cc.color}) 카드${wasDown?' 공개':''}`,pid);render();await fx('pause',{ms:wasDown?680:320});
   if(wasDown)await checkTrigger(1-pid,cc.color);
   if(!onField(att)){log(`${nm(att)}이(가) 필드를 떠나 판정 실패`,pid);render();return}
-  if(D(att).colors.includes(cc.color)){
+  if(colorsOf(att).includes(cc.color)){
     const from=stageRect(document.querySelector(`.z-cl.p${1-pid} [data-cl="${idx}"]`));
     cc.gone=true;O.niji.push(cc.color);if(!G.cfg.headless)NJHIDE.add((1-pid)+cc.color); // 성공한 컬러 카드는 컬러 라인 주인(상대)의 니지 에리어로 (날아가는 연출이 끝나면 표시)
     log(`성공! ${cc.color} 컬러 카드가 ${O.name}의 니지 에리어로 (${O.niji.length}/7)`,pid);render();await fx('ccWin',{pid:1-pid,color:cc.color,from});
@@ -1954,9 +1966,9 @@ async function lockEnter(pid,f,text){
   const u=await ask(pid,{kind:'card',uids:opts.map(x=>x.uid),optional:false,text,ai:()=>maxBy(opts,val).uid});
   const t=byUid(u);t.noUntap=true;fxFloat(t.uid,'잠금!','lock');log(`${nm(t)} 잠금: 다음 스타트 페이즈에 세로가 되지 않음`,pid);
 }
-async function spCall(pid,c){
-  const O=G.p[1-pid];const idxs=O.cl.map((x,i)=>i).filter(i=>!O.cl[i].gone);if(!idxs.length)return;
-  const i=await ask(pid,{kind:'color',owner:1-pid,idxs,optional:false,att:c.uid,text:`${nm(c)} SP 콜: 상대 컬러 카드 1장 선택 (블로커로 막을 수 없음)`,ai:()=>aiPickColor(c,idxs,O)});
+async function spCall(pid,c,downOnly){
+  const O=G.p[1-pid];const idxs=O.cl.map((x,i)=>i).filter(i=>!O.cl[i].gone&&(!downOnly||!O.cl[i].up));if(!idxs.length){if(downOnly)log(`${nm(c)} SP 콜: 상대의 뒷면 컬러 카드가 없음`,pid);return}
+  const i=await ask(pid,{kind:'color',owner:1-pid,idxs,optional:false,att:c.uid,text:`${nm(c)} SP 콜: 상대${downOnly?'의 뒷면':''} 컬러 카드 1장 선택 (블로커로 막을 수 없음)`,ai:()=>aiPickColor(c,idxs,O)});
   log(`${nm(c)} SP 콜!`,pid);await fx('sp');await colorCall(c,i,true);
 }
 EFF['SD01-001']={
@@ -2106,6 +2118,26 @@ EFF['BP01-001']={ // 켄모치 토야 채널
     await flipColor(1-pid,pid,'켄모치 토야 채널');
   },
   async trig(pid){await lockEnter(pid,()=>true,'켄모치 토야 트리거: 다음 스타트 페이즈에 세로가 되지 않을 상대의 가로 라이버 선택')}
+};
+EFF['BP01-008']={ // 켄모치 토야 Lv1: 배틀 승리 시 켄모치 이외의 #탄환 라이버 1장을 세로로
+  async win(pid,c){const P=G.p[pid];const opts=P.field.filter(x=>x!==c&&x.tapped&&nm(x)!=='켄모치 토야'&&hasTag(x,'弾丸'));
+    if(!opts.length){log('켄모치 토야: 세로로 할 가로 #탄환 라이버가 없음',pid);return}
+    const u=opts.length===1?opts[0].uid:await ask(pid,{kind:'card',uids:opts.map(x=>x.uid),optional:false,text:'켄모치 토야 배틀 승리 시: 세로로 할 「켄모치 토야」 이외의 #탄환 라이버',ai:()=>maxBy(opts,x=>power(x)+colorsOf(x).length*500).uid});
+    const t=byUid(u);if(t&&onField(t)){await untapCard(t);log(`켄모치 토야: ${nm(t)}을(를) 세로로 함`,pid);render();await sleep(250)}}
+};
+EFF['BP01-009']={ // 켄모치 토야 Lv2: 로그에 무기·가쿠·리리(라이버)가 있으면 이번 턴 모든 색
+  async enter(pid,c){const L=G.p[pid].log.filter(x=>D(x).type==='liver').map(nm);
+    if(['이에나가 무기','후시미 가쿠','유히 리리'].every(n=>L.includes(n))){c.allCol=true;fxFloat(c.uid,'모든 색!','buff');log('켄모치 토야: 로그에 무기·가쿠·리리가 있어 이번 턴 모든 색을 얻음',pid);render();await sleep(300)}
+    else log('켄모치 토야: 로그에 「이에나가 무기」「후시미 가쿠」「유히 리리」가 모두 있지 않아 효과 없음',pid)}
+};
+EFF['BP01-023']={ // 유히 리리 R: 다른 #탄환 라이버가 배틀에 승리하면 상대 컬러 카드 1장 앞면 (턴 1회)
+  async allyWin(pid,self,w){const k='lw'+G.turnNo;if(self.once[k]||!hasTag(w,'弾丸'))return;self.once[k]=true;
+    await flipColor(pid,1-pid,'유히 리리')}
+};
+EFF['BP01-030']={ // 4발의 탄환: #탄환 라이버가 배틀에 승리하면 그 카드로 상대 뒷면 컬러 카드에 SP 콜 (턴 1회)
+  async allyWin(pid,st,w){const P=G.p[pid];const k='b4'+G.turnNo;if(P.once[k]||!hasTag(w,'弾丸')||!onField(w))return;
+    if(!G.p[1-pid].cl.some(x=>!x.gone&&!x.up))return;P.once[k]=true;
+    log(`4발의 탄환: ${nm(w)}(으)로 SP 콜`,pid);await spCall(pid,w,true)}
 };
 EFF['SD04-001']={
   async turnEnd(pid){const P=G.p[pid];
@@ -2278,7 +2310,7 @@ function aiDebuffTarget(pid,amt){
   return (k.length?maxBy(k,val):maxBy(O.field,val)).uid;
 }
 function aiPickColor(c,idxs,O){
-  const sure=idxs.filter(i=>O.cl[i].up&&D(c).colors.includes(O.cl[i].color));if(sure.length)return sure[0];
+  const sure=idxs.filter(i=>O.cl[i].up&&colorsOf(c).includes(O.cl[i].color));if(sure.length)return sure[0];
   const down=idxs.filter(i=>!O.cl[i].up);if(down.length)return down[Math.random()*down.length|0];
   return idxs[0];
 }
@@ -2288,7 +2320,7 @@ function aiBlock(def,att,tg,blockers){
   if(winners.length)return minBy(winners,val).uid;
   if(tg.kind==='color'){
     const cc=G.p[def].cl[tg.idx];
-    const certain=cc.up&&D(att).colors.includes(cc.color);
+    const certain=cc.up&&colorsOf(att).includes(cc.color);
     const desperate=G.p[def].niji.length>=5;
     if(certain||desperate)return minBy(blockers,val).uid;
   }
@@ -2352,15 +2384,15 @@ function aiChooseTarget(pid,a){
   const O=G.p[1-pid];const pa=power(a);
   const kill=O.field.filter(t=>t.tapped&&power(t)<pa);
   if(kill.length)return{kind:'liver',uid:maxBy(kill,val).uid};
-  if(a.noCC||!D(a).colors.length)return null;
+  if(a.noCC||!colorsOf(a).length)return null;
   const open=O.cl.map((x,i)=>({x,i})).filter(o=>!o.x.gone);
-  const sure=open.filter(o=>o.x.up&&D(a).colors.includes(o.x.color));
+  const sure=open.filter(o=>o.x.up&&colorsOf(a).includes(o.x.color));
   const blk=O.field.filter(x=>!x.tapped&&D(x).blocker);
   const blkWins=blk.some(b=>power(b)>=pa);
   if(sure.length)return{kind:'color',idx:sure[0].i};
   const down=open.filter(o=>!o.x.up);
   if(!down.length)return null;
-  if(blkWins&&D(a).colors.length<3&&O.field.length)return null;
+  if(blkWins&&colorsOf(a).length<3&&O.field.length)return null;
   return{kind:'color',idx:down[Math.random()*down.length|0].i};
 }
 async function aiAction(pid){
@@ -2433,7 +2465,7 @@ function evalState(S,pid){
   const me=S.p[pid],op=S.p[1-pid];
   const nj=k=>k*12+k*k*2.4; // 니지 에리어는 7이 되면 패배 — 쌓일수록 급하게 나빠짐
   let s=nj(op.niji.length)-nj(me.niji.length);
-  const cols=P=>new Set(P.field.flatMap(c=>D(c).colors||[]));const mc=cols(me),oc=cols(op);
+  const cols=P=>new Set(P.field.flatMap(c=>colorsOf(c)||[]));const mc=cols(me),oc=cols(op);
   const open=P=>P.cl.filter(x=>!x.gone&&x.up);
   s+=open(op).filter(x=>mc.has(x.color)).length*4.5-open(me).filter(x=>oc.has(x.color)).length*4.5; // 다음 컬러 콜이 확실한 자리
   s+=open(op).length*1.2-open(me).length*1.2;
@@ -2602,7 +2634,7 @@ function humanCanAct(){return G&&G.winner==null&&G.cur===0&&!G.p[0].ai&&!UI.pend
 
 
 /* ================= NAMES / ART / STORAGE ================= */
-const TAGKO={'囚人':'죄인','JK':'JK','ミッドナイト':'미드나이트','生徒会':'학생회','家族':'가족','ゲーマー':'게이머','メメント':'메멘토','勝負師':'승부사','バンド':'밴드','B級':'B급','シェアハウス':'셰어하우스','エンカウンター':'엔카운터','カードゲーマー':'카드게이머','盤':'반','塾':'학원','クリエイター':'크리에이터','伝説':'전설','Brown':'Brown','弾丸':'탄환'};
+const TAGKO={'囚人':'죄인','JK':'JK','ミッドナイト':'미드나이트','生徒会':'학생회','家族':'가족','ゲーマー':'게이머','メメント':'메멘토','勝負師':'승부사','バンド':'밴드','B級':'B급','シェアハウス':'셰어하우스','エンカウンター':'엔카운터','カードゲーマー':'카드게이머','盤':'반','塾':'학원','クリエイター':'크리에이터','伝説':'전설','Brown':'Brown','弾丸':'탄환','オカルト':'오컬트','トゥライユーン':'투라이윤'};
 const tagKo=t=>TAGKO[t]||t;
 // 색상(클래스) 4종: 태양/솔(적), 달/루나(청), 혜성/코멧(녹), 별/스텔라(황)
 const CLSLIST=['sun','moon','comet','star'];
@@ -3119,7 +3151,7 @@ function cardHTML(c,opt={}){
     const ob=[];if(d.blocker)ob.push('<span class="badge blk">블로커</span>');if(d.sp)ob.push('<span class="badge sp">SP</span>');if(d.limited)ob.push('<span class="badge lim">한정</span>');
     const iid=opt.full?art:thumbOf(c.id);inner=`<img src="${blobUrl(iid)}" data-art="${iid}" alt="" draggable="false" decoding="async"><div class="ov">
       <span class="ov-lv">${d.lv??''}</span>${ob.length?`<div class="ov-bd">${ob.join('')}</div>`:''}
-      ${isL?`<div class="ov-bot"><span class="ov-pw ${pw>d.power?'up':pw<d.power?'down':''}">${pw}</span>${barHTML(d.colors)}</div>`:`<span class="ov-ty">${d.type.toUpperCase()}</span>`}</div>`;
+      ${isL?`<div class="ov-bot"><span class="ov-pw ${pw>d.power?'up':pw<d.power?'down':''}">${pw}</span>${barHTML(colorsOf(c))}</div>`:`<span class="ov-ty">${d.type.toUpperCase()}</span>`}</div>`;
   }else{
     const badges=[];
     if(d.blocker)badges.push('<span class="badge blk">블로커</span>');
@@ -3129,7 +3161,7 @@ function cardHTML(c,opt={}){
     inner=`<div class="c-head"><span class="c-lv">${d.lv??''}</span><span class="c-name">${esc(d.name)}</span></div>
     <div class="c-type">${d.type.toUpperCase()}</div>
     <div class="c-art"><span class="glyph">${esc([...d.jp][0])}</span>${badges.join('')}${txt}</div>
-    ${isL?`<div class="c-pow ${pw>d.power?'up':pw<d.power?'down':''}">${pw}</div>${barHTML(d.colors)}`:''}`;
+    ${isL?`<div class="c-pow ${pw>d.power?'up':pw<d.power?'down':''}">${pw}</div>${barHTML(colorsOf(c))}`:''}`;
   }
   const attrs=opt.cid?` data-cid="${c.id}" tabindex="0" role="button"`:plain?'':` data-uid="${c.uid}" tabindex="0" role="button"`;
   return`<div class="${cls.join(' ')}"${attrs} aria-label="${esc(d.name)} Lv${d.lv??''}${isL?' 파워 '+pw:''}${c.tapped&&live?' 가로':''}">${inner}${st.length?`<div class="status">${st.join('')}</div>`:''}</div>`;
@@ -3277,7 +3309,7 @@ function centerHTML(){
 }
 function colorLabel(owner,i){const x=G.p[owner].cl[i];return x&&x.up?`${CNAME[x.color]}(${x.color}) 컬러 카드`:`뒷면 컬러 카드 (${i+1}번째)`}
 function ccChance(att,owner,i){
-  const cl=G.p[owner].cl,x=cl[i],cols=D(att).colors;
+  const cl=G.p[owner].cl,x=cl[i],cols=colorsOf(att);
   if(x.up)return{known:true,ok:cols.includes(x.color),pct:cols.includes(x.color)?100:0};
   const hidden=cl.filter(y=>!y.up&&!y.gone).map(y=>y.color);const hit=hidden.filter(c=>cols.includes(c)).length;
   return{known:false,ok:hit>0,pct:hidden.length?Math.round(hit/hidden.length*100):0};
@@ -3388,7 +3420,7 @@ function inspHTML(s){
   let meta=`<span>${TYPEKO[d.type]} · ${CLSKO[d.cls]}(${CLSSUB[d.cls]}) · ${d.rar}</span><span>${c.owner===0?'내':'상대'} ${zn}</span>`;
   if(d.lv!=null)meta+=`<span>Lv <span class="num">${d.lv}</span></span>`;
   if(d.type==='liver')meta+=`<span>파워 <span class="num">${power(c)}</span>${c.buff?` (기본 ${d.power}, 이번 턴 ${c.buff>0?'+':''}${c.buff})`:''}</span>
-    <span>색 ${d.colors.length?d.colors.map(x=>`<i class="chip" style="--cc:var(--${x})">${x}</i>`).join(' '):'없음'}</span>`;
+    <span>색 ${colorsOf(c).length?colorsOf(c).map(x=>`<i class="chip" style="--cc:var(--${x})">${x}</i>`).join(' '):'없음'}${c.allCol?' (이번 턴 모든 색)':''}</span>`;
   if(d.trigger)meta+=`<span>트리거 ${d.trigger.map(x=>`<i class="chip" style="--cc:var(--${x})">${x}</i>`).join(' ')}</span>`;
   if(zone==='field')meta+=`<span>${c.tapped?'가로 (행동 완료)':'세로'}${c.noUntap?' · 잠금':''}${c.noCC?' · 이번 턴 컬러 콜 불가':''}</span>`;
   const tags=d.tags.length?`<div class="tags" style="margin-top:8px">${d.tags.map(t=>`<span class="tag">#${esc(tagKo(t))}</span>`).join('')}</div>`:'';
