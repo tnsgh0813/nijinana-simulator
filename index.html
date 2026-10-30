@@ -18,9 +18,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Noto+Sans+JP:wght@500;700;900&display=swap">
-<script>window.NJ_BUILD="202610301534";window.NJ_NOTES=["부스터 BP01 #탄환 카드 8장 추가: 켄모치 토야 (Lv0·1·2), 이에나가 무기, 후시미 가쿠, 유히 리리 (2종), 스테이지 「4발의 탄환」", "켄모치 토야 채널의 기동 효과를 이제 실제로 쓸 수 있음 (#탄환 라이버 등장)", "새 태그: #오컬트 · #투라이윤", "공식 룰 Q&A 반영: 필드 5장 제한 · 덱 0장 니지 에리어 비교 판정"];</script>
-<script src="config.js?v=202610301534"></script>
-<script src="fb.js?v=202610301534"></script>
+<script>window.NJ_BUILD="202610301748";window.NJ_NOTES=["새 카드: BP01-003 이에나가 무기 (R) — 등장 시 덱 위 3장 중 #탄환 카드 1장을 손패로", "새 카드: BP01-021 후시미 가쿠 (R) — 다른 #탄환 라이버가 배틀에 이기면 이 카드와 손패 1장을 로그에 놓고 로그의 「켄모치 토야」 등장", "부스터 BP01 #탄환 카드 8장 추가: 켄모치 토야 (Lv0·1·2), 이에나가 무기, 후시미 가쿠, 유히 리리 (2종), 스테이지 「4발의 탄환」", "켄모치 토야 채널의 기동 효과를 이제 실제로 쓸 수 있음 (#탄환 라이버 등장)", "새 태그: #오컬트 · #투라이윤"];</script>
+<script src="config.js?v=202610301748"></script>
+<script src="fb.js?v=202610301748"></script>
 </head>
 <body>
 <style>
@@ -1562,6 +1562,8 @@ const CARDS={
    text:'【한정: 같은 #】\n【기동 메인】【턴 1회】 자신의 덱 위에서 1장을 이 카드 아래에 둔다. 그 후, 이 카드 아래의 카드가 3장 이상일 경우, 이 카드와 그 카드들을 원하는 순서로 덱 아래에 두고, 자신의 로그의 Lv4 이하인 「쿠즈하」 라이버 1장을 등장시킨다.'},
  'SD03-001':{"name": "사사키 사쿠", "jp": "笹木咲", "type": "channel", "cls": "comet", "tags": ["ゲーマー", "囚人", "バンド"], "trigger": ["B"], "rar": "CH", "text": "【상대의 턴 중】【턴 1회】 자신의 라이버가 배틀로 인해 로그에 놓였을 때, 그 라이버를 이 카드 아래에 둔다. 그 후, 이 카드 아래의 카드가 3장 이상일 경우, 그것들을 원하는 순서로 덱 아래에 두고, 자신의 패가 5장이 되도록 카드를 뽑는다.\n【트리거: B】 (상대의 턴 중, 지정된 자신의 컬러 카드가 앞면이 됐을 때 발동) 자신의 패가 5장이 되도록 카드를 뽑는다."},
  'BP01-001':{"name": "켄모치 토야", "jp": "剣持刀也", "type": "channel", "cls": "sun", "tags": ["囚人", "弾丸", "メメント"], "trigger": ["V"], "rar": "CH", "text": "【기동 메인】【턴 1회】 「켄모치 토야」 이외의 자신의 (#탄환) 을 가진 라이버 1장을 가로로 하는 것으로, 이번 턴 중, 자신의 「켄모치 토야」 라이버 1장의 파워를 가로로 한 카드의 파워만큼 +한다. 그 후, 상대에게 자신의 컬러 카드 1장을 앞면으로 하게 한다.\n【트리거: V】 (상대의 턴 중, 지정된 자신의 컬러 카드가 앞면이 됐을 때 발동) 상대의 가로 라이버 1장은 다음 상대의 스타트 페이즈에 세로가 되지 않는다."},
+ 'BP01-003':{"name": "이에나가 무기", "jp": "家長むぎ", "type": "liver", "cls": "sun", "lv": 2, "power": 5000, "colors": ["R", "O"], "tags": ["弾丸"], "rar": "R", "text": "【등장 시】 자신의 덱 위에서 3장을 보고, 그중에서 (#탄환) 을 가진 카드 1장까지를 공개하고 손패에 넣고, 나머지를 원하는 순서로 덱 아래에 놓는다."},
+ 'BP01-021':{"name": "후시미 가쿠", "jp": "伏見ガク", "type": "liver", "cls": "sun", "lv": 2, "power": 5000, "colors": ["Y", "V"], "tags": ["オカルト", "勝負師", "弾丸", "トゥライユーン"], "rar": "R", "text": "이 카드 이외의 자신의 (#탄환) 을 가진 라이버가 배틀에 승리했을 때, 이 카드와 자신의 손패 1장을 로그에 놓아도 된다. 그렇게 했을 경우, 자신의 로그의 Lv4 이하인 「켄모치 토야」 라이버 1장을 등장시킨다."},
  'BP01-004':{"name": "이에나가 무기", "jp": "家長むぎ", "type": "liver", "cls": "sun", "lv": 2, "power": 6000, "colors": ["O", "Y", "G"], "tags": ["弾丸"], "rar": "N", "text": ""},
  'BP01-005':{"name": "켄모치 토야", "jp": "剣持刀也", "type": "liver", "cls": "sun", "lv": 0, "power": 3000, "colors": [], "tags": ["囚人", "弾丸", "メメント"], "rar": "N", "limited": true, "text": "【한정: 같은 #】"},
  'BP01-008':{"name": "켄모치 토야", "jp": "剣持刀也", "type": "liver", "cls": "sun", "lv": 1, "power": 4000, "colors": ["V"], "tags": ["囚人", "弾丸", "メメント"], "rar": "SR", "text": "【배틀 승리 시】 「켄모치 토야」 이외의 자신의 (#탄환) 을 가진 라이버 1장을 세로로 한다."},
@@ -2118,6 +2120,32 @@ EFF['BP01-001']={ // 켄모치 토야 채널
     await flipColor(1-pid,pid,'켄모치 토야 채널');
   },
   async trig(pid){await lockEnter(pid,()=>true,'켄모치 토야 트리거: 다음 스타트 페이즈에 세로가 되지 않을 상대의 가로 라이버 선택')}
+};
+EFF['BP01-003']={ // 이에나가 무기 R: 등장 시 덱 위 3장 중 #탄환 카드 1장까지 공개해 손패로, 나머지는 원하는 순서로 덱 아래
+  async enter(pid,c){const P=G.p[pid];const look=P.deck.splice(0,3);if(!look.length){log('이에나가 무기: 덱에 카드가 없음',pid);return}
+    G.look={pid,cards:look};log(`이에나가 무기: 덱 위에서 ${look.length}장을 봄`,pid);render();await sleep(500);
+    const ok=look.filter(x=>hasTag(x,'弾丸'));let chosen=null;
+    if(ok.length){const u=await ask(pid,{kind:'card',uids:ok.map(x=>x.uid),optional:true,text:'이에나가 무기: 공개해서 손패에 넣을 #탄환 카드 1장 (건너뛰기 가능)',ai:()=>maxBy(ok,x=>keepVal(x)).uid});
+      if(u!=null)chosen=look.find(x=>x.uid===u)||null}
+    else log('이에나가 무기: 본 카드 중 #탄환 카드가 없음',pid);
+    const rest=look.filter(x=>x!==chosen);G.look.cards=rest;
+    if(chosen){P.hand.push(chosen);log(`이에나가 무기: ${nm(chosen)}을(를) 공개하고 손패에 넣음`,pid);sfx('draw');render();await sleep(300)}
+    if(rest.length)await orderToBottom(pid,rest,'이에나가 무기');
+    G.look=null;render();deckOutCheck(pid);
+  }
+};
+EFF['BP01-021']={ // 후시미 가쿠 R: 다른 #탄환 라이버가 배틀 승리 → 이 카드와 손패 1장을 로그에 놓으면 로그의 Lv4 이하 켄모치 토야 등장
+  async allyWin(pid,self,w){const P=G.p[pid];if(!hasTag(w,'弾丸')||!onField(self)||!P.hand.length)return;
+    const kens=()=>P.log.filter(x=>D(x).type==='liver'&&nm(x)==='켄모치 토야'&&(D(x).lv||0)<=4);
+    const ok=await ask(pid,{kind:'yesno',text:`후시미 가쿠: 이 카드와 손패 1장을 로그에 놓고, 로그의 Lv4 이하 「켄모치 토야」를 등장시킬까? (등장 가능 ${kens().length}장)`,
+      ai:()=>kens().length>0&&val(maxBy(kens(),val))>=val(self)*.8});
+    if(!ok||!onField(self)||!P.hand.length)return;
+    const hu=P.hand.length===1?P.hand[0].uid:await ask(pid,{kind:'card',uids:P.hand.map(x=>x.uid),optional:false,text:'후시미 가쿠: 로그에 놓을 손패 1장 선택',ai:()=>minBy(P.hand,keepVal).uid});
+    await destroy(self,false);const h=take(P.hand,hu);if(h){fxToLog(h.uid,pid);P.log.push(h);log(`후시미 가쿠: 손패의 ${nm(h)}을(를) 로그에 놓음`,pid)}render();await sleep(250);
+    const opts=kens();if(!opts.length){log('후시미 가쿠: 등장시킬 Lv4 이하 「켄모치 토야」가 로그에 없음',pid);return}
+    const u=opts.length===1?opts[0].uid:await ask(pid,{kind:'card',uids:opts.map(x=>x.uid),optional:false,text:'후시미 가쿠: 등장시킬 로그의 Lv4 이하 「켄모치 토야」 선택',ai:()=>maxBy(opts,val).uid});
+    const k=take(P.log,u);if(k){log(`후시미 가쿠: 로그의 ${nm(k)} 등장`,pid);await enter(pid,k)}
+  }
 };
 EFF['BP01-008']={ // 켄모치 토야 Lv1: 배틀 승리 시 켄모치 이외의 #탄환 라이버 1장을 세로로
   async win(pid,c){const P=G.p[pid];const opts=P.field.filter(x=>x!==c&&x.tapped&&nm(x)!=='켄모치 토야'&&hasTag(x,'弾丸'));
